@@ -1,0 +1,11 @@
+{
+  "checks": 43,
+  "failures": 0,
+  "metrics": {
+    "air_correction_degrees_500ms": 34.67402128827,
+    "grapple_rise_1s_m": 9.68307415000163,
+    "ground_stop_distance_m": 0.216663360595703,
+    "ground_stop_seconds": 0.075,
+    "jump_apex_m": 1.36704111099243
+  }
+}

@@ -1,0 +1,10 @@
+.godot/
+.local/
+tools/godot/
+dist/
+*.log
+*.blend1
+__pycache__/
+user_bindings.cfg
+.env
+.secrets/

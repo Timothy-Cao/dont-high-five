@@ -1,0 +1,46 @@
+{
+  "resolution": "(3840, 2160)",
+  "scenario": "60 frame stationary samples across 8 arena viewpoints; other desktop apps may be running",
+  "views": {
+    "01-arrival": {
+      "median_ms": 7.173,
+      "p95_ms": 8.823,
+      "samples": 60
+    },
+    "02-upper-atrium": {
+      "median_ms": 6.841,
+      "p95_ms": 8.301,
+      "samples": 60
+    },
+    "03-amber-shaft": {
+      "median_ms": 6.493,
+      "p95_ms": 7.736,
+      "samples": 60
+    },
+    "04-violet-galleries": {
+      "median_ms": 7.174,
+      "p95_ms": 8.901,
+      "samples": 60
+    },
+    "05-low-tunnels": {
+      "median_ms": 8.526,
+      "p95_ms": 10.123,
+      "samples": 60
+    },
+    "06-maze": {
+      "median_ms": 8.144,
+      "p95_ms": 10.979,
+      "samples": 60
+    },
+    "07-upper-maze": {
+      "median_ms": 7.886,
+      "p95_ms": 9.245,
+      "samples": 60
+    },
+    "08-north-galleries": {
+      "median_ms": 7.794,
+      "p95_ms": 9.47,
+      "samples": 60
+    }
+  }
+}

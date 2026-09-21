@@ -1,0 +1,8 @@
+{
+  "frames": 572,
+  "mean_frame_ms": 5.2486993006993,
+  "median_frame_ms": 5.125,
+  "p95_frame_ms": 6.56,
+  "resolution": "(3840, 2160)",
+  "scenario": "standing in first-class bay, glove lights on, other desktop apps running"
+}
