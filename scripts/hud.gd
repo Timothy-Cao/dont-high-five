@@ -126,7 +126,7 @@ func show_page(which: String) -> void:
 				label(pages,"No timer, finish line, or required route.\nAll spaces connect. These are just shortcuts.",19,DIM)
 				for i in 4:
 					button(pages,lab.station_names[i],func():lab.goto_station(i);lab.started=true;lab.set_paused(false))
-				label(pages,"%d sparks found"%lab.arena.collected,18,ORANGE)
+				label(pages,"Power stations recharge around the center and four corners.",18,DIM)
 				return
 			label(pages,"AFTER-HOURS MOVEMENT LAB",14,ORANGE)
 			label(pages,"Light the way. Launch yourself.",29)
@@ -139,7 +139,7 @@ func show_page(which: String) -> void:
 		"Controls":
 			label(pages,"THE EMPLOYEE HANDBOOK",14,ORANGE)
 			label(pages,"Familiar feet. Unusual hands.",29)
-			label(pages,"LMB / RMB  •  Place or recall a glove (25.5 m)\nLMB + RMB together  •  Quick zip (17 m; gloves recover for 2 s)\nHold MMB  •  Reel",18,PAPER)
+			label(pages,"LMB / RMB  •  Place or recall a glove (25.5 m)\nLMB + RMB together  •  Parallel punch; hit nearby ground to hop\nHold MMB  •  Reel",18,PAPER)
 			for action in ["jump","launch","reel","brake","cling","recall","retry","reset"]:
 				var row:=HBoxContainer.new()
 				pages.add_child(row)
@@ -153,7 +153,7 @@ func show_page(which: String) -> void:
 		"Abilities":
 			label(pages,"EXPERIMENTAL MOVEMENT KIT",14,ORANGE)
 			label(pages,"Keep what feels good.",29)
-			check_button("Quick zip (LMB + RMB)",lab.player.zip_enabled,func(v):lab.player.zip_enabled=v)
+			check_button("Parallel punch (LMB + RMB)",lab.player.punch_enabled,func(v):lab.player.punch_enabled=v)
 			check_button("Double jump",lab.player.double_jump_enabled,func(v):lab.player.double_jump_enabled=v)
 			check_button("Stone brake / crouch",lab.player.brake_enabled,func(v):lab.player.brake_enabled=v)
 			check_button("Wall grip & wall jump",lab.player.wall_grip_enabled,func(v):lab.player.wall_grip_enabled=v)
@@ -265,14 +265,14 @@ func _draw() -> void:
 			var tension := clampf((p.chest().distance_to(h.point)-float(h.rest))/p.stretch_limit,0,1)
 			draw_line(pos+Vector2(-12,15),pos+Vector2(12,15),Color("233b43"),4,true)
 			draw_line(pos+Vector2(-12,15),pos+Vector2(-12+24*tension,15),h.color.lightened(0.2),3,true)
-	var hint := "LMB + RMB together   /   Quick zip" if welcome_time>0 else ""
+	var hint := "LMB + RMB together   /   Punch" if welcome_time>0 else ""
 	if p.ball:
 		hint = "%s  Brake"%lab.controls.prompt("brake") if p.velocity.length()>12 else ""
 	elif p.power>0.02:
 		hint = "%s   Launch   •   %.0f m/s   •   hold %s  Reel"%[lab.controls.prompt("launch"),p.shot_velocity(p.position).length(),lab.controls.prompt("reel")]
 	elif attached:
 		hint = "Walk back to stretch  •  hold %s to reel"%lab.controls.prompt("reel")
-	if p.zip_pending: hint="ZIP  /  catching…"
+	if p.combat.active: hint="PUNCH"
 	elif p.stone: hint="STONE BRAKE  /  horizontal momentum stopped"
 	elif p.wall_clinging: hint="WALL GRIP  /  %s climb  •  %s wall jump"%[lab.controls.movement_prompt(),lab.controls.prompt("jump")]
 	elif p.reeling: hint="REELING  /  release %s to coast  •  %s jump off"%[lab.controls.prompt("reel"),lab.controls.prompt("jump")]
@@ -287,6 +287,16 @@ func _draw() -> void:
 	elif lab.arena.collect_flash>0:
 		var flash:float=lab.arena.collect_flash
 		draw_arc(center,18+(1-flash)*22,0,TAU,40,Color(1,0.85,0.5,flash),2,true)
+	if p.combat.hit_flash>0:
+		for side in [-1,1]:
+			draw_line(center+Vector2(side*9,-9),center+Vector2(side*15,-15),ORANGE,2,true)
+			draw_line(center+Vector2(side*9,9),center+Vector2(side*15,15),ORANGE,2,true)
+	var row_y:=size.y-28.0
+	var names:={"speed":"SPEED","reach":"LONG ARMS","pull":"POWER","vision":"VISION","overdrive":"OVERDRIVE"}
+	for kind in p.buffs:
+		var value:float=p.buffs[kind]
+		txt(Vector2(24,row_y),names[kind]+"  "+str(ceili(value))+"s",16,ORANGE if kind=="overdrive" else PAPER)
+		row_y-=24
 	if lab.message_time>0 and lab.test_world:
 		centered(Vector2(center.x,76),lab.message,16)
 

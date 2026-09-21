@@ -28,123 +28,38 @@ func run(lab: Node3D) -> void:
 		check(h.lamp.shadow_enabled and h.lamp.shadow_caster_mask==1,"glove lamp preserves world occlusion but excludes viewmodel layer")
 	check(p.ball_rim.cast_shadow==GeometryInstance3D.SHADOW_CASTING_SETTING_OFF,"ball rim cannot cast an enlarged first-person shadow")
 	p.handle_glove_button(0,true,1000)
-	check(p.hands[0].state==1 and not p.zip_pending,"single click fires immediately without waiting for chord detection")
+	check(p.hands[0].state==1 and not p.combat.active,"single click fires an ordinary glove immediately")
 	p.handle_glove_button(1,true,1070)
-	check(p.zip_pending and p.hands[0].state==1 and p.hands[1].state==1,"70 ms left-right chord starts both projectiles")
-	var a:Vector3=(p.hands[0].point-p.hands[0].from).normalized()
-	var b:Vector3=(p.hands[1].point-p.hands[1].from).normalized()
-	check(a.dot(b)>0.99999,"zip glove rays extend in parallel rather than converging at the reticle")
+	check(p.combat.active and p.hands[0].state==3 and p.hands[1].state==3,"70 ms left-right chord starts a parallel punch")
 	var origin:Vector3=p.position
-	var count:int=p.zip_count
-	var ticks:=0
-	while p.zip_count==count and ticks<100:
-		await frames(1)
-		ticks+=1
-	check(p.zip_count==count+1 and ticks<45,"real overhead catch produces a burst in under 375 ms")
-	check(p.ball and p.velocity.length()>27 and p.velocity.length()<=28.1,"zip tucks into a ball and gives a bounded 28 m/s impulse")
-	check(not p.has_anchor() and not p.zip_pending,"zip releases anchors cleanly after the catch")
-	check(p.hand_recovery>1.98,"successful catch begins two seconds of glove recovery")
-	p.fire_hand(0);p.fire_hand(1)
-	check(p.hands[0].state==0 and p.hands[1].state==0 and not p.begin_zip(),"both ordinary glove shots and zip are blocked during recovery")
-	p.cancel_hands()
-	check(p.hand_recovery>1.98,"recall cannot bypass physical hand recovery")
+	await frames(75)
+	check(not p.combat.active and p.position.distance_to(origin)<0.15,"overhead punch ends without pulling the player toward the hit")
+	check(p.hand_recovery>0,"punch has an explicit physical return interval")
+	p.fire_hand(0)
+	check(p.hands[0].state==0,"regular glove use waits for fist recovery")
 	var recovery_before:float=p.hand_recovery
-	lab.set_paused(true)
-	await frames(12)
-	check(is_equal_approx(p.hand_recovery,recovery_before),"pausing freezes hand recovery instead of skipping the cost")
-	lab.set_paused(false)
-	await frames(20)
-	check(p.position.y>origin.y+3,"zip actually carries the player upward through the level")
-	check(p.hands[0].glove.visible and p.hands[1].glove.visible,"returning gloves remain visible while tucked in a ball")
-	p.handle_glove_button(1,true,1400)
-	await frames(100)
-	check(p.zip_count==count+1,"holding both buttons never repeats the burst")
-	check(p.hand_recovery>0.9,"gloves are still unavailable about one second after the burst")
-	await frames(130)
-	check(p.hand_recovery==0,"gloves finish recovering after two seconds of active play")
+	lab.set_paused(true);await frames(12)
+	check(is_equal_approx(p.hand_recovery,recovery_before),"pause freezes fist recovery")
+	lab.set_paused(false);await frames(90)
+	check(p.hand_recovery==0,"hands return to regular use after recovery")
 	p.fire_hand(0)
-	check(p.hands[0].state==1,"ordinary glove use returns when the physical recovery ends")
+	check(p.hands[0].state==1,"ordinary glove can fire after recovery")
 	await setup(lab)
-	p.handle_glove_button(1,true,2000)
-	p.handle_glove_button(0,true,2110)
-	check(p.zip_pending,"right-left order works within the 120 ms tolerance")
+	p.handle_glove_button(1,true,2000);p.handle_glove_button(0,true,2100)
+	check(p.combat.active,"right-left chord works within 120 ms")
 	p.cancel_hands()
-	await frames(65)
-	check(not p.zip_pending and p.zip_count==count+1,"recall cancels an in-flight zip without a delayed launch")
+	check(not p.combat.active and p.hand_recovery>0,"recall cancels projectiles without skipping their return")
 	await setup(lab)
-	p.handle_glove_button(0,true,3000)
-	p.handle_glove_button(1,true,3200)
-	check(not p.zip_pending and p.hands[0].state==1 and p.hands[1].state==1,"slower separate clicks remain independent glove placements")
+	p.handle_glove_button(0,true,3000);p.handle_glove_button(1,true,3200)
+	check(not p.combat.active and p.hands[0].state==1 and p.hands[1].state==1,"separate clicks keep independent glove placements")
 	await setup(lab)
-	p.zip_enabled=false
-	p.handle_glove_button(0,true,4000)
-	p.handle_glove_button(1,true,4050)
-	check(not p.zip_pending and p.hands[0].state==1 and p.hands[1].state==1,"disabling zip restores independent shots even for simultaneous clicks")
-	p.zip_enabled=true
+	p.punch_enabled=false
+	p.handle_glove_button(0,true,4000);p.handle_glove_button(1,true,4050)
+	check(not p.combat.active,"ability toggle disables the punch")
+	p.punch_enabled=true
 	await setup(lab)
-	p.begin_zip()
-	p.action_override={"brake":true}
-	await frames(45)
-	check(not p.zip_pending and p.zip_count==count+1,"brake pressed during projectile travel cancels the pending launch")
-	await setup(lab)
-	p.camera.rotation=Vector3.ZERO
-	var speed:float=p.velocity.length()
-	check(not p.begin_zip() and p.velocity.length()==speed,"empty space cannot produce a free air dash")
-	# Only one parallel ray fits at the edge of a pad.
-	p.reset_to(Vector3(40,15,18))
-	p.camera.rotation=Vector3.ZERO
-	var narrow=lab.box(Vector3(39.63,16,8),Vector3(0.4,3,0.4),lab.MINT)
-	await frames(2)
-	var left_hit:Dictionary=p.ray(p.hand_start(0),p.hand_start(0)+Vector3.FORWARD*p.ZIP_RANGE)
-	var right_hit:Dictionary=p.ray(p.hand_start(1),p.hand_start(1)+Vector3.FORWARD*p.ZIP_RANGE)
-	check(not left_hit.is_empty() and left_hit.collider==narrow and right_hit.is_empty(),"edge fixture has exactly one valid parallel ray")
-	check(not p.begin_zip(),"a one-glove edge hit cannot trigger the two-hand move")
-	narrow.queue_free()
-	var level_pad=lab.box(Vector3(40,4,8),Vector3(4,8,0.3),lab.MINT)
-	p.reset_to(Vector3(40,0.05,18))
-	p.camera.rotation=Vector3.ZERO
-	await frames(15)
-	check(p.is_on_floor() and p.begin_zip(),"a level shot from the floor can start a zip")
-	var flat_count:int=p.zip_count
-	for tick in 100:
-		await frames(1)
-		if p.zip_count>flat_count: break
-	await frames(3)
-	check(p.velocity.z< -26 and p.velocity.y>4 and not p.is_on_floor(),"level zip has enough lift to escape floor friction")
-	p.action_override={"brake":true}
-	await frames(2)
-	check(absf(p.velocity.x)<0.01 and absf(p.velocity.z)<0.01 and p.hand_recovery>1.8,"stone brake stays available without bypassing hand recovery")
-	p.action_override={}
-	p.jump_buffer=0.10
-	await frames(2)
-	check(p.velocity.y>7 and p.hand_recovery>1.8,"air jump remains available while gloves retract")
-	p.reset_to(Vector3(40,0.05,26.2));p.camera.rotation=Vector3.ZERO
-	await frames(15)
-	check(not p.begin_zip(),"surface beyond 17 m cannot trigger quick zip")
-	p.fire_hand(0)
-	await frames(45)
-	check(p.hands[0].state==2,"normal glove can still attach beyond quick zip range")
-	p.reset_to(Vector3(40,0.05,33.5));p.camera.rotation=Vector3.ZERO
-	await frames(15)
-	p.fire_hand(0)
-	await frames(55)
-	check(p.hands[0].state==2,"regular shot attaches just inside its 25.5 m reach")
-	p.reset_to(Vector3(40,0.05,34.0));p.camera.rotation=Vector3.ZERO
-	await frames(15)
-	p.fire_hand(0)
-	await frames(55)
-	check(p.hands[0].state==0 and not p.target_valid,"shot and reticle both reject surfaces beyond 25.5 m")
-	level_pad.queue_free()
-	await setup(lab)
-	p.hand_recovery=0.3
-	check(not p.begin_zip(),"busy hands prevent stacked impulses")
-	p.hand_recovery=0
-	p.action_override={"brake":true}
-	check(not p.begin_zip(),"held brake takes priority over zip")
-	p.action_override={}
-	check(p.begin_zip(),"valid target becomes available after recovery and brake release")
-	lab.set_paused(true)
-	check(not p.zip_pending and not p.mouse_down[0] and not p.mouse_down[1],"pause cancels the pending burst and clears stale mouse chords")
+	p.combat.begin();lab.set_paused(true)
+	check(not p.combat.active and not p.mouse_down[0] and not p.mouse_down[1],"pause cancels an active punch and clears mouse chords")
 	await frames(5)
 	check(lab.hud.page=="Home" and lab.hud.menu.size.x<500 and lab.hud.menu.size.y<520,"pause opens a compact home menu")
 	check(lab.hud.home.visible and not lab.hud.pages.visible,"advanced content is hidden on the home screen")

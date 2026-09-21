@@ -20,7 +20,7 @@ func run(lab: Node3D) -> void:
 	await frames(10)
 	check(not lab.test_world and a!=null,"normal build loads the connected arena instead of the test bays")
 	check(a.find_children("*","Label3D",true,false).is_empty(),"arena contains no instructional or objective signs")
-	check(a.sparks.size()>150 and a.pads.size()>15 and a.openings.size()>20,"map contains varied pickups, bounce pads, and genuine openings")
+	check(a.sparks.is_empty() and a.pads.size()>15 and a.openings.size()>20,"old collectible trails are gone; bounce pads and genuine openings remain")
 	for i in 4:
 		lab.goto_station(i)
 		await frames(15)
@@ -65,10 +65,10 @@ func run(lab: Node3D) -> void:
 		check(accessible,"central hall and corner region reachable on foot: "+str(center))
 	var orb_shape:=SphereShape3D.new();orb_shape.radius=0.20
 	var blocked:Array=[]
-	for i in a.sparks.size():
-		if not clear_shape(p,orb_shape,a.sparks[i]): blocked.append({"index":i,"pos":a.sparks[i]})
+	for pos in a.powerups.candidates:
+		if not clear_shape(p,orb_shape,pos): blocked.append(pos)
 	print("BLOCKED SPARKS ",blocked)
-	check(blocked.is_empty(),"every collectible is clear of solid geometry")
+	check(blocked.is_empty(),"validated random pickup candidates are clear of solid geometry")
 	for xf in a.pockets:
 		p.reset_to(xf*Vector3(-2,0.05,3.5))
 		check(not p.test_move(p.transform,xf.basis*Vector3(0,0,-5)),"sheltered perch has a full standing entrance: "+str(xf.origin))
@@ -86,7 +86,7 @@ func run(lab: Node3D) -> void:
 	p.reset_to(Vector3(0,0.05,-10));p.camera.rotation_degrees=Vector3(89,0,0)
 	p.fire_hand(0)
 	check(not p.hands[0].hit,"shorter gloves cannot directly reach the atrium roof from the floor")
-	p.reset_to(Vector3(0,16,-10));p.camera.rotation_degrees=Vector3(89,0,0)
+	p.reset_to(Vector3(0,20,-10));p.camera.rotation_degrees=Vector3(89,0,0)
 	p.camera.position.y=1.58
 	p.fire_hand(0)
 	check(p.hands[0].hit and p.hands[0].point.y>33,"gaining height first makes the same roof reachable")
@@ -133,11 +133,9 @@ func run(lab: Node3D) -> void:
 	lab.goto_station(0)
 	await frames(10)
 	p.camera.look_at(Vector3(-14,7.8,11))
-	var zip_before:int=p.zip_count
-	check(p.begin_zip(),"wide underside of an atrium bridge accepts the parallel zip")
-	await frames(60)
-	print("ATRIUM ZIP position=",p.position," velocity=",p.velocity," new launches=",p.zip_count-zip_before)
-	check(p.zip_count==zip_before+1 and p.position.y>2,"zip produces actual upward traversal in the new architecture")
+	check(p.combat.begin(),"parallel punch works against atrium architecture")
+	await frames(90)
+	check(p.position.y<0.2,"punching an overhead bridge does not perform the removed quick zip")
 	lab.goto_station(0)
 	await frames(10)
 	p.camera.look_at(Vector3(-14,7.8,11))
@@ -162,25 +160,12 @@ func run(lab: Node3D) -> void:
 	await frames(300)
 	check(p.position.y>5 and p.is_on_floor(),"the atrium ramp is walkable rather than a collision step")
 	p.input_override=Vector2.ZERO
-	# A collectible is swept at zip speeds, cannot pay twice, and cannot be taken through cover.
+	# The broad new floor has a standing surface and the atrium retains open vertical space.
 	p.set_physics_process(false)
-	a.set_physics_process(false)
-	var index:int=a.sparks.size()-1
-	var location:Vector3=a.sparks[index]
-	a.taken[index]=false
-	var before:int=a.collected
-	a.collect_at(location-Vector3.RIGHT*2,location+Vector3.RIGHT*2)
-	check(a.taken[index] and a.collected>before,"swept collection catches a pickup between movement samples")
-	before=a.collected
-	a.collect_at(location,location)
-	check(a.collected==before,"collected pickup cannot pay out twice")
-	# An explicit nearby test barrier isolates occlusion from random maze geometry.
-	var barrier=lab.box(Vector3(0,2,73),Vector3(4,4,0.2),lab.INK)
-	await frames(2)
-	a.sparks[index]=Vector3(0,1,73.4);a.taken[index]=false
-	a.collect_at(Vector3(0,1,72.6),Vector3(0,1,72.6))
-	check(not a.taken[index],"a wall blocks collecting a nearby spark through it")
-	barrier.queue_free()
+	check(clear_shape(p,capsule,Vector3(100,20.95,80)),"second main floor leaves standing headroom")
+	var floor_hit:Dictionary=p.ray(Vector3(100,22,80),Vector3(100,18,80))
+	check(not floor_hit.is_empty() and absf(floor_hit.position.y-20)<0.05,"second main floor has real collision at 20 m")
+	check(p.ray(Vector3(0,5,15),Vector3(0,32,15)).is_empty(),"atrium opening remains a vertical movement route")
 	# Expanded boundary must not trigger the old 70 m recovery limit.
 	p.set_physics_process(true)
 	p.reset_to(Vector3(73,0.05,0));p.velocity=Vector3.ZERO

@@ -6,10 +6,10 @@ A standalone Godot project: a first-person playground of stretchy gloves, slings
 
 - **Play.cmd** runs the game in a visible window. The first run imports the assets automatically.
 - **Edit.cmd** opens this project in the bundled Godot editor.
-- **Verify.cmd** runs all five automated suites, then shows the result.
+- **Verify.cmd** runs all six automated suites, then shows the result.
 - You can also open **project.godot** in Godot **4.7.2**. Other engine versions have not been verified for this project.
 
-WASD moves, mouse looks, Space jumps/double-jumps, LMB/RMB place gloves, both clicks together quick-zip, E slingshots, F/MMB reels, Ctrl brakes/crouches, and Shift grips walls. F5 toggles first/third person. Esc opens the menu and keyboard binder. Full controls and movement details are in [docs/PLAYING.md](docs/PLAYING.md).
+WASD moves, mouse looks, Space jumps/double-jumps, LMB/RMB place gloves, both clicks together punch, E slingshots, F/MMB reels, Ctrl brakes/crouches, and Shift grips walls. F5 toggles first/third person. Esc opens the menu and keyboard binder. Full controls and movement details are in [docs/PLAYING.md](docs/PLAYING.md).
 
 ## Project layout
 
@@ -30,7 +30,7 @@ The working folder has its own Git repository on `main`; the portable ZIP omits 
 
 ## Development
 
-The main scene uses `scripts/lab.gd` as its bootstrap; ordinary play builds `scripts/arena.gd`. The old training bays survive only as deterministic regression fixtures. They are not a second playable project. The expanded building is 304 × 240 m, with four directional launch pads, two distant portal pairs and 278 optional sparks. An original courier prototype supports F5 camera testing. All five supplied music tracks rotate with crossfades, alongside the new effects library. See [docs/EXPANSION.md](docs/EXPANSION.md) and [docs/AUDIO-DESIGN.md](docs/AUDIO-DESIGN.md).
+The main scene uses `scripts/lab.gd` as its bootstrap; ordinary play builds `scripts/arena.gd`. The old training bays survive only as deterministic regression fixtures. They are not a second playable project. The expanded building is 304 × 240 m, with two main floors, broad ramps, dark distance haze, four directional launch pads and two distant portal pairs. Parallel fist punches replace quick zip. Five timed power stations and sparse temporary speed pickups replace the old spark trails. Six damageable dummies provide combat targets. See [docs/COMBAT-POWER-PASS.md](docs/COMBAT-POWER-PASS.md). An original courier prototype supports F5 camera testing. All five supplied music tracks rotate with crossfades, alongside the new effects library. See [docs/EXPANSION.md](docs/EXPANSION.md) and [docs/AUDIO-DESIGN.md](docs/AUDIO-DESIGN.md).
 
 Run tests without opening a console prompt at the end:
 
@@ -38,7 +38,7 @@ Run tests without opening a console prompt at the end:
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/Run.ps1 -Mode Verify
 ```
 
-Tests cover 241 assertions. They run headlessly. Windows certificate-store and shutdown resource warnings can appear in engine logs; script errors and failed assertions fail verification.
+Tests cover 272 assertions. They run headlessly. Windows certificate-store and shutdown resource warnings can appear in engine logs; script errors and failed assertions fail verification.
 
 Keybindings are stored in Godot's user data directory (`user://user_bindings.cfg`). They are personal data, outside the source package. Collection progress is session-local.
 

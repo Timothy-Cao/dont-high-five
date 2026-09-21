@@ -9,6 +9,8 @@ const WALL:=Color("232738")
 const FLOOR:=Color("202a3c")
 var lab: Node3D
 var travel: Node3D
+var powerups:Node3D
+var dummies:Array[Node3D]=[]
 var batches: Dictionary={}
 var solid: StaticBody3D
 var pads: Array[Dictionary]=[]
@@ -173,10 +175,10 @@ func build() -> void:
 	solid.set_meta("grippy",true)
 	# A continuous safety floor and enclosing building; no reset volumes in the routes.
 	block(Vector3(0,-0.5,0),Vector3(304,1,240),FLOOR)
-	block(Vector3(0,35,0),Vector3(304,1,240),Color("121725"))
+	block(Vector3(0,44,0),Vector3(304,1,240),Color("121725"))
 	for side in [-1,1]:
-		wall(Vector3(side*152,17.5,0),Vector3(1,35,240),BLUE)
-		wall(Vector3(0,17.5,side*120),Vector3(304,35,1),BLUE)
+		wall(Vector3(side*152,22,0),Vector3(1,44,240),BLUE)
+		wall(Vector3(0,22,side*120),Vector3(304,44,1),BLUE)
 	for x in [-72,-24,24,72]:
 		for z in [-72,-24,24,72]:
 			block(Vector3(x,17,z),Vector3(1.1,34,1.1),WALL)
@@ -209,8 +211,13 @@ func build() -> void:
 	platform(Vector3(28,8.5,49),Vector2(7,5),PINK)
 	for pos in [Vector3(0,27,0),Vector3(-49,23,0),Vector3(49,20,0),Vector3(0,25,-49),Vector3(0,13,49),Vector3(-49,15,-49),Vector3(49,14,49),Vector3(49,10,-49),Vector3(-49,10,49)]:
 		light_pool(pos,[CYAN,BLUE,PINK][int(absf(pos.x+pos.z))%3])
+	load("res://scripts/upper_floor.gd").new().build(self)
 	flush_batches()
-	build_sparks()
+	# Former pickup trails are removed; only timed, useful power-ups spawn now.
+	sparks.clear()
+	powerups=load("res://scripts/powerups.gd").new();powerups.lab=lab;add_child(powerups)
+	for pos in [Vector3(-4,0,17),Vector3(14,0,19),Vector3(39,20,14),Vector3(-108,0,-25),Vector3(115,20,33),Vector3(21,20,88)]:
+		var dummy=load("res://scripts/target_dummy.gd").new();dummy.lab=lab;add_child(dummy);dummy.position=pos;dummy.rotation.y=PI;dummies.append(dummy)
 
 func build_atrium() -> void:
 	# Two differently oriented bridges cross without forming a flat ceiling.
@@ -444,48 +451,10 @@ func flush_batches() -> void:
 		if data.glow>0: node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(node)
 
-func build_sparks() -> void:
-	var node:=MultiMeshInstance3D.new()
-	add_child(node)
-	spark_mesh=MultiMesh.new()
-	spark_mesh.transform_format=MultiMesh.TRANSFORM_3D
-	var gem:=PrismMesh.new()
-	gem.size=Vector3(0.36,0.58,0.36)
-	spark_mesh.mesh=gem
-	spark_mesh.instance_count=sparks.size()
-	node.multimesh=spark_mesh
-	node.material_override=material(Color("ffc35f"),0.8)
-	node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	for i in sparks.size():
-		taken.append(false)
-		spark_mesh.set_instance_transform(i,Transform3D(Basis.IDENTITY,sparks[i]))
-
-func collect_at(from: Vector3,to: Vector3) -> void:
-	for i in sparks.size():
-		if taken[i]: continue
-		var closest:=Geometry3D.get_closest_point_to_segment(sparks[i],from,to)
-		if closest.distance_squared_to(sparks[i])>1.15*1.15: continue
-		if not lab.player.ray(closest,sparks[i]).is_empty(): continue
-		taken[i]=true
-		collected+=1
-		collect_flash=1
-		collect_chain=minf(collect_chain+0.08,0.6)
-		lab.sound("success",1.1+collect_chain)
-		spark_mesh.set_instance_transform(i,Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*0.001),Vector3(0,-30,0)))
-
 func _physics_process(dt: float) -> void:
 	if not is_instance_valid(lab.player) or lab.paused: return
 	collect_flash=move_toward(collect_flash,0,dt*2.5)
-	collect_chain=move_toward(collect_chain,0,dt*0.12)
 	var body:Vector3=lab.player.position+Vector3.UP*(0.32 if lab.player.ball else 0.95)
 	if previous_body.distance_to(body)>5: previous_body=body
-	collect_at(previous_body,body)
+	powerups.collect(previous_body,body)
 	previous_body=body
-
-func _process(_dt: float) -> void:
-	if not is_instance_valid(spark_mesh) or lab.paused: return
-	var t:=Time.get_ticks_msec()/1000.0
-	for i in sparks.size():
-		if taken[i]: continue
-		var basis:=Basis(Vector3.UP,t+i*0.7)*Basis(Vector3.FORWARD,0.35)
-		spark_mesh.set_instance_transform(i,Transform3D(basis,sparks[i]+Vector3.UP*sin(t*2+i)*0.12))

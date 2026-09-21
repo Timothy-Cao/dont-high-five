@@ -50,7 +50,11 @@ func _ready() -> void:
 	layer.add_child(hud)
 	build_audio()
 	goto_station(0)
-	if "--expansion-capture" in args:
+	if "--combat-capture" in args:
+		call_deferred("capture_combat_power")
+	elif "--combat-power" in args:
+		call_deferred("run_combat_power")
+	elif "--expansion-capture" in args:
 		call_deferred("capture_expansion")
 	elif "--expansion-verify" in args:
 		call_deferred("run_expansion_verification")
@@ -161,9 +165,11 @@ func build_world() -> void:
 	env.environment=e
 	add_child(env)
 	if not test_world:
-		e.ambient_light_energy=0.25
-		visibility_fill=0.25
-		e.fog_density=0.0018
+		e.ambient_light_energy=0.17
+		visibility_fill=0.17
+		e.fog_density=0.018
+		e.fog_light_color=Color("0c1323")
+		e.fog_light_energy=0.7
 		arena=load("res://scripts/arena.gd").new()
 		arena.lab=self
 		add_child(arena)
@@ -311,7 +317,7 @@ func set_paused(value: bool) -> void:
 		hud.start_button.text = "Resume" if started else "Play"
 		if value:
 			player.clear_mouse_chord()
-			if player.zip_pending: player.cancel_hands()
+			if player.combat.active: player.cancel_hands()
 			hud.show_page("Home")
 
 func _notification(what: int) -> void:
@@ -319,6 +325,9 @@ func _notification(what: int) -> void:
 		set_paused(true)
 
 func _process(delta: float) -> void:
+	if not test_world and is_instance_valid(player):
+		environment.fog_density=0.018/player.vision_multiplier()
+		environment.ambient_light_energy=visibility_fill*(1.15 if player.vision_multiplier()>1 else 1.0)
 	if controls.changed and world_hints.size()==2:
 		world_hints[0].text="HOLD "+controls.prompt("cling")+"  /  WALL GRIP"
 		world_hints[1].text="HOLD "+controls.prompt("reel")+" OR MMB  /  REEL TO YOUR GLOVES"
@@ -405,11 +414,11 @@ func capture_arena() -> void:
 		player.set_physics_process(true)
 		await get_tree().create_timer(0.15).timeout
 		player.camera.look_at(Vector3(-14,7.8,11))
-		var did_zip:bool=player.begin_zip()
+		var did_punch:bool=player.combat.begin()
 		for tick in 180:
 			await get_tree().physics_frame
 			if player.hand_recovery>0: break
-		print("RECOVERY CAPTURE started=",did_zip," recovery=",player.hand_recovery)
+		print("RECOVERY CAPTURE started=",did_punch," recovery=",player.hand_recovery)
 		player.camera.rotation.x=0
 		for shot in [["14-gloves-returning",0.12],["15-gloves-winding",0.65],["16-gloves-readying",1.05]]:
 			await get_tree().create_timer(shot[1]).timeout
@@ -499,11 +508,11 @@ func capture_views() -> void:
 	goto_station(3)
 	await get_tree().create_timer(0.1).timeout
 	player.camera.look_at(Vector3(0,17,27))
-	player.begin_zip()
+	player.combat.begin()
 	await get_tree().create_timer(0.1).timeout
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/09-zip-catch.png")
+	get_viewport().get_texture().get_image().save_png("res://.local/captures/09-punch-extension.png")
 	await get_tree().create_timer(0.3).timeout
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/10-zip-flight.png")
+	get_viewport().get_texture().get_image().save_png("res://.local/captures/10-punch-recovery.png")
 	get_tree().quit()
 
 func glow_box(pos: Vector3,size: Vector3,color: Color,energy:=1.0) -> Node3D:
@@ -546,5 +555,15 @@ func run_expansion_verification() -> void:
 
 func capture_expansion() -> void:
 	var capture=load("res://tests/capture_expansion.gd").new()
+	add_child(capture)
+	await capture.run(self)
+
+func run_combat_power() -> void:
+	var test=load("res://tests/verify_combat_power.gd").new()
+	add_child(test)
+	await test.run(self)
+
+func capture_combat_power() -> void:
+	var capture=load("res://tests/capture_combat_power.gd").new()
 	add_child(capture)
 	await capture.run(self)

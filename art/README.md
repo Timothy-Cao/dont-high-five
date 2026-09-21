@@ -17,3 +17,7 @@ The arena geometry and carpet are procedural game code. Audio is prebuilt by `bu
 `blender --background --python art/build_avatar.py` rebuilds the editable courier and `assets/courier.glb`. Evaluated modifiers must be exported so molded corners survive into Godot.
 
 `python art/build_audio.py` rebuilds the 57 sound assets and measures the five music tracks. This authoring command requires NumPy and FFmpeg. The included Kenney source samples are CC0; music files are the user-supplied originals.
+
+## Fists, generators and dummies
+
+`blender --background --python art/build_toys.py` exports two closed fists, a charge pedestal, five distinct floating power symbols and the spring target dummy, with all nine editable Blender files alongside the script. Their geometry and materials are original.

@@ -1,8 +1,8 @@
 extends RefCounted
 
 func build(a: Node3D,t: Node3D) -> void:
-	var side_holes:Array[Rect2]=[Rect2(-61,0,14,8),Rect2(-7,0,14,10),Rect2(47,0,14,8),Rect2(-28,14,16,7),Rect2(14,21,16,6)]
-	var end_holes:Array[Rect2]=[Rect2(-62,0,14,8),Rect2(-7,0,14,10),Rect2(48,0,14,8),Rect2(-30,14,16,7),Rect2(12,21,16,6)]
+	var side_holes:Array[Rect2]=[Rect2(-61,0,14,8),Rect2(-7,0,14,10),Rect2(47,0,14,8),Rect2(-28,14,16,7),Rect2(14,20,16,9)]
+	var end_holes:Array[Rect2]=[Rect2(-62,0,14,8),Rect2(-7,0,14,10),Rect2(48,0,14,8),Rect2(-30,14,16,7),Rect2(12,20,16,9)]
 	var screen_holes:Array[Rect2]=[Rect2(-26,0,14,8),Rect2(-6,10,16,8),Rect2(16,0,12,8),Rect2(-22,21,12,6)]
 	# The old shell becomes a perforated internal boundary; the new halls form a loop.
 	for side in [-1,1]:
@@ -29,7 +29,6 @@ func build(a: Node3D,t: Node3D) -> void:
 		a.trail(Vector3(side*122,18.2,6),Vector3(side*134,18.2,6),3)
 		# North and south concourses are long enough to make a travel network useful.
 		a.platform(Vector3(0,8,side*97),Vector2(224,6),a.CYAN,true)
-		a.ramp(Vector3(-125,0,side*86),Vector3(-105,8,side*97),5,a.CYAN)
 		for x in [-120,-60,0,60,120]:
 			a.light_pool(Vector3(x,20,side*102),a.BLUE,29)
 			a.trail(Vector3(x-5,1.2,side*82),Vector3(x+5,1.2,side*82),3)

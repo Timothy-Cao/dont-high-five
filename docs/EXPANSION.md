@@ -1,5 +1,7 @@
 # Outer halls, travel and courier — September 21, 2026
 
+Historical expansion record. [The subsequent combat/power pass](COMBAT-POWER-PASS.md) replaces spark trails and quick zip, adds the second main floor, and raises the roof to 44 m.
+
 The building is now 304 × 240 m, with the original 152 m square maze inside it. The 35 m ceiling remains. A continuous ground floor connects amber and violet side halls, long blue concourses, intermediate shelves, window walls and covered perimeter pockets. The original dense maze remains the place for tight movement; the annex gives fast movement room to breathe. There are 278 optional sparks, 1,406 collision boxes and 66 shared architecture batches.
 
 ## Travel
