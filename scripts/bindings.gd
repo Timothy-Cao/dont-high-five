@@ -22,7 +22,7 @@ func _ready() -> void:
 	apply()
 
 func permitted(key: int) -> bool:
-	return key>0 and key not in [KEY_ESCAPE,KEY_TAB,KEY_F11,KEY_1,KEY_2,KEY_3,KEY_4]
+	return key>0 and key not in [KEY_ESCAPE,KEY_TAB,KEY_F5,KEY_F11,KEY_1,KEY_2,KEY_3,KEY_4]
 
 func apply() -> void:
 	changed=true

@@ -23,13 +23,11 @@ var gate: StaticBody3D
 var gate_open := false
 var targets: Array[Dictionary] = []
 var audio_enabled := true
-var sounds: Dictionary = {}
-var wind: AudioStreamPlayer
-var creak: AudioStreamPlayer
+var audio_service: Node
 var started := false
 var arena: Node3D
 var test_world:=false
-var world_limits:=Vector2(80,80)
+var world_limits:=Vector2(156,124)
 
 func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute("res://.local/reports")
@@ -52,7 +50,11 @@ func _ready() -> void:
 	layer.add_child(hud)
 	build_audio()
 	goto_station(0)
-	if "--arena-verify" in args:
+	if "--expansion-capture" in args:
+		call_deferred("capture_expansion")
+	elif "--expansion-verify" in args:
+		call_deferred("run_expansion_verification")
+	elif "--arena-verify" in args:
 		call_deferred("run_arena_verification")
 	elif "--arena-capture" in args:
 		call_deferred("capture_arena")
@@ -322,10 +324,6 @@ func _process(delta: float) -> void:
 		world_hints[1].text="HOLD "+controls.prompt("reel")+" OR MMB  /  REEL TO YOUR GLOVES"
 		controls.changed=false
 	message_time = maxf(0,message_time-delta)
-	if wind:
-		wind.volume_db = -80 if paused or not audio_enabled else lerpf(-48,-18,clampf(player.velocity.length()/35,0,1))
-		creak.volume_db = -80 if paused or not audio_enabled or player.power < 0.04 else -27+player.power*8
-		creak.pitch_scale = 0.6+player.power*1.3
 	if not paused:
 		for target in targets:
 			var p: Vector3 = target.pos
@@ -337,61 +335,12 @@ func _process(delta: float) -> void:
 				sound("success")
 
 func build_audio() -> void:
-	for kind in ["fire","stick","launch","land","cancel","success","wind","creak","jump","bounce"]:
-		var duration := 1.0 if kind in ["wind","creak"] else 0.24
-		var rate := 22050
-		var count := int(duration*rate)
-		var data := PackedByteArray()
-		data.resize(count*2)
-		var rng := RandomNumberGenerator.new()
-		rng.seed = 912
-		var filtered := 0.0
-		for j in count:
-			var t := float(j)/rate
-			var f := float(j)/count
-			filtered = lerpf(filtered,rng.randf_range(-1,1),0.18)
-			var sample := 0.0
-			match kind:
-				"wind": sample = filtered*0.35
-				"creak": sample = sin(TAU*110*t)*0.09 + sin(TAU*220*t)*0.025
-				"launch": sample = (filtered*0.6 + sin(TAU*(150*t-210*t*t))*0.32)*pow(1-f,2)
-				"stick": sample = (filtered*0.4+sin(TAU*170*t)*0.25)*exp(-t*40)
-				"fire": sample = (filtered*0.25+sin(TAU*(500*t-600*t*t))*0.15)*pow(1-f,3)
-				"land": sample = (filtered*0.45+sin(TAU*65*t)*0.25)*exp(-t*22)
-				"jump": sample = sin(TAU*(260*t+550*t*t))*0.12*pow(1-f,2)
-				"bounce": sample = sin(TAU*(110*t+900*t*t))*0.2*pow(1-f,2)
-				"success": sample = sin(TAU*(660 if f<0.45 else 880)*t)*0.18*sin(PI*f)
-				_: sample = sin(TAU*260*t)*0.10*pow(1-f,3)
-			data.encode_s16(j*2,int(clampf(sample,-1,1)*32700))
-		var wav := AudioStreamWAV.new()
-		wav.format = AudioStreamWAV.FORMAT_16_BITS
-		wav.mix_rate = rate
-		wav.data = data
-		if kind in ["wind","creak"]:
-			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
-			wav.loop_end = count
-		var a := AudioStreamPlayer.new()
-		add_child(a)
-		a.stream = wav
-		a.volume_db = -10
-		sounds[kind] = a
-	wind = sounds.wind
-	creak = sounds.creak
-	wind.volume_db = -80
-	creak.volume_db = -80
-	wind.play()
-	creak.play()
+	audio_service=load("res://scripts/audio_service.gd").new()
+	audio_service.lab=self
+	add_child(audio_service)
 
-func sound(kind: String) -> void:
-	if audio_enabled and sounds.has(kind):
-		sounds[kind].play()
-
-func _exit_tree() -> void:
-	for audio in sounds.values():
-		if is_instance_valid(audio):
-			audio.stop()
-			audio.stream = null
-	sounds.clear()
+func sound(kind: String,pitch:=1.0) -> void:
+	if is_instance_valid(audio_service): audio_service.play(kind,pitch)
 
 func run_verification() -> void:
 	var test = load("res://tests/verify.gd").new()
@@ -589,3 +538,13 @@ func build_movement_lab() -> void:
 func set_visibility(value: float) -> void:
 	visibility_fill=value
 	environment.ambient_light_energy=value
+
+func run_expansion_verification() -> void:
+	var test=load("res://tests/verify_expansion.gd").new()
+	add_child(test)
+	await test.run(self)
+
+func capture_expansion() -> void:
+	var capture=load("res://tests/capture_expansion.gd").new()
+	add_child(capture)
+	await capture.run(self)

@@ -17,6 +17,8 @@ var welcome_time := 10.0
 var nav_buttons: Dictionary = {}
 var selected_binding := ""
 var binder_status: Label
+var now_playing: Label
+var skip_track: Button
 
 func style(color: Color, radius := 10) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
@@ -96,7 +98,7 @@ func _ready() -> void:
 	show_page("Home")
 
 func go_back() -> void:
-	show_page("Controls" if page=="Bindings" else ("Settings" if page in ["Abilities","Physics"] else "Home"))
+	show_page("Controls" if page=="Bindings" else ("Settings" if page in ["Abilities","Physics","Audio"] else "Home"))
 
 func show_page(which: String) -> void:
 	page = which
@@ -144,7 +146,7 @@ func show_page(which: String) -> void:
 				var key:=label(row,lab.controls.prompt(action),18,ORANGE)
 				key.custom_minimum_size.x=110
 				label(row,lab.controls.TITLES[action],18,DIM)
-			label(pages,"Wheel  Shorter / longer arms     •     "+lab.controls.movement_prompt()+"  Move\n1–4  Areas     •     Esc / Tab  Menu     •     F11  Fullscreen",18,DIM)
+			label(pages,"Wheel  Shorter / longer arms     •     "+lab.controls.movement_prompt()+"  Move\nF5  Camera    •    1–4  Areas    •    Esc / Tab  Menu    •    F11  Fullscreen",18,DIM)
 			button(pages,"Customize the keyboard →",func():show_page("Bindings"))
 		"Bindings":
 			build_binder()
@@ -171,6 +173,16 @@ func show_page(which: String) -> void:
 			pages.add_child(advanced)
 			button(advanced,"Movement abilities",func():show_page("Abilities"))
 			button(advanced,"Advanced tuning",func():show_page("Physics"))
+			button(advanced,"Audio",func():show_page("Audio"))
+		"Audio":
+			label(pages,"AFTERGLOW RADIO",14,ORANGE)
+			label(pages,"Sound & music",29)
+			add_slider("Music",0,100,1,lab.audio_service.music_volume*100,func(v):lab.audio_service.music_volume=v/100)
+			add_slider("Effects",0,100,1,lab.audio_service.effects_volume*100,func(v):lab.audio_service.effects_volume=v/100)
+			label(pages,"Now playing",16,DIM)
+			now_playing=label(pages,lab.audio_service.title(),24)
+			label(pages,"Five tracks. Shuffled, with a soft transition between songs.",18,DIM)
+			skip_track=button(pages,"Next track",func():lab.audio_service.start_track())
 		"Physics":
 			label(pages,"RUBBER DEPARTMENT",14,ORANGE)
 			label(pages,"Experiment with the feel",29)
@@ -211,6 +223,9 @@ func add_slider(title: String, lo: float, hi: float, step: float, value: float, 
 	slider.value_changed.connect(func(v):number.text="%.1f"%v;action.call(v))
 
 func _process(dt: float) -> void:
+	if page=="Audio" and is_instance_valid(now_playing):
+		now_playing.text=lab.audio_service.title()
+		skip_track.disabled=lab.audio_service.fade_time<lab.audio_service.FADE
 	if not lab.paused: welcome_time=maxf(0,welcome_time-dt)
 	queue_redraw()
 

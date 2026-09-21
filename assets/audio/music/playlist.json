@@ -1,0 +1,42 @@
+[
+  {
+    "file": "arcade_hantise.mp3",
+    "title": "Arcade Hantise",
+    "seconds": 299.12,
+    "integrated_lufs": -13.73,
+    "true_peak_db": -3.65,
+    "gain_db": -4.27
+  },
+  {
+    "file": "glitch_protocol.mp3",
+    "title": "Glitch Protocol",
+    "seconds": 179.4,
+    "integrated_lufs": -15.87,
+    "true_peak_db": -4.84,
+    "gain_db": -2.13
+  },
+  {
+    "file": "hypnotic_groove.mp3",
+    "title": "Hypnotic Groove",
+    "seconds": 260.0,
+    "integrated_lufs": -13.74,
+    "true_peak_db": -3.5,
+    "gain_db": -4.26
+  },
+  {
+    "file": "neon_glitch.mp3",
+    "title": "Neon Glitch",
+    "seconds": 197.6,
+    "integrated_lufs": -14.28,
+    "true_peak_db": -3.55,
+    "gain_db": -3.72
+  },
+  {
+    "file": "nocturnal_arcade.mp3",
+    "title": "Nocturnal Arcade",
+    "seconds": 298.88,
+    "integrated_lufs": -14.42,
+    "true_peak_db": -3.98,
+    "gain_db": -3.58
+  }
+]

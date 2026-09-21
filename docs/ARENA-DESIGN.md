@@ -1,6 +1,6 @@
 # Standalone project note
 
-The design and validation record below describes the current game. Runtime code now lives in `scripts/`, tests in `tests/`, and generated output in `.local/`. Historical captures and `checkpoints/pass5` remain in the pre-migration experiment in the original workspace; they are not needed by this project. Baseline measurement files are retained alongside this document with a `baseline-` prefix.
+The design and validation record below describes the original inner arena. The current 304 × 240 m expansion, travel network and new validation are documented in [EXPANSION.md](EXPANSION.md). Runtime code now lives in `scripts/`, tests in `tests/`, and generated output in `.local/`. Historical captures and `checkpoints/pass5` remain in the pre-migration experiment in the original workspace; they are not needed by this project. Baseline measurement files are retained alongside this document with a `baseline-` prefix.
 
 # Afterglow arena
 

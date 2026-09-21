@@ -2,13 +2,14 @@
 
 Open **Play.cmd** in the project root. Close and reopen an older game window to load the new arena. F11 toggles fullscreen.
 
-The training bays have been replaced by a connected, glow-in-the-dark indoor playground: a 152 × 152 m building, tall atrium, overlapping bridges, six maze layers, low tunnels, high galleries, jump-through windows, circular openings and bounce shafts. Routes rise to 26 m. Explore freely and collect 184 glowing sparks for the sound and movement; there is no required route, timer, finish line or collection quota.
+The training bays have been replaced by a connected, glow-in-the-dark indoor playground: a 304 × 240 m building, tall atrium, overlapping bridges, six maze layers, low tunnels, high galleries, jump-through windows, circular openings and bounce shafts. Routes rise to 26 m. Explore freely and collect 278 glowing sparks for the sound and movement; there is no required route, timer, finish line or collection quota.
 
 ## Controls
 
 | Input | Action |
 | --- | --- |
 | WASD + mouse | Move and look |
+| F5 | Toggle first-person / third-person test camera |
 | Space | Jump; press again for one air jump |
 | Left / right mouse | Place or recall that glove |
 | Left + right mouse together | Quick zip: parallel catches, then a fast launch |
@@ -36,9 +37,15 @@ If a surface is beyond zip range but within regular reach, the clicks remain ord
 
 Three sheltered perches sit along the atrium, amber shaft and violet galleries. Each has an offset standing entrance, a hidden corner, a low side escape and a usable roof. Behind the lime tunnels is a covered passage with two low hopping barriers and a central crouch shortcut. These add optional hideouts and movement choices around the open routes.
 
+## New travel and music
+
+Arrow pads launch you automatically toward another platform. Hold Ctrl to suppress activation. Round pads remain vertical bouncers. Two glowing portal pairs link opposite ends of the new outer halls; step into their front face. Cyan connects west ground to east high gallery, and pink connects north high gallery to south ground. Momentum follows the exit direction. Attached gloves release; spent jumps and glove recovery persist.
+
+All five songs play in shuffled rotations. Esc → Settings → Audio changes music/effects volume or skips a track. F5 shows the courier prototype and its rolling ball form; networking is not implemented. See [EXPANSION.md](EXPANSION.md) for the layout and four proposed future toys.
+
 ## Verification
 
-`Verify.cmd` runs four suites: 60 arena checks plus 127 controller, physics and menu checks (187 total). The original bays remain test fixtures only; ordinary play opens the new arena.
+`Verify.cmd` runs five suites: 60 arena checks, 127 controller/physics/menu checks, and 54 travel/camera/audio checks (241 total). The original bays remain test fixtures only; ordinary play opens the new arena.
 
 The new tests check physical ground connectivity, every pickup's clearance, pickup occlusion and fast collection, standing versus ball-sized openings, spawn safety, bounce/brake, zip, reel, wall grip, ramp walking, expanded recovery bounds and menu layout. 2,382 of 2,383 sampled clear ground positions connect without jumping; the remaining sample lies between the hopping barriers. A separate real movement test traverses that passage with two normal jumps. Complete human traversal of every elevated route has not been verified.
 

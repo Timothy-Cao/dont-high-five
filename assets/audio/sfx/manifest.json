@@ -1,0 +1,344 @@
+{
+  "fire_0": {
+    "seconds": 0.24,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.92,
+    "loop": false
+  },
+  "stick_0": {
+    "seconds": 0.22,
+    "peak_dbfs": -7,
+    "rms_dbfs": -23.65,
+    "loop": false
+  },
+  "cancel_0": {
+    "seconds": 0.28,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.9,
+    "loop": false
+  },
+  "launch_0": {
+    "seconds": 0.68,
+    "peak_dbfs": -7,
+    "rms_dbfs": -19.6,
+    "loop": false
+  },
+  "jump_0": {
+    "seconds": 0.25,
+    "peak_dbfs": -11,
+    "rms_dbfs": -25.36,
+    "loop": false
+  },
+  "bounce_0": {
+    "seconds": 0.5,
+    "peak_dbfs": -7,
+    "rms_dbfs": -19.21,
+    "loop": false
+  },
+  "land_0": {
+    "seconds": 0.42,
+    "peak_dbfs": -7,
+    "rms_dbfs": -23.45,
+    "loop": false
+  },
+  "brake_0": {
+    "seconds": 0.5,
+    "peak_dbfs": -7,
+    "rms_dbfs": -22.83,
+    "loop": false
+  },
+  "portal_0": {
+    "seconds": 1.1,
+    "peak_dbfs": -7,
+    "rms_dbfs": -21.4,
+    "loop": false
+  },
+  "pad_0": {
+    "seconds": 0.75,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.54,
+    "loop": false
+  },
+  "success_0": {
+    "seconds": 0.4,
+    "peak_dbfs": -11,
+    "rms_dbfs": -27.52,
+    "loop": false
+  },
+  "ui_0": {
+    "seconds": 0.13,
+    "peak_dbfs": -11,
+    "rms_dbfs": -33.85,
+    "loop": false
+  },
+  "fire_1": {
+    "seconds": 0.24,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.06,
+    "loop": false
+  },
+  "stick_1": {
+    "seconds": 0.22,
+    "peak_dbfs": -7,
+    "rms_dbfs": -22.58,
+    "loop": false
+  },
+  "cancel_1": {
+    "seconds": 0.28,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.96,
+    "loop": false
+  },
+  "launch_1": {
+    "seconds": 0.68,
+    "peak_dbfs": -7,
+    "rms_dbfs": -19.83,
+    "loop": false
+  },
+  "jump_1": {
+    "seconds": 0.25,
+    "peak_dbfs": -11,
+    "rms_dbfs": -25.1,
+    "loop": false
+  },
+  "bounce_1": {
+    "seconds": 0.5,
+    "peak_dbfs": -7,
+    "rms_dbfs": -21.84,
+    "loop": false
+  },
+  "land_1": {
+    "seconds": 0.42,
+    "peak_dbfs": -7,
+    "rms_dbfs": -23.31,
+    "loop": false
+  },
+  "brake_1": {
+    "seconds": 0.5,
+    "peak_dbfs": -7,
+    "rms_dbfs": -22.96,
+    "loop": false
+  },
+  "portal_1": {
+    "seconds": 1.1,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.58,
+    "loop": false
+  },
+  "pad_1": {
+    "seconds": 0.75,
+    "peak_dbfs": -7,
+    "rms_dbfs": -19.85,
+    "loop": false
+  },
+  "success_1": {
+    "seconds": 0.4,
+    "peak_dbfs": -11,
+    "rms_dbfs": -27.73,
+    "loop": false
+  },
+  "ui_1": {
+    "seconds": 0.13,
+    "peak_dbfs": -11,
+    "rms_dbfs": -29.23,
+    "loop": false
+  },
+  "fire_2": {
+    "seconds": 0.24,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.87,
+    "loop": false
+  },
+  "stick_2": {
+    "seconds": 0.22,
+    "peak_dbfs": -7,
+    "rms_dbfs": -23.53,
+    "loop": false
+  },
+  "cancel_2": {
+    "seconds": 0.28,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.47,
+    "loop": false
+  },
+  "launch_2": {
+    "seconds": 0.68,
+    "peak_dbfs": -7,
+    "rms_dbfs": -19.57,
+    "loop": false
+  },
+  "jump_2": {
+    "seconds": 0.25,
+    "peak_dbfs": -11,
+    "rms_dbfs": -25.66,
+    "loop": false
+  },
+  "bounce_2": {
+    "seconds": 0.5,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.56,
+    "loop": false
+  },
+  "land_2": {
+    "seconds": 0.42,
+    "peak_dbfs": -7,
+    "rms_dbfs": -23.22,
+    "loop": false
+  },
+  "brake_2": {
+    "seconds": 0.5,
+    "peak_dbfs": -7,
+    "rms_dbfs": -22.72,
+    "loop": false
+  },
+  "portal_2": {
+    "seconds": 1.1,
+    "peak_dbfs": -7,
+    "rms_dbfs": -21.23,
+    "loop": false
+  },
+  "pad_2": {
+    "seconds": 0.75,
+    "peak_dbfs": -7,
+    "rms_dbfs": -19.25,
+    "loop": false
+  },
+  "success_2": {
+    "seconds": 0.4,
+    "peak_dbfs": -11,
+    "rms_dbfs": -28.59,
+    "loop": false
+  },
+  "ui_2": {
+    "seconds": 0.13,
+    "peak_dbfs": -11,
+    "rms_dbfs": -31.2,
+    "loop": false
+  },
+  "fire_3": {
+    "seconds": 0.24,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.53,
+    "loop": false
+  },
+  "stick_3": {
+    "seconds": 0.22,
+    "peak_dbfs": -7,
+    "rms_dbfs": -23.18,
+    "loop": false
+  },
+  "cancel_3": {
+    "seconds": 0.28,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.93,
+    "loop": false
+  },
+  "launch_3": {
+    "seconds": 0.68,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.29,
+    "loop": false
+  },
+  "jump_3": {
+    "seconds": 0.25,
+    "peak_dbfs": -11,
+    "rms_dbfs": -25.13,
+    "loop": false
+  },
+  "bounce_3": {
+    "seconds": 0.5,
+    "peak_dbfs": -7,
+    "rms_dbfs": -21.53,
+    "loop": false
+  },
+  "land_3": {
+    "seconds": 0.42,
+    "peak_dbfs": -7,
+    "rms_dbfs": -23.27,
+    "loop": false
+  },
+  "brake_3": {
+    "seconds": 0.5,
+    "peak_dbfs": -7,
+    "rms_dbfs": -22.27,
+    "loop": false
+  },
+  "portal_3": {
+    "seconds": 1.1,
+    "peak_dbfs": -7,
+    "rms_dbfs": -21.56,
+    "loop": false
+  },
+  "pad_3": {
+    "seconds": 0.75,
+    "peak_dbfs": -7,
+    "rms_dbfs": -20.54,
+    "loop": false
+  },
+  "success_3": {
+    "seconds": 0.4,
+    "peak_dbfs": -11,
+    "rms_dbfs": -26.45,
+    "loop": false
+  },
+  "ui_3": {
+    "seconds": 0.13,
+    "peak_dbfs": -11,
+    "rms_dbfs": -36.16,
+    "loop": false
+  },
+  "step_0": {
+    "seconds": 0.35,
+    "peak_dbfs": -13,
+    "rms_dbfs": -38.53,
+    "loop": false
+  },
+  "step_1": {
+    "seconds": 0.35,
+    "peak_dbfs": -13,
+    "rms_dbfs": -30.88,
+    "loop": false
+  },
+  "step_2": {
+    "seconds": 0.35,
+    "peak_dbfs": -13,
+    "rms_dbfs": -30.88,
+    "loop": false
+  },
+  "step_3": {
+    "seconds": 0.35,
+    "peak_dbfs": -13,
+    "rms_dbfs": -38.35,
+    "loop": false
+  },
+  "step_4": {
+    "seconds": 0.35,
+    "peak_dbfs": -13,
+    "rms_dbfs": -38.35,
+    "loop": false
+  },
+  "wind": {
+    "seconds": 4.0,
+    "peak_dbfs": -14,
+    "rms_dbfs": -27.57,
+    "loop": true
+  },
+  "creak": {
+    "seconds": 4.0,
+    "peak_dbfs": -14,
+    "rms_dbfs": -22.14,
+    "loop": true
+  },
+  "reel": {
+    "seconds": 4.0,
+    "peak_dbfs": -14,
+    "rms_dbfs": -24.87,
+    "loop": true
+  },
+  "room": {
+    "seconds": 4.0,
+    "peak_dbfs": -14,
+    "rms_dbfs": -25.72,
+    "loop": true
+  }
+}

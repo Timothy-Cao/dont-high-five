@@ -8,6 +8,7 @@ const BLUE:=Color("8199ec")
 const WALL:=Color("232738")
 const FLOOR:=Color("202a3c")
 var lab: Node3D
+var travel: Node3D
 var batches: Dictionary={}
 var solid: StaticBody3D
 var pads: Array[Dictionary]=[]
@@ -171,11 +172,11 @@ func build() -> void:
 	add_child(solid)
 	solid.set_meta("grippy",true)
 	# A continuous safety floor and enclosing building; no reset volumes in the routes.
-	block(Vector3(0,-0.5,0),Vector3(152,1,152),FLOOR)
-	block(Vector3(0,35,0),Vector3(152,1,152),Color("121725"))
+	block(Vector3(0,-0.5,0),Vector3(304,1,240),FLOOR)
+	block(Vector3(0,35,0),Vector3(304,1,240),Color("121725"))
 	for side in [-1,1]:
-		wall(Vector3(side*76,17.5,0),Vector3(1,35,152),BLUE)
-		wall(Vector3(0,17.5,side*76),Vector3(152,35,1),BLUE)
+		wall(Vector3(side*152,17.5,0),Vector3(1,35,240),BLUE)
+		wall(Vector3(0,17.5,side*120),Vector3(304,35,1),BLUE)
 	for x in [-72,-24,24,72]:
 		for z in [-72,-24,24,72]:
 			block(Vector3(x,17,z),Vector3(1.1,34,1.1),WALL)
@@ -190,6 +191,8 @@ func build() -> void:
 	build_south()
 	build_details()
 	build_hideaways()
+	travel=load("res://scripts/travel.gd").new();travel.lab=lab;add_child(travel)
+	load("res://scripts/annex.gd").new().build(self,travel)
 	# Four connected corner mazes; two have a second walkable labyrinth overhead.
 	maze(Vector3(-69,0,-69),7,7,5.5,CYAN,971,true)
 	maze(Vector3(30,0,-69),7,7,5.5,BLUE,173,false)
@@ -467,8 +470,7 @@ func collect_at(from: Vector3,to: Vector3) -> void:
 		collected+=1
 		collect_flash=1
 		collect_chain=minf(collect_chain+0.08,0.6)
-		lab.sounds.success.pitch_scale=1.1+collect_chain
-		lab.sound("success")
+		lab.sound("success",1.1+collect_chain)
 		spark_mesh.set_instance_transform(i,Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*0.001),Vector3(0,-30,0)))
 
 func _physics_process(dt: float) -> void:

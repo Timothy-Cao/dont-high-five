@@ -25,10 +25,10 @@ try {
     }
     if ($Mode -eq 'Import') { exit 0 }
     if ($Mode -eq 'Verify') {
-        foreach ($suite in @('verify','metrics','polish','arena-verify')) {
+        foreach ($suite in @('verify','metrics','polish','arena-verify','expansion-verify')) {
             Invoke-CheckedEngine ($suite + '.log') @('--headless','--',('--' + $suite))
         }
-        Write-Host 'All four suites passed. Reports and logs are in .local/.'
+        Write-Host 'All five suites passed. Reports and logs are in .local/.'
         exit 0
     }
     $arguments = @('--path', ('"' + $projectRoot + '"'), '--log-file', ('"' + (Join-Path $logRoot ($Mode.ToLower() + '.log')) + '"'))

@@ -2,6 +2,15 @@ extends CharacterBody3D
 
 var lab: Node3D
 var camera: Camera3D
+var follow_camera: Camera3D
+var avatar: Node3D
+var third_person:=false
+var camera_cut:=true
+var camera_distance:=4.8
+var follow_shape:=SphereShape3D.new()
+var portal_lock:=0.0
+var pad_lock:=0.0
+var step_distance:=0.0
 var collider: CollisionShape3D
 var stand_shape := CapsuleShape3D.new()
 var ball_shape := SphereShape3D.new()
@@ -101,12 +110,12 @@ func _ready() -> void:
 	add_child(camera)
 	camera.position.y = 1.58
 	camera.near = 0.045
-	camera.far = 250
+	camera.far = 420
 	camera.fov = 84
 	camera.current = true
 	var glove_fill:=DirectionalLight3D.new()
 	lab.add_child(glove_fill)
-	glove_fill.light_cull_mask=2
+	glove_fill.light_cull_mask=6
 	glove_fill.light_energy=0.7
 	glove_fill.rotation_degrees=Vector3(-35,-25,0)
 	for i in 2:
@@ -163,6 +172,46 @@ func _ready() -> void:
 	camera.add_child(ball_rim)
 	ball_rim.position = Vector3(0,-0.26,-0.22)
 	ball_rim.hide()
+	avatar=load("res://scripts/avatar.gd").new();add_child(avatar);avatar.hide()
+	follow_camera=Camera3D.new();lab.add_child(follow_camera)
+	follow_camera.near=0.08;follow_camera.far=420;follow_camera.fov=84
+	follow_shape.radius=0.28
+
+func toggle_view() -> void:
+	third_person=not third_person
+	follow_camera.current=third_person;camera.current=not third_person
+	camera_cut=true
+	update_camera(0.016)
+
+func aim_point() -> Vector3:
+	var end:=camera.global_position-camera.global_basis.z*HAND_RANGE
+	var hit:=ray(camera.global_position,end)
+	return hit.position if not hit.is_empty() else end
+
+func update_camera(dt: float) -> void:
+	if not third_person:
+		avatar.hide()
+		return
+	var origin:=camera.global_position
+	var offset:=camera.global_basis*Vector3(0.65,0.4,4.8)
+	var q:=PhysicsShapeQueryParameters3D.new()
+	q.shape=follow_shape;q.transform=Transform3D(Basis.IDENTITY,origin)
+	q.motion=offset;q.collision_mask=1;q.exclude=[get_rid()];q.margin=0.025
+	var fractions:=get_world_3d().direct_space_state.cast_motion(q)
+	var allowed:=maxf(0.0,offset.length()*fractions[0]-0.06)
+	# Pull in immediately at a wall; ease back out. Never smooth through geometry.
+	camera_distance=allowed if camera_cut or allowed<camera_distance else lerpf(camera_distance,allowed,1-exp(-dt*12))
+	follow_camera.global_position=origin+offset.normalized()*camera_distance
+	follow_camera.look_at(aim_point(),Vector3.UP)
+	follow_camera.fov=camera.fov
+	avatar.visible=camera_distance>0.9
+	camera_cut=false
+
+func launch_from_pad(impulse: Vector3) -> void:
+	cancel_hands();set_ball(true)
+	velocity=impulse;momentum_air=true;flying=true;flight_time=0
+	launch_origin=position;grounded_time=0;air_jumps=1;jump_lock=0.15;coyote=0
+	wall_clinging=false;wall_lock=0.2
 
 func chest() -> Vector3:
 	return global_position + Vector3.UP*1.15
@@ -201,7 +250,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			MOUSE_BUTTON_WHEEL_DOWN:
 				if event.pressed: adjust_length(1.0)
 	elif event is InputEventKey and event.pressed and not event.echo:
-		if event.is_action_pressed("pop_jump"): request_jump()
+		if event.keycode==KEY_F5: toggle_view()
+		elif event.is_action_pressed("pop_jump"): request_jump()
 		elif event.is_action_pressed("pop_launch"): launch()
 		elif event.is_action_pressed("pop_recall") or event.keycode==KEY_BACKSPACE: cancel_hands()
 		elif event.is_action_pressed("pop_retry"): retry()
@@ -475,6 +525,7 @@ func try_stand() -> bool:
 	return true
 
 func reset_to(p: Vector3) -> void:
+	portal_lock=0;pad_lock=0;camera_cut=true;step_distance=0
 	clear_mouse_chord()
 	hand_recovery=0
 	position = p
@@ -510,6 +561,8 @@ func retry() -> void:
 
 func _physics_process(dt: float) -> void:
 	if lab.paused: return
+	var movement_start:=position
+	var was_stone:=stone
 	hand_recovery=maxf(0,hand_recovery-dt)
 	if zip_pending and held("brake"): cancel_hands()
 	var input:=Vector2(float(held("right"))-float(held("left")),float(held("back"))-float(held("forward")))
@@ -526,6 +579,7 @@ func _physics_process(dt: float) -> void:
 	wall_normal=find_wall() if held("cling") and wall_grip_enabled and hand_recovery<=0 and not was_floor and wall_lock<=0 else Vector3.ZERO
 	wall_clinging=wall_normal.length()>0.5 and not held("brake") and not reeling
 	stone=brake_enabled and held("brake") and not was_floor
+	if stone and not was_stone: lab.sound("brake")
 	if was_floor: set_crouch(brake_enabled and held("brake"))
 	var jumped:=false
 	if jump_buffer>0 and not stone:
@@ -626,6 +680,12 @@ func _physics_process(dt: float) -> void:
 		if grounded_time>0.12 and velocity.length()<8: try_stand()
 	else: grounded_time=0
 	if position.y < -12 or absf(position.x)>lab.world_limits.x or absf(position.z)>lab.world_limits.y: retry()
+	if lab.arena: lab.arena.travel.update_player(self,movement_start,dt)
+	if is_on_floor() and not ball and not flying:
+		step_distance+=Vector2(position.x-movement_start.x,position.z-movement_start.z).length()
+		if step_distance>1.9:
+			step_distance=0;lab.sound("step",0.92 if crouched else 1.0)
+	else: step_distance=0
 	update_hands(dt)
 	power=clampf(shot_velocity(position).length()/max_speed,0,1)
 	preview_tick+=1
@@ -672,6 +732,9 @@ func _process(dt: float) -> void:
 	camera.fov = lerpf(camera.fov,84+(clampf(velocity.length()/40,0,1)*5 if camera_motion else 0),1-exp(-dt*5))
 	# Keep the ball outline below the recovering wrists so their state is readable.
 	ball_rim.position.y=lerpf(-0.26,-0.35,smoothstep(0.0,0.35,hand_recovery))
+	ball_rim.visible=ball and not third_person
+	avatar.pose(self,dt)
+	update_camera(dt)
 	arm_frame += 1
 	for i in 2:
 		var h: Dictionary = hands[i]
@@ -707,6 +770,7 @@ func _process(dt: float) -> void:
 			if absf(direction.dot(Vector3.UP))<0.98:
 				h.glove.look_at(end-direction,Vector3.UP)
 		var shoulder := camera.global_transform*Vector3(-0.30 if i==0 else 0.30,-0.42,-0.1)
+		if third_person: shoulder=global_transform*Vector3(-0.325 if i==0 else 0.325,0.95 if crouched else 1.17,0)
 		var slack: float = maxf(0,h.rest-chest().distance_to(h.point)) if h.state==2 else 0.0
 		var strain: float = maxf(0,chest().distance_to(h.point)-h.rest)/stretch_limit if h.state==2 else 0.0
 		if h.cord.visible:
