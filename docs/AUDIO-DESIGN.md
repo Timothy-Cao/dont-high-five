@@ -30,4 +30,4 @@ Separate buses and a master limiter follow [Godot's audio bus workflow](https://
 
 `assets/audio/sfx/manifest.json` contains durations, peak/RMS measurements and loop flags. `.local/reports/audio-audit.json` records independent PCM checks and byte-for-byte matches against the supplied MP3 originals. All effects passed 48 kHz, peak headroom and negligible DC checks. Engine tests verify track advancement near the actual end, overlapping crossfade decks, twelve complete no-repeat shuffle cycles, sample variation, loops, pause and master mute.
 
-The user supplied the music for this project. Its ownership and redistribution terms are not established by this integration; the CC0 notices apply to Kenney's effects, not these songs.
+The user supplied the music for this project. On 2026-09-21 the user confirmed permission to redistribute all five tracks and explicitly authorized their inclusion in this public repository and download. This is project distribution permission, not a blanket third-party reuse license; the CC0 notices apply to Kenney's effects, not these songs.
