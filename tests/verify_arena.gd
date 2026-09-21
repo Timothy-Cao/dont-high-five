@@ -175,6 +175,6 @@ func run(lab: Node3D) -> void:
 	lab.hud.show_page("Yard")
 	await get_tree().process_frame
 	await get_tree().process_frame
-	check(lab.hud.menu.get_global_rect().encloses(lab.hud.pages.get_global_rect()),"Explore shortcuts fit the menu")
+	check(lab.hud.menu.get_global_rect().encloses(lab.hud.page_scroll.get_global_rect()),"Explore shortcuts fit the menu")
 	print("ARENA RESULT: ",checks-failures,"/",checks)
 	get_tree().quit(1 if failures else 0)

@@ -1,4 +1,4 @@
-# Parcel Pop — Afterglow
+# Don’t High Five
 
 Open **Play.cmd** in the project root. Close and reopen an older game window to load the new arena. F11 toggles fullscreen.
 
@@ -27,9 +27,9 @@ Explore a 304 × 240 m glow-in-the-dark building with two main floors, tall ceil
 
 Walls, floors and platforms accept gloves. Ringed pads bounce. Small windows admit the tucked ball or crouched body; elevated openings offer slingshot shortcuts. All main regions connect, and the continuous ground floor lets you recover from missed jumps without restarting.
 
-The HUD stays minimal: a reticle, glove state, brief damage feedback, and labels only while temporary bonuses are active. **Explore** in the pause menu offers optional entry shortcuts. The old spark tally and collection trails are removed.
+The HUD stays minimal: reticle, glove state, brief damage feedback, and labels while a bonus or suppression field is active. The pause menu contains Resume, Settings and Quit. Settings → Controls → Key bindings opens a simple action list: click a key and press its replacement. Occupied keys swap; Esc cancels. Bindings and ordinary settings save automatically. Music and effects both default to 50%; music has an additional ×0.25 multiplier (12.5% bus gain at the default). Volume zero fully mutes the corresponding bus.
 
-**Controls & bindings** retains the keyboard workbench: drag an ability onto a key, or click it and press a key. Occupied keys swap. Keyboard bindings save to `user://user_bindings.cfg`; other settings remain session-local. **Settings** contains visibility, audio, camera and movement options, including disabling the two-button punch. Advanced spring tuning is still available there.
+The red field room is on the upper northeast floor, around (112, 20, -82). It disables arm equipment inside and stops incoming glove/punch projectiles at its doors. Walk or jump out through either membrane to restore arms. It does not imply a killer role or an alignment test.
 
 Regular glove shots reach **25.5 m**. Press LMB and RMB together within 120 ms to fire **two parallel fists** at the same range. Each stops on its first collision and deals 30 damage to a dummy. A nearby ground hit hops you straight up about 2.25 m; ceiling/forward hits do not pull you. Fists take **0.65 s to recover after their flight**. Single clicks, E slingshot and F/MMB reel remain available outside that recovery.
 
@@ -41,10 +41,10 @@ Three sheltered perches sit along the atrium, amber shaft and violet galleries. 
 
 Arrow pads launch you automatically toward another platform. Hold Ctrl to suppress activation. Round pads remain vertical bouncers. Two glowing portal pairs link opposite ends of the new outer halls; step into their front face. Cyan connects west ground to east high gallery, and pink connects north high gallery to south ground. Momentum follows the exit direction. Attached gloves release; spent jumps and glove recovery persist.
 
-All five songs play in shuffled rotations. Esc → Settings → Audio changes music/effects volume or skips a track. F5 shows the courier prototype and its rolling ball form; networking is not implemented. See [EXPANSION.md](EXPANSION.md) for the layout and four proposed future toys.
+All five songs play in shuffled rotations. Esc → Settings changes music and sound-effects volume. F5 shows the courier prototype and its rolling ball form; networking is not implemented. See [EXPANSION.md](EXPANSION.md) for the layout and four proposed future toys.
 
 ## Verification
 
-`Verify.cmd` runs six suites with 272 checks. These cover the controller, physics, menus, arena routes, camera, travel, music, punches, temporary stats, timed generators and both complete ramp walks. All four pad arcs still reach their intended landings. Headless tests and 4K render review are not a substitute for your playtesting.
+`Verify.cmd` runs seven suites with 299 checks. These cover the controller, physics, menus, arena routes, camera, travel, music, punches, temporary stats, timed generators and both complete ramp walks. All four pad arcs still reach their intended landings. Headless tests and 4K render review are not a substitute for your playtesting.
 
-See [COMBAT-POWER-PASS.md](COMBAT-POWER-PASS.md) for tuning values, implementation decisions and evidence. New captures are in `.local/captures/combat-power/`; older design documents retain earlier iteration history.
+See [COMBAT-POWER-PASS.md](COMBAT-POWER-PASS.md) for tuning values, implementation decisions and evidence. The public gallery is in [screenshots/README.md](screenshots/README.md); older design documents retain earlier iteration history. See [RELEASE-0.1.md](RELEASE-0.1.md) for this pass.

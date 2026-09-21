@@ -260,6 +260,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if event.keycode==KEY_F11:
 			fullscreen = not fullscreen
+			lab.save_preferences()
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 			return
 	if lab.paused: return
@@ -336,8 +337,11 @@ func set_crouch(value: bool) -> void:
 	collider.shape=crouch_shape if value else stand_shape
 	collider.position.y=0.525 if value else 0.9
 
+func arms_suppressed() -> bool:
+	return is_instance_valid(lab.arena) and is_instance_valid(lab.arena.suppression_room) and lab.arena.suppression_room.contains(global_position+Vector3.UP*0.9)
+
 func fire_hand(i: int) -> void:
-	if stone or hand_recovery>0 or combat.active: return
+	if arms_suppressed() or stone or hand_recovery>0 or combat.active: return
 	# Gloves can be fired in flight to chain a launch into a grapple.
 	var h: Dictionary = hands[i]
 	if h.state != 0:
@@ -348,7 +352,8 @@ func fire_hand(i: int) -> void:
 		return
 	var from := camera.global_position
 	var to := from-camera.global_basis.z*hand_range()
-	var result := ray(from,to)
+	var query:=PhysicsRayQueryParameters3D.create(from,to,9,[get_rid()])
+	var result := get_world_3d().direct_space_state.intersect_ray(query)
 	h.point = result.position if not result.is_empty() else to
 	h.normal = result.normal if not result.is_empty() else Vector3.UP
 	h.body = result.get("collider")
@@ -441,6 +446,7 @@ func shot_velocity(at: Vector3) -> Vector3:
 	return pull.normalized()*minf(max_speed*pull_multiplier(),speed*pull_multiplier())
 
 func launch() -> void:
+	if arms_suppressed(): return
 	if not is_on_floor() and not wall_clinging and not has_anchor():
 		lab.notify("Stick a glove first, then stretch or reel.")
 		return
@@ -527,6 +533,7 @@ func retry() -> void:
 
 func _physics_process(dt: float) -> void:
 	if lab.paused: return
+	if arms_suppressed(): cancel_hands()
 	var movement_start:=position
 	var was_stone:=stone
 	hand_recovery=maxf(0,hand_recovery-dt)
@@ -543,8 +550,8 @@ func _physics_process(dt: float) -> void:
 	jump_buffer=maxf(0,jump_buffer-dt)
 	coyote=0.10 if was_floor and jump_lock<=0 else maxf(0,coyote-dt)
 	if was_floor and jump_lock<=0: air_jumps=1
-	reeling=reel_enabled and held("reel") and has_anchor()
-	wall_normal=find_wall() if held("cling") and wall_grip_enabled and hand_recovery<=0 and not was_floor and wall_lock<=0 else Vector3.ZERO
+	reeling=not arms_suppressed() and reel_enabled and held("reel") and has_anchor()
+	wall_normal=find_wall() if not arms_suppressed() and held("cling") and wall_grip_enabled and hand_recovery<=0 and not was_floor and wall_lock<=0 else Vector3.ZERO
 	wall_clinging=wall_normal.length()>0.5 and not held("brake") and not reeling
 	stone=brake_enabled and held("brake") and not was_floor
 	if stone and not was_stone: lab.sound("brake")

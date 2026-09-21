@@ -6,6 +6,8 @@ const CREAM = Color("b6ac94")
 const INK = Color("20283d")
 const MINT = Color("347d87")
 const GOLD = Color("e5a35e")
+var preferences = preload("res://scripts/preferences.gd").new()
+var scripted_run := false
 var controls: Node
 var environment: Environment
 var visibility_fill := 0.12
@@ -32,6 +34,7 @@ var world_limits:=Vector2(156,124)
 func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute("res://.local/reports")
 	var args:=OS.get_cmdline_user_args()
+	scripted_run = not args.is_empty()
 	test_world="--verify" in args or "--metrics" in args or "--polish" in args or "--capture" in args
 	if test_world: world_limits=Vector2(70,75)
 	controls=load("res://scripts/bindings.gd").new()
@@ -49,8 +52,15 @@ func _ready() -> void:
 	hud.lab = self
 	layer.add_child(hud)
 	build_audio()
+	if not scripted_run: preferences.restore(self)
 	goto_station(0)
-	if "--combat-capture" in args:
+	if "--showcase" in args:
+		var showcase = load("res://tests/capture_showcase.gd").new();add_child(showcase)
+		showcase.call_deferred("run",self)
+	elif "--settings-verify" in args:
+		var test = load("res://tests/verify_settings.gd").new();add_child(test)
+		test.call_deferred("run",self)
+	elif "--combat-capture" in args:
 		call_deferred("capture_combat_power")
 	elif "--combat-power" in args:
 		call_deferred("run_combat_power")
@@ -73,6 +83,10 @@ func _ready() -> void:
 		call_deferred("capture_views")
 	else:
 		set_paused(true)
+
+func save_preferences() -> void:
+	if not scripted_run and preferences.save(self) != OK:
+		push_warning("Could not save settings; current session values remain active.")
 
 func mat(c: Color, glow: float = 0.0) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
@@ -279,7 +293,7 @@ func decorate_yard() -> void:
 	for x in range(-45,46,10):
 		box(Vector3(x,2.2,-53),Vector3(0.24,4.4,0.24),GOLD,false,false)
 		box(Vector3(x,4.2,-53),Vector3(5,0.45,0.45),CREAM,false,false)
-	postal_sign("PARCEL POP  /  NIGHT SHIFT",Vector3(0,7,-53),23)
+	postal_sign("DON’T HIGH FIVE",Vector3(0,7,-53),23)
 	# Oversized rounded sorting bins read as playful scenery at a distance.
 	for x in [-44,44]:
 		for z in [-35,-23,-11]:
@@ -311,7 +325,7 @@ func hit_button() -> void:
 
 func set_paused(value: bool) -> void:
 	paused = value
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if value else Input.MOUSE_MODE_CAPTURED
+	if not scripted_run: Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if value else Input.MOUSE_MODE_CAPTURED
 	if is_instance_valid(hud):
 		hud.menu.visible = value
 		hud.start_button.text = "Resume" if started else "Play"

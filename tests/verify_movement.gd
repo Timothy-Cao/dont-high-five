@@ -179,7 +179,7 @@ func run(lab: Node3D) -> void:
 		lab.hud.show_page(page_name)
 		await get_tree().process_frame
 		await get_tree().process_frame
-		check(lab.hud.menu.get_global_rect().encloses(lab.hud.pages.get_global_rect()),page_name+" content fits inside its menu")
+		check(lab.hud.menu.get_global_rect().encloses(lab.hud.page_scroll.get_global_rect()),page_name+" content fits inside its menu")
 		check(lab.hud.get_global_rect().encloses(lab.hud.menu.get_global_rect()),page_name+" entire menu fits the viewport")
 	print("METRICS ",JSON.stringify(metrics))
 	print("MOVEMENT RESULT: ",checks-failures,"/",checks)

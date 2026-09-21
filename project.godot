@@ -1,6 +1,6 @@
 config_version=5
 [application]
-config/name="Parcel Pop — Night Shift"
+config/name="Don’t High Five"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="ParcelPop"
 run/main_scene="res://scenes/main.tscn"

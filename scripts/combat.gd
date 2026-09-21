@@ -18,7 +18,7 @@ func _ready() -> void:
 	shape.radius=0.22
 
 func begin() -> bool:
-	if not player.punch_enabled or player.stone or player.held("brake") or player.hand_recovery>0 or active: return false
+	if player.arms_suppressed() or not player.punch_enabled or player.stone or player.held("brake") or player.hand_recovery>0 or active: return false
 	player.cancel_hands()
 	active=true;pose_fists=true;hopped=false;attacks+=1
 	direction=-player.camera.global_basis.z;shot_basis=player.camera.global_basis
@@ -74,7 +74,7 @@ func tick(dt: float) -> void:
 		var step:float=minf(SPEED*dt,projectile.remaining)
 		var q:=PhysicsShapeQueryParameters3D.new()
 		q.shape=shape;q.transform.origin=projectile.pos;q.motion=direction*step
-		q.collision_mask=1;q.exclude=[player.get_rid()];q.margin=0.005
+		q.collision_mask=9;q.exclude=[player.get_rid()];q.margin=0.005
 		var space:=player.get_world_3d().direct_space_state
 		var initial:=space.get_rest_info(q)
 		var fraction:=space.cast_motion(q)

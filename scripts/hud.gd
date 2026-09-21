@@ -17,6 +17,8 @@ var welcome_time := 10.0
 var nav_buttons: Dictionary = {}
 var selected_binding := ""
 var binder_status: Label
+var page_scroll: ScrollContainer
+var binding_buttons: Dictionary = {}
 var now_playing: Label
 var skip_track: Button
 
@@ -76,14 +78,12 @@ func _ready() -> void:
 	home = VBoxContainer.new()
 	home.add_theme_constant_override("separation",10)
 	column.add_child(home)
-	label(home,"AFTERGLOW" if not lab.test_world else "NIGHT SHIFT",13,ORANGE)
-	label(home,"Parcel Pop",36)
-	label(home,"An elastic playground.",17,DIM)
+	label(home,"Don’t High Five",32)
 	var space := Control.new()
 	space.custom_minimum_size.y=12
 	home.add_child(space)
 	start_button=button(home,"Play",func():lab.started=true;lab.set_paused(false),true)
-	for entry in [["Yard","Practice areas" if lab.test_world else "Explore"],["Controls","Controls & bindings"],["Settings","Settings"]]:
+	for entry in [["Settings","Settings"]]:
 		nav_buttons[entry[0]]=button(home,entry[1],func():show_page(entry[0]))
 	button(home,"Quit",func():get_tree().quit())
 	detail_header=HBoxContainer.new()
@@ -92,13 +92,19 @@ func _ready() -> void:
 	header_title=label(detail_header,"",19,DIM)
 	header_title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	header_title.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+	page_scroll=ScrollContainer.new()
+	page_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	page_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	page_scroll.follow_focus=true
+	column.add_child(page_scroll)
 	pages=VBoxContainer.new()
+	pages.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	pages.add_theme_constant_override("separation",12)
-	column.add_child(pages)
+	page_scroll.add_child(pages)
 	show_page("Home")
 
 func go_back() -> void:
-	show_page("Controls" if page=="Bindings" else ("Settings" if page in ["Abilities","Physics","Audio"] else "Home"))
+	show_page("Controls" if page=="Bindings" else ("Settings" if page in ["Controls","Abilities","Physics","Audio"] else "Home"))
 
 func show_page(which: String) -> void:
 	page = which
@@ -108,11 +114,13 @@ func show_page(which: String) -> void:
 		child.queue_free()
 	home.visible=which=="Home"
 	pages.visible=which!="Home"
+	page_scroll.visible=which!="Home"
+	page_scroll.scroll_vertical=0
 	detail_header.visible=which!="Home"
 	header_title.text={"Yard":"Practice areas","Bindings":"Key bindings","Physics":"Advanced tuning"}.get(which,which)
 	if which=="Yard" and not lab.test_world: header_title.text="Explore"
-	var width:=420.0 if which=="Home" else 820.0
-	var height:=452.0 if which=="Home" else (740.0 if which=="Bindings" else 690.0)
+	var width:=440.0 if which=="Home" else 700.0
+	var height:=300.0 if which=="Home" else 650.0
 	menu.offset_left=-width/2
 	menu.offset_right=width/2
 	menu.offset_top=-height/2
@@ -137,17 +145,11 @@ func show_page(which: String) -> void:
 				button(pages,names[i],func():lab.goto_station(i);lab.started=true;lab.set_paused(false))
 			label(pages,"No timer. No lives. Just one more launch.",17,DIM)
 		"Controls":
-			label(pages,"THE EMPLOYEE HANDBOOK",14,ORANGE)
-			label(pages,"Familiar feet. Unusual hands.",29)
-			label(pages,"LMB / RMB  •  Place or recall a glove (25.5 m)\nLMB + RMB together  •  Parallel punch; hit nearby ground to hop\nHold MMB  •  Reel",18,PAPER)
-			for action in ["jump","launch","reel","brake","cling","recall","retry","reset"]:
-				var row:=HBoxContainer.new()
-				pages.add_child(row)
-				var key:=label(row,lab.controls.prompt(action),18,ORANGE)
-				key.custom_minimum_size.x=110
-				label(row,lab.controls.TITLES[action],18,DIM)
-			label(pages,"Wheel  Shorter / longer arms     •     "+lab.controls.movement_prompt()+"  Move\nF5  Camera    •    1–4  Areas    •    Esc / Tab  Menu    •    F11  Fullscreen",18,DIM)
-			button(pages,"Customize the keyboard →",func():show_page("Bindings"))
+			label(pages,"LMB / RMB   Place or recall a glove",18)
+			label(pages,"LMB + RMB   Punch; aim at nearby ground to hop",18)
+			label(pages,"Hold MMB   Reel     •     Wheel   Adjust arm length",18,DIM)
+			label(pages,"F5   Camera     •     F11   Fullscreen     •     Esc   Menu",18,DIM)
+			button(pages,"Key bindings",func():show_page("Bindings"))
 		"Bindings":
 			build_binder()
 		"Abilities":
@@ -160,20 +162,15 @@ func show_page(which: String) -> void:
 			check_button("Grapple reel",lab.player.reel_enabled,func(v):lab.player.reel_enabled=v)
 			label(pages,"Ringed pads bounce. Walls and platforms accept gloves.",18,DIM)
 		"Settings":
-			label(pages,"MAKE YOURSELF COMFORTABLE",14,ORANGE)
-			label(pages,"Settings",29)
+			add_slider("Music",0,100,1,lab.audio_service.music_volume*100,func(v):lab.audio_service.music_volume=v/100,true)
+			add_slider("Sound effects",0,100,1,lab.audio_service.effects_volume*100,func(v):lab.audio_service.effects_volume=v/100,true)
 			add_slider("Mouse sensitivity",0.6,4,0.1,lab.player.sensitivity*1000,func(v):lab.player.sensitivity=v/1000)
-			check_button("Trajectory preview",lab.player.preview_enabled,func(v):lab.player.preview_enabled=v)
-			check_button("Sound",lab.audio_enabled,func(v):lab.audio_enabled=v)
-			add_slider("Darkness / visibility",0.06,0.4,0.01,lab.visibility_fill,func(v):lab.set_visibility(v))
-			check_button("Glove lights",lab.player.grip_lights,func(v):lab.player.grip_lights=v)
+			add_slider("Brightness",0.06,0.4,0.01,lab.visibility_fill,func(v):lab.set_visibility(v))
 			check_button("Speed FOV effect",lab.player.camera_motion,func(v):lab.player.camera_motion=v)
-			check_button("Fullscreen",lab.player.fullscreen,func(v):lab.player.fullscreen=v;DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if v else DisplayServer.WINDOW_MODE_WINDOWED))
-			var advanced:=HBoxContainer.new()
-			pages.add_child(advanced)
-			button(advanced,"Movement abilities",func():show_page("Abilities"))
-			button(advanced,"Advanced tuning",func():show_page("Physics"))
-			button(advanced,"Audio",func():show_page("Audio"))
+			check_button("Fullscreen",lab.player.fullscreen,func(v):lab.player.fullscreen=v;DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if v else DisplayServer.WINDOW_MODE_WINDOWED) if not lab.scripted_run else null)
+			button(pages,"Controls",func():show_page("Controls"))
+			if lab.test_world:
+				button(pages,"Practice tuning",func():show_page("Physics"))
 		"Audio":
 			label(pages,"AFTERGLOW RADIO",14,ORANGE)
 			label(pages,"Sound & music",29)
@@ -201,10 +198,10 @@ func check_button(title: String, checked: bool, action: Callable) -> void:
 	b.custom_minimum_size.y = 40
 	b.add_theme_font_size_override("font_size",20)
 	b.add_theme_color_override("font_color",PAPER)
-	b.toggled.connect(action)
+	b.toggled.connect(func(v):action.call(v);lab.save_preferences())
 	pages.add_child(b)
 
-func add_slider(title: String, lo: float, hi: float, step: float, value: float, action: Callable) -> void:
+func add_slider(title: String, lo: float, hi: float, step: float, value: float, action: Callable, percentage := false) -> void:
 	var row := HBoxContainer.new()
 	pages.add_child(row)
 	var l := label(row,title,18)
@@ -217,10 +214,10 @@ func add_slider(title: String, lo: float, hi: float, step: float, value: float, 
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slider.custom_minimum_size.y = 42
 	row.add_child(slider)
-	var number := label(row,"%.1f"%value,18,ORANGE)
+	var number := label(row,("%.0f%%"%value) if percentage else ("%.2f"%value),18,ORANGE)
 	number.custom_minimum_size.x = 45
 	number.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	slider.value_changed.connect(func(v):number.text="%.1f"%v;action.call(v))
+	slider.value_changed.connect(func(v):number.text=("%.0f%%"%v) if percentage else ("%.2f"%v);action.call(v);lab.save_preferences())
 
 func _process(dt: float) -> void:
 	if page=="Audio" and is_instance_valid(now_playing):
@@ -246,6 +243,7 @@ func _draw() -> void:
 	if lab.test_world: txt(Vector2(28,40),lab.station_names[lab.station],15,DIM)
 	if lab.test_world and p.velocity.length()>9:
 		txt(Vector2(size.x-124,40),"%02.0f m/s"%p.velocity.length(),19,DIM)
+	if p.arms_suppressed(): centered(center+Vector2(0,42),"ARMS OFFLINE",14,Color("f49baa"))
 	var reticle := Color("9dcfbb") if p.target_valid else PAPER
 	draw_circle(center,6,Color(0.05,0.12,0.13,0.7))
 	draw_arc(center,5,0,TAU,24,reticle,1.5,true)
@@ -301,48 +299,32 @@ func _draw() -> void:
 		centered(Vector2(center.x,76),lab.message,16)
 
 func build_binder() -> void:
-	label(pages,"YOUR HANDS, YOUR KEYS",14,ORANGE)
-	label(pages,"Keyboard workbench",29)
-	binder_status=label(pages,"Drag an ability onto a key. Or click an ability, then press a key.\nOccupied keys swap. Esc cancels. Bindings save automatically.",17,DIM)
-	var key_script=load("res://scripts/binding_key.gd")
-	var short_names:={"forward":"Forward","back":"Back","left":"Left","right":"Right","jump":"Jump","launch":"Launch","reel":"Reel","brake":"Brake","cling":"Grip","recall":"Recall","retry":"Retry","reset":"Return","preview":"Preview"}
-	for codes in [[KEY_Q,KEY_W,KEY_E,KEY_R,KEY_T,KEY_Y,KEY_U,KEY_I,KEY_O,KEY_P],[KEY_A,KEY_S,KEY_D,KEY_F,KEY_G,KEY_H,KEY_J,KEY_K,KEY_L],[KEY_SHIFT,KEY_Z,KEY_X,KEY_C,KEY_V,KEY_B,KEY_N,KEY_M],[KEY_CTRL,KEY_SPACE]]:
-		var row:=HBoxContainer.new()
-		row.add_theme_constant_override("separation",5)
-		pages.add_child(row)
-		for code in codes:
-			var key=key_script.new()
-			key.binder=self
-			key.key_code=code
-			key.custom_minimum_size=Vector2(220 if code==KEY_SPACE else (90 if code in [KEY_CTRL,KEY_SHIFT] else 64),52)
-			var caption:String=lab.controls.key_name(code)
-			var occupied:=false
-			for action in lab.controls.keys:
-				if lab.controls.keys[action]==code: caption+="\n"+short_names[action];occupied=true
-			key.text=caption
-			key.add_theme_font_size_override("font_size",13)
-			key.add_theme_stylebox_override("normal",style(Color("36545e") if occupied else Color("253944"),6))
-			key.pressed.connect(func():
-				if not selected_binding.is_empty(): assign_binding(selected_binding,code))
-			row.add_child(key)
-	var chips:=GridContainer.new()
-	chips.columns=3
-	pages.add_child(chips)
+	binding_buttons.clear()
+	binder_status=label(pages,"Choose a key to change. Esc cancels. Used keys swap.",16,DIM)
 	for action in lab.controls.keys:
-		var chip=key_script.new()
-		chip.binder=self
-		chip.action_name=action
-		chip.text=lab.controls.prompt(action)+"  /  "+lab.controls.TITLES[action]
-		chip.custom_minimum_size=Vector2(235,31)
-		chip.add_theme_font_size_override("font_size",14)
-		chip.pressed.connect(func():selected_binding=action;binder_status.text="Press a key for "+lab.controls.TITLES[action]+". Esc cancels.")
-		chips.add_child(chip)
-	button(pages,"Restore default keys",func():lab.controls.reset_bindings();selected_binding="";show_page("Bindings"))
+		var row:=HBoxContainer.new()
+		pages.add_child(row)
+		var title:=label(row,lab.controls.TITLES[action],18)
+		title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		title.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+		var key:=button(row,lab.controls.prompt(action),func():select_binding(action))
+		key.custom_minimum_size=Vector2(150,36)
+		key.add_theme_font_size_override("font_size",17)
+		binding_buttons[action]=key
+	button(pages,"Reset keys",func():lab.controls.reset_bindings(not lab.scripted_run);selected_binding="";show_page("Bindings"))
+
+func select_binding(action: String) -> void:
+	for old in binding_buttons: binding_buttons[old].text=lab.controls.prompt(old)
+	selected_binding=action
+	binding_buttons[action].text="Press a key…"
+	binder_status.text="Press a key for "+lab.controls.TITLES[action]+". Esc cancels."
 
 func assign_binding(action: String,code: int) -> void:
-	if lab.controls.bind(action,code):
+	if lab.controls.bind(action,code,not lab.scripted_run):
 		selected_binding=""
-		call_deferred("show_page","Bindings")
+		for bound in binding_buttons: binding_buttons[bound].text=lab.controls.prompt(bound)
+		binder_status.text="Saved. Used keys swap; Esc returns."
+		binding_buttons[action].grab_focus()
 	else: binder_status.text="That key is reserved for the menu, fullscreen, or practice areas."
 
 func _input(event: InputEvent) -> void:

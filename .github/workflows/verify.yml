@@ -1,0 +1,26 @@
+name: Verify playground
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  godot:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Godot runtime
+        shell: pwsh
+        run: ./tools/Setup-Godot.ps1
+      - name: Import and run all seven suites
+        shell: pwsh
+        run: ./tools/Run.ps1 -Mode Verify
+      - name: Keep verification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-logs
+          path: .local/logs/

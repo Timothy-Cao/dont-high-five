@@ -1,49 +1,70 @@
-# Parcel Pop — Afterglow
+# Don’t High Five
 
-A standalone Godot project: a first-person playground of stretchy gloves, slingshots, grapples and glowing indoor mazes. This folder contains the current game, original assets, editable Blender sources, tests and a portable Windows Godot runtime. It does not depend on the old experiments workspace.
+**Stretch your arms. Trust your landing. Be careful who you help.**
 
-## Start
+A first-person Godot movement playground inside an enormous glow-in-the-dark attraction. Fire sticky gloves, stretch into a slingshot, reel around corners, and punch the floor to hop.
 
-- **Play.cmd** runs the game in a visible window. The first run imports the assets automatically.
-- **Edit.cmd** opens this project in the bundled Godot editor.
-- **Verify.cmd** runs all six automated suites, then shows the result.
-- You can also open **project.godot** in Godot **4.7.2**. Other engine versions have not been verified for this project.
+![First-person gloves, central power station and two posed robot models](docs/screenshots/01-high-five-club.png)
 
-WASD moves, mouse looks, Space jumps/double-jumps, LMB/RMB place gloves, both clicks together punch, E slingshots, F/MMB reels, Ctrl brakes/crouches, and Shift grips walls. F5 toggles first/third person. Esc opens the menu and keyboard binder. Full controls and movement details are in [docs/PLAYING.md](docs/PLAYING.md).
+**Current build: single-player prototype.** Multiplayer, social deduction and player-to-player high-fives are being designed; they are not implemented. The two robots above are staged character models, not connected players.
 
-## Project layout
+## Play
 
-| Folder | Contents |
+[**Download the portable Windows playground**](https://github.com/Timothy-Cao/dont-high-five/releases/tag/v0.1.0-playground) · [Controls](docs/PLAYING.md) · [Design notebook](docs/design/README.md) · [Screenshot gallery](docs/screenshots/README.md)
+
+Extract `DontHighFive-standalone.zip` into a writable folder and open **Play.cmd**. This development package includes Godot 4.7.2, the game and editable source assets. The first launch imports assets and can take longer. It is a source/development package, not an optimized production export.
+
+For a source clone, open `project.godot` in **Godot 4.7.2**, or on Windows run:
+
+```powershell
+./tools/Setup-Godot.ps1
+./Play.cmd
+```
+
+The setup script downloads the pinned official engine and verifies its SHA-256. No Blender installation, service account, API key or sibling workspace is needed to play. Blender is only needed to rebuild models.
+
+## In the playground
+
+- Two main floors, tall ceilings, broad ramps, maze corridors and hiding nooks across a 304 × 240 m building.
+- Independent elastic gloves, slingshots, reels, wall grip, double jump and an air brake.
+- Parallel fist attacks with a ground-punch hop and six regenerating targets.
+- Directional launch pads and linked portals connecting distant spaces.
+- Five timed power stations, sparse speed pickups, distance haze and vision boosts.
+- A red hologram room that suppresses arm abilities, with two walkable exits.
+- Original Blender models, an F5 test camera, five-track soundtrack and layered effects.
+- Saved settings and simple click-to-rebind keys.
+
+| Vertical playground | Red suppression room |
 | --- | --- |
-| `scenes/` | Main scene |
-| `scripts/` | Player, arena, HUD, bindings and world setup |
-| `shaders/` | Procedural blacklight carpet and animated portals |
-| `assets/` | Runtime GLB assets, music, effects and import settings |
-| `art/` | Original Blender sources and rebuild scripts |
-| `tests/` | Controller, movement, UI and arena verification |
-| `docs/` | Controls, arena design, development notes and baseline measurements |
-| `tools/` | Launch/test script, packaging script and bundled Windows engine |
-| `licenses/` | Bundled engine notices and project asset provenance |
-| `.local/` | Generated logs, reports and screenshots; not packaged or committed |
+| ![Upper and lower traversal routes](docs/screenshots/02-vertical-playground.png) | ![Red scanning field with gloves in view](docs/screenshots/04-red-room.png) |
 
-The working folder has its own Git repository on `main`; the portable ZIP omits Git metadata. `.gitignore` excludes import caches, local output and the bundled engine; `.gdignore` keeps authoring files and tooling out of Godot's asset scan. No project source license has been selected on your behalf.
+## Controls
+
+| Input | Action |
+| --- | --- |
+| WASD / mouse | Move / look |
+| Space | Jump / double jump |
+| LMB / RMB | Fire or recall that glove |
+| LMB + RMB together | Parallel punch; nearby ground hit gives an upward hop |
+| E | Slingshot from stretched arms |
+| Hold F / MMB | Reel in |
+| Ctrl | Crouch / stop horizontal momentum in the air |
+| Shift | Grip a wall; Space jumps away |
+| Q | Recall gloves |
+| F5 / Esc | Camera / menu |
+
+Full controls: [Playing](docs/PLAYING.md). **Music and effects default to 50%; music has an additional ×0.25 gain**, giving 12.5% music bus gain before per-track matching and pause ducking.
+
+## Where this could go
+
+The working social-game idea is **Blackout Relay**: recover physical charge, negotiate high-fives, restart circuits, and decide whether a helpful teammate is sabotaging handoffs. Alternatives include a hot-potato party mode and cooperative movement assists. These are hypotheses awaiting playtests.
+
+The [research notebook](docs/design/README.md) compares related games and challenges the ideas. It includes faction objectives, high-five input rules, special rooms, weapons/counterplay and a small first multiplayer test.
 
 ## Development
 
-The main scene uses `scripts/lab.gd` as its bootstrap; ordinary play builds `scripts/arena.gd`. The old training bays survive only as deterministic regression fixtures. They are not a second playable project. The expanded building is 304 × 240 m, with two main floors, broad ramps, dark distance haze, four directional launch pads and two distant portal pairs. Parallel fist punches replace quick zip. Five timed power stations and sparse temporary speed pickups replace the old spark trails. Six damageable dummies provide combat targets. See [docs/COMBAT-POWER-PASS.md](docs/COMBAT-POWER-PASS.md). An original courier prototype supports F5 camera testing. All five supplied music tracks rotate with crossfades, alongside the new effects library. See [docs/EXPANSION.md](docs/EXPANSION.md) and [docs/AUDIO-DESIGN.md](docs/AUDIO-DESIGN.md).
+This repository is self-contained. [CONTRIBUTING.md](CONTRIBUTING.md) covers layout, assets, testing and packaging. `Edit.cmd` opens the editor; `Verify.cmd` runs seven suites. Current local verification passed **299 assertions**, followed by a 4K render review. These checks verify mechanics and layout, not human enjoyment or online balance.
 
-Run tests without opening a console prompt at the end:
+Git excludes engine binaries, caches, personal settings, logs and generated release packages. Editable Blender files and runtime assets are included. The old internal `ParcelPop` user-data identifier is retained so existing key bindings survive the rename; earlier pass documents are historical notes.
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/Run.ps1 -Mode Verify
-```
-
-Tests cover 272 assertions. They run headlessly. Windows certificate-store and shutdown resource warnings can appear in engine logs; script errors and failed assertions fail verification.
-
-Keybindings are stored in Godot's user data directory (`user://user_bindings.cfg`). They are personal data, outside the source package. Collection progress is session-local.
-
-See [art/README.md](art/README.md) to rebuild source assets and [docs/ARENA-DESIGN.md](docs/ARENA-DESIGN.md) for layout and balance decisions. Earlier demos are archived in the original workspace. The pre-migration experiment retains old sky art, checkpoints and captures; Windows held that directory open during cleanup. None of that history is a runtime dependency.
-
-## Portable package
-
-Run `tools/Package.ps1` to create `dist/ParcelPop-standalone.zip`. It uses an explicit list of source directories and bundled runtime files, excluding personal data, logs, caches, old experiments and credentials. Extract the archive anywhere writable and open its `parcel-pop/Play.cmd`. This is a complete source/development package with Godot included, rather than an exported release build.
+See [licenses and asset provenance](licenses/README.md). Godot and Kenney notices do not license the original game code or the five user-supplied songs; no blanket open-source license has been selected for this project.

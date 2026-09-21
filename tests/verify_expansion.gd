@@ -129,7 +129,7 @@ func run(lab: Node3D) -> void:
 	check(not AudioServer.is_bus_mute(audio.music_bus) and AudioServer.is_bus_mute(audio.effects_bus),"pause ducks music and silences movement effects")
 	lab.hud.show_page("Audio")
 	await get_tree().process_frame;await get_tree().process_frame
-	check(lab.hud.menu.get_global_rect().encloses(lab.hud.pages.get_global_rect()),"audio controls fit the existing minimal menu")
+	check(lab.hud.menu.get_global_rect().encloses(lab.hud.page_scroll.get_global_rect()),"audio controls fit the existing minimal menu")
 	print("EXPANSION RESULT: ",checks-failures,"/",checks)
 	var report:=FileAccess.open("res://.local/reports/expansion-metrics.json",FileAccess.WRITE)
 	report.store_string(JSON.stringify({"checks":checks,"failures":failures,"sparks":lab.arena.sparks.size(),"collision_boxes":lab.arena.shapes,"architecture_batches":lab.arena.batches.size(),"portals":t.portals.size(),"launch_pads":t.launch_pads.size()},"  "))

@@ -8,6 +8,7 @@ const BLUE:=Color("8199ec")
 const WALL:=Color("232738")
 const FLOOR:=Color("202a3c")
 var lab: Node3D
+var suppression_room: Node3D
 var travel: Node3D
 var powerups:Node3D
 var dummies:Array[Node3D]=[]
@@ -212,6 +213,7 @@ func build() -> void:
 	for pos in [Vector3(0,27,0),Vector3(-49,23,0),Vector3(49,20,0),Vector3(0,25,-49),Vector3(0,13,49),Vector3(-49,15,-49),Vector3(49,14,49),Vector3(49,10,-49),Vector3(-49,10,49)]:
 		light_pool(pos,[CYAN,BLUE,PINK][int(absf(pos.x+pos.z))%3])
 	load("res://scripts/upper_floor.gd").new().build(self)
+	suppression_room=load("res://scripts/suppression_room.gd").new();add_child(suppression_room);suppression_room.build(self)
 	flush_batches()
 	# Former pickup trails are removed; only timed, useful power-ups spawn now.
 	sparks.clear()

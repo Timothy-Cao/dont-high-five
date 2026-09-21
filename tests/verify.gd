@@ -137,14 +137,14 @@ func run(lab: Node3D) -> void:
 		lab.hud.show_page(page_name)
 		await get_tree().process_frame
 		await get_tree().process_frame
-		check(lab.hud.page==page_name and lab.hud.menu.get_global_rect().encloses(lab.hud.pages.get_global_rect()),page_name+" menu opens with its content inside the panel")
+		check(lab.hud.page==page_name and lab.hud.menu.get_global_rect().encloses(lab.hud.page_scroll.get_global_rect()),page_name+" menu opens with its content inside the panel")
 	lab.hud.show_page("Settings")
 	var settings_checks = lab.hud.pages.find_children("*","CheckButton",true,false)
 	settings_checks[0].button_pressed = false
 	settings_checks[1].button_pressed = false
-	check(not p.preview_enabled and not lab.audio_enabled,"settings toggles change the actual preview and audio state")
+	check(not p.camera_motion and not p.fullscreen,"settings toggles change the live camera and display state")
 	settings_checks[0].button_pressed = true
-	settings_checks[1].button_pressed = true
+	settings_checks[1].button_pressed = false
 	lab.hud.show_page("Physics")
 	var sliders = lab.hud.pages.find_children("*","HSlider",true,false)
 	sliders[0].value = 5.5

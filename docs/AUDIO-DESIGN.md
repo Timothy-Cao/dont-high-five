@@ -1,8 +1,8 @@
-# Afterglow audio
+# Don’t High Five audio
 
 ## Music
 
-All five user-supplied MP3 files are included unchanged. Playback chooses a random first track, plays every track once in a shuffled bag, then reshuffles without an immediate repeat across the boundary. Two players make a 1.4 second equal-power transition. The Audio page has separate music and effects sliders, the live song title and a Next track button. The button waits for the current transition to finish before allowing another skip. Pause ducks music by 6 dB and silences movement effects; the master Sound toggle mutes all audio.
+All five user-supplied MP3 files are included unchanged. Playback chooses a random first track, plays every track once in a shuffled bag, then reshuffles without an immediate repeat across the boundary. Two players make a 1.4 second equal-power transition. The streamlined Settings page has separate music and sound-effects sliders, both defaulting to 50%. Music has a further ×0.25 bus gain, giving 12.5% at the default before per-track matching. Sound effects use ordinary linear gain. Zero fully mutes either bus. Preferences save automatically. Pause additionally ducks music by 6 dB and silences movement effects. The older Audio page and master toggle remain regression fixtures, not normal menu navigation.
 
 FFmpeg's [loudness analysis](https://ffmpeg.org/ffmpeg-filters.html#loudnorm) measured the original tracks. Playback gain matches their integrated loudness to approximately −18 LUFS before the music volume control; files were not re-encoded. `assets/audio/music/playlist.json` records measurements and gains.
 

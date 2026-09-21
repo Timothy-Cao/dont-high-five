@@ -63,11 +63,14 @@ func run(lab: Node3D) -> void:
 	await frames(5)
 	check(lab.hud.page=="Home" and lab.hud.menu.size.x<500 and lab.hud.menu.size.y<520,"pause opens a compact home menu")
 	check(lab.hud.home.visible and not lab.hud.pages.visible,"advanced content is hidden on the home screen")
-	lab.hud.nav_buttons.Controls.pressed.emit()
+	lab.hud.nav_buttons.Settings.pressed.emit()
+	for b in lab.hud.pages.find_children("*","Button",true,false):
+		if b.text=="Controls": b.pressed.emit();break
 	check(lab.hud.page=="Controls","home Controls button opens the actual control page")
 	lab.hud.show_page("Bindings")
 	lab.hud.back_button.pressed.emit()
 	check(lab.hud.page=="Controls","bindings Back returns to its parent page")
+	lab.hud.back_button.pressed.emit()
 	lab.hud.back_button.pressed.emit()
 	await get_tree().process_frame
 	await get_tree().process_frame

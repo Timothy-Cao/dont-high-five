@@ -7,7 +7,7 @@ $logRoot = Join-Path $projectRoot '.local/logs'
 New-Item -ItemType Directory -Path $logRoot -Force | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $projectRoot '.local/reports') -Force | Out-Null
 if (-not (Test-Path -LiteralPath $engine)) {
-    Write-Host 'Bundled Godot is missing. Put Godot 4.7.2 Windows x64 executables in tools/godot/ as Godot.exe and Godot_console.exe, or import project.godot into your installed editor.'
+    Write-Host 'Godot is missing. Run tools/Setup-Godot.ps1 once, or open project.godot in your installed Godot 4.7.2 editor.'
     exit 1
 }
 function Invoke-CheckedEngine([string]$LogName, [string[]]$EngineArgs) {
@@ -25,10 +25,10 @@ try {
     }
     if ($Mode -eq 'Import') { exit 0 }
     if ($Mode -eq 'Verify') {
-        foreach ($suite in @('verify','metrics','polish','arena-verify','expansion-verify','combat-power')) {
+        foreach ($suite in @('verify','metrics','polish','arena-verify','expansion-verify','combat-power','settings-verify')) {
             Invoke-CheckedEngine ($suite + '.log') @('--headless','--',('--' + $suite))
         }
-        Write-Host 'All six suites passed. Reports and logs are in .local/.'
+        Write-Host 'All seven suites passed. Reports and logs are in .local/.'
         exit 0
     }
     $arguments = @('--path', ('"' + $projectRoot + '"'), '--log-file', ('"' + (Join-Path $logRoot ($Mode.ToLower() + '.log')) + '"'))

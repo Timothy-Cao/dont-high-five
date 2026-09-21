@@ -9,8 +9,9 @@ var active_deck:=0
 var decks: Array[AudioStreamPlayer]=[]
 var deck_tracks: Array[int]=[-1,-1]
 var fade_time:=FADE
-var music_volume:=0.65
-var effects_volume:=0.8
+const MUSIC_GAIN := 0.25
+var music_volume:=0.5
+var effects_volume:=0.5
 var samples: Dictionary={}
 var voices: Dictionary={}
 var last_variant: Dictionary={}
@@ -86,10 +87,10 @@ func play(kind: String,pitch:=1.0) -> void:
 	voice.play()
 
 func update_mix(dt: float) -> void:
-	AudioServer.set_bus_mute(music_bus,not lab.audio_enabled)
-	AudioServer.set_bus_mute(effects_bus,not lab.audio_enabled or lab.paused)
-	AudioServer.set_bus_mute(ambience_bus,not lab.audio_enabled or lab.paused)
-	AudioServer.set_bus_volume_db(music_bus,linear_to_db(maxf(0.0001,music_volume))+(-6 if lab.paused else 0))
+	AudioServer.set_bus_mute(music_bus,not lab.audio_enabled or music_volume<=0)
+	AudioServer.set_bus_mute(effects_bus,not lab.audio_enabled or lab.paused or effects_volume<=0)
+	AudioServer.set_bus_mute(ambience_bus,not lab.audio_enabled or lab.paused or effects_volume<=0)
+	AudioServer.set_bus_volume_db(music_bus,linear_to_db(maxf(0.0001,music_volume*MUSIC_GAIN))+(-6 if lab.paused else 0))
 	AudioServer.set_bus_volume_db(effects_bus,linear_to_db(maxf(0.0001,effects_volume)))
 	AudioServer.set_bus_volume_db(ambience_bus,linear_to_db(maxf(0.0001,effects_volume)))
 	fade_time=minf(FADE,fade_time+dt)
