@@ -18,8 +18,8 @@ func run(lab: Node3D) -> void:
 	lab.goto_station(0)
 	await frames(10)
 	p.input_override=Vector2(0,-1)
-	await frames(30)
-	check(absf(p.velocity.z+7)<0.05,"W reaches the intended 7 m/s walking speed")
+	await frames(45)
+	check(absf(p.velocity.z+3.5)<0.05,"W reaches the intended 3.5 m/s walking speed")
 	var stopped_at:Vector3=p.position
 	p.input_override=Vector2.ZERO
 	var stop_ticks:=0
@@ -33,11 +33,11 @@ func run(lab: Node3D) -> void:
 	lab.goto_station(0)
 	await frames(12)
 	p.input_override=Vector2(1,1)
-	await frames(25)
-	check(absf(Vector2(p.velocity.x,p.velocity.z).length()-7)<0.05,"diagonal movement has no speed boost")
+	await frames(45)
+	check(absf(Vector2(p.velocity.x,p.velocity.z).length()-3.5)<0.05,"diagonal movement has no speed boost")
 	p.input_override=Vector2(-1,-1)
-	await frames(18)
-	check(p.velocity.x<0 and p.velocity.z<0,"opposite input reverses direction within 150 ms")
+	await frames(80)
+	check(p.velocity.x<0 and p.velocity.z<0,"opposite input reverses direction within 670 ms")
 	p.input_override=Vector2.ZERO
 	lab.goto_station(0)
 	await frames(10)
@@ -95,7 +95,7 @@ func run(lab: Node3D) -> void:
 	p.action_override={}
 	p.input_override=Vector2(1,0)
 	await frames(20)
-	check(p.velocity.x>3 and not p.stone,"release brake restores air control")
+	check(p.velocity.x>0.7 and p.velocity.x<1.2 and not p.stone,"release brake restores air control")
 	p.input_override=Vector2.ZERO
 	p.reset_to(Vector3(16.06,5,42))
 	p.action_override={"cling":true}

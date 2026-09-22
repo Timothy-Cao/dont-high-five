@@ -20,7 +20,7 @@ func run(lab: Node3D) -> void:
 	await frames(10)
 	check(not lab.test_world and a!=null,"normal build loads the connected arena instead of the test bays")
 	check(a.find_children("*","Label3D",true,false).is_empty(),"arena contains no instructional or objective signs")
-	check(a.sparks.is_empty() and a.pads.size()>15 and a.openings.size()>20,"old collectible trails are gone; bounce pads and genuine openings remain")
+	check(not a.has_method("trail") and a.pads.size()>15 and a.openings.size()>20,"old collectible trails are gone; bounce pads and genuine openings remain")
 	for i in 4:
 		lab.goto_station(i)
 		await frames(15)
@@ -108,8 +108,8 @@ func run(lab: Node3D) -> void:
 	p.input_override=Vector2(1,0)
 	var hurdles:=[-3.0,3.0]
 	var next_hurdle:=0
-	for tick in 250:
-		if next_hurdle<2 and p.is_on_floor() and p.position.x>hurdles[next_hurdle]-1.7:
+	for tick in 650:
+		if next_hurdle<2 and p.is_on_floor() and p.position.x>hurdles[next_hurdle]-1.0:
 			p.jump_buffer=0.10;next_hurdle+=1
 		await frames(1)
 		if p.position.x>7: break
@@ -125,8 +125,8 @@ func run(lab: Node3D) -> void:
 	lab.goto_station(0)
 	await frames(12)
 	p.input_override=Vector2(0,-1)
-	await frames(24)
-	check(absf(p.velocity.z+7)<0.1,"walking retains its 7 m/s speed in the new arena")
+	await frames(50)
+	check(absf(p.velocity.z+3.5)<0.1,"walking uses the new 3.5 m/s speed in the new arena")
 	p.input_override=Vector2.ZERO
 	await frames(12)
 	check(Vector2(p.velocity.x,p.velocity.z).length()<0.1,"new floor retains clean stopping")
@@ -157,7 +157,7 @@ func run(lab: Node3D) -> void:
 	p.reset_to(Vector3(-20,0.05,30.5))
 	p.rotation.y=0
 	p.input_override=Vector2(0,-1)
-	await frames(300)
+	await frames(650)
 	check(p.position.y>5 and p.is_on_floor(),"the atrium ramp is walkable rather than a collision step")
 	p.input_override=Vector2.ZERO
 	# The broad new floor has a standing surface and the atrium retains open vertical space.

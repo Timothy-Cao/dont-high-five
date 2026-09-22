@@ -11,10 +11,10 @@ var pickups:=0
 var testing:=false
 func _ready() -> void:
 	rng.randomize()
-	add_station(Vector3(0,20,0),"overdrive",22,65)
+	add_station(Vector3(0,20,0),"overdrive",22,30)
 	var kinds:=["reach","pull","speed","vision"]
 	var positions:=[Vector3(-136,0,-101),Vector3(136,0,-101),Vector3(136,0,101),Vector3(-136,0,101)]
-	for i in 4: add_station(positions[i],kinds[i],4+i*6,30+i*2)
+	for i in 4: add_station(positions[i],kinds[i],4+i*6,30)
 	call_deferred("prepare_candidates")
 func icon(kind: String,pos: Vector3,scale_size:=1.0) -> Node3D:
 	var node:Node3D=load("res://assets/power_"+kind+".glb").instantiate()

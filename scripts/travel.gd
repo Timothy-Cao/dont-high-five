@@ -59,7 +59,7 @@ func update_player(p: CharacterBody3D,from: Vector3,dt: float) -> void:
 			if absf(hit.x)>1.64 or absf(hit.y)>2.2-half_height+0.02: continue
 			var partner:=i+1 if i%2==0 else i-1
 			if transfer(p,i,partner,hit): return
-	if p.pad_lock<=0 and not p.held("brake"):
+	if p.pad_lock<=0 and not p.held("brake") and not p.held("anchor"):
 		for pad in launch_pads:
 			var local:Vector3=pad.basis.inverse()*(p.position-pad.pos)
 			if absf(local.x)<2.05 and absf(local.z)<2.6 and local.y>=-0.05 and local.y<0.18 and p.velocity.y<=0.1:

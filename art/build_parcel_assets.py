@@ -85,47 +85,6 @@ def export(name):
     bpy.ops.export_scene.gltf(filepath=str(ASSETS/(name+'.glb')),export_format='GLB',use_selection=True,export_yup=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'art'/(name+'.blend')))
 
-for side,paint in [('left',amber),('right',teal)]:
-    clear()
-    # Palm, padded heel, dark side gusset and a contrasting stitched back patch.
-    ellipsoid('Soft rubber glove', (0,0,0),(.112,.05,.125),paint)
-    ellipsoid('Palm grip pad',(0,.044,-.006),(.082,.016,.089),ink)
-    box('Back of hand patch',(0,-.048,.015),(.125,.014,.11),paper,.024)
-    for x in [-.047,.047]:
-        for z in [-.025,0,.025,.05]:
-            segment('Visible stitch',(x,-.060,z),(x,-.060,z+.009),.0018,stitch)
-    # Raised parcel emblem: a small box with tape, no baked text.
-    box('Parcel emblem',(0,-.06,.013),(.047,.008,.038),paint,.004)
-    box('Parcel tape',(0,-.066,.013),(.007,.004,.038),paper,.001)
-    # Four individually articulated digits with different lengths and gentle curl.
-    for idx,(x,length) in enumerate([(-.076,.15),(-.026,.19),(.028,.178),(.079,.135)]):
-        z=.087
-        spread=(idx-1.5)*.009
-        a=(x,0,z)
-        b=(x+spread,.008,z+length*.48)
-        c=(x+spread*1.4,.032,z+length*.81)
-        d=(x+spread*1.4,.060,z+length)
-        radius=.026 if idx<3 else .024
-        segment('Finger base',a,b,radius,paint)
-        segment('Finger middle',b,c,radius*.94,paint)
-        segment('Finger tip',c,d,radius*.9,paint)
-        ellipsoid('Knuckle reinforcement',(b[0],b[1]-.025,b[2]),(.022,.009,.026),paper)
-        ellipsoid('Fingertip grip',(d[0],d[1]+.008,d[2]-.012),(.018,.011,.027),ink)
-        ring('Finger flex seam',b,radius*.96,.0023,ink,rotation=(math.pi/2,0,0))
-    segment('Thumb root',(-.082,0,-.052),(-.145,.012,-.005),.038,paint)
-    segment('Thumb tip',(-.145,.012,-.005),(-.16,.050,.062),.031,paint)
-    ellipsoid('Thumb grip',(-.167,.067,.044),(.021,.012,.03),ink)
-    box('Canvas wrist cuff',(0,0,-.133),(.173,.105,.09),paper,.025)
-    box('Wrist cinch',(0,-.060,-.133),(.18,.017,.032),ink,.008)
-    box('Buckle',(0.053,-.071,-.133),(.038,.01,.040),metal,.007)
-    box('Buckle center',(0.053,-.078,-.133),(.019,.004,.021),ink,.003)
-    ring('Arm socket',(0,0,-.18),.056,.013,ink)
-    if side=='right':
-        for o in list(bpy.context.scene.objects):
-            o.location.x*=-1
-            o.scale.x*=-1
-    export('glove_'+side)
-
 clear()
 box('Soft modular block',(0,0,0),(1,1,1),paper,.045)
 export('rounded_block')
@@ -138,3 +97,7 @@ box('Shipping label',(.30,-.458,.68),(.32,.008,.22),stitch,.01)
 for x in [.21,.25,.28,.32,.345,.38]:
     box('Barcode stripe',(x,-.466,.65),(.009,.004,.085),ink,.001)
 export('parcel')
+
+# Use the current original padded glove source, also shared with the fist builder.
+import runpy
+runpy.run_path(str(ROOT/"art/build_soft_gloves.py"),run_name="__main__")

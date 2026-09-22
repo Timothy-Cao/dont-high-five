@@ -37,7 +37,7 @@ func _ready() -> void:
 	playlist=JSON.parse_string(FileAccess.get_file_as_string("res://assets/audio/music/playlist.json"))
 	for i in 2:
 		var deck:=AudioStreamPlayer.new();deck.bus="Music";add_child(deck);decks.append(deck)
-	for kind in ["fire","stick","cancel","launch","jump","bounce","land","brake","portal","pad","success","ui","step"]:
+	for kind in ["fire","stick","cancel","launch","jump","bounce","land","brake","portal","pad","success","ui","step","blast"]:
 		samples[kind]=[];voices[kind]=[];last_variant[kind]=-1
 		for i in (5 if kind=="step" else 4):
 			samples[kind].append(load("res://assets/audio/sfx/%s_%d.wav"%[kind,i]))
@@ -106,8 +106,9 @@ func update_mix(dt: float) -> void:
 	var p=lab.player
 	var speed:float=p.velocity.length()
 	loops.wind.volume_db=lerpf(-70,-14,smoothstep(7,38,speed))
-	loops.creak.volume_db=-80 if p.power<0.04 else lerpf(-29,-16,clampf(p.power,0,1))
-	loops.creak.pitch_scale=0.75+clampf(p.power,0,1)*0.65
+	var tension:float=maxf(p.power,0.15+p.combat.charge_fraction()*0.65 if p.combat.charging else 0.0)
+	loops.creak.volume_db=-80 if tension<0.04 else lerpf(-29,-16,clampf(tension,0,1))
+	loops.creak.pitch_scale=0.75+clampf(tension,0,1)*0.65
 	loops.reel.volume_db=move_toward(loops.reel.volume_db,-20 if p.reeling else -80,dt*100)
 	loops.room.volume_db=-29
 

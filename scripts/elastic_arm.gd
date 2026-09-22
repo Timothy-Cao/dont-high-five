@@ -9,13 +9,13 @@ func _ready() -> void:
 	material_override = rubber
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
-func shape_arm(start: Vector3,end: Vector3,slack: float,strain: float,color: Color) -> void:
+func shape_arm(start: Vector3,end: Vector3,slack: float,strain: float,color: Color,bend := Vector3.ZERO,width := 0.034) -> void:
 	global_transform = Transform3D.IDENTITY
 	rubber.albedo_color = color
 	tube.clear_surfaces()
 	var delta := end-start
 	if delta.length()<0.02: return
-	var radius := 0.034/sqrt(1+strain*0.9)
+	var radius := width/sqrt(1+strain*0.9)
 	var tangent := delta.normalized()
 	var side := tangent.cross(Vector3.UP).normalized()
 	if side.length()<0.01: side=Vector3.RIGHT
@@ -28,7 +28,7 @@ func shape_arm(start: Vector3,end: Vector3,slack: float,strain: float,color: Col
 		normals.append(side*cos(a)+outward*sin(a))
 	for i in 25:
 		var t := i/24.0
-		var p := start.lerp(end,t)+Vector3.DOWN*(sin(PI*t)*sag)
+		var p := start.lerp(end,t)+Vector3.DOWN*(sin(PI*t)*sag)+bend*sin(PI*t)
 		var vertices := PackedVector3Array()
 		for n in normals: vertices.append(p+n*radius)
 		rings.append(vertices)

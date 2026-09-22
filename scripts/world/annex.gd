@@ -24,16 +24,11 @@ func build(a: Node3D,t: Node3D) -> void:
 		for z in [-68,-20,28,76]:
 			a.wall(Vector3(side*139,2.5,z),Vector3(14,5,0.8),c)
 			a.platform(Vector3(side*142,5.7,z+3),Vector2(10,7),c)
-			a.trail(Vector3(side*104,1.2,z-5),Vector3(side*104,1.2,z+5),3)
-		a.trail(Vector3(side*92,10.2,45),Vector3(side*111,10.2,45),4)
-		a.trail(Vector3(side*122,18.2,6),Vector3(side*134,18.2,6),3)
 		# North and south concourses are long enough to make a travel network useful.
 		a.platform(Vector3(0,8,side*97),Vector2(224,6),a.CYAN,true)
 		for x in [-120,-60,0,60,120]:
 			a.light_pool(Vector3(x,20,side*102),a.BLUE,29)
-			a.trail(Vector3(x-5,1.2,side*82),Vector3(x+5,1.2,side*82),3)
 			a.wall(Vector3(x+12,2.2,side*112),Vector3(0.8,4.4,10),a.BLUE)
-		a.trail(Vector3(-100,9.2,side*97),Vector3(100,9.2,side*97),13)
 	a.platform(Vector3(140,17,0),Vector2(14,20),a.PINK)
 	a.platform(Vector3(0,18,-108),Vector2(18,16),a.BLUE,true)
 	a.ramp(Vector3(-36,8,-97),Vector3(-5,18,-108),4,a.BLUE)

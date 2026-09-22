@@ -2,7 +2,7 @@
 
 **Stretch your arms. Trust your landing. Be careful who you help.**
 
-A first-person Godot movement playground inside an enormous glow-in-the-dark attraction. Fire sticky gloves, stretch into a slingshot, reel around corners, and punch the floor to hop.
+A first-person Godot movement playground inside an enormous glow-in-the-dark attraction. Fire sticky gloves, stretch into a slingshot, reel around corners, and charge a floor punch to blast upward.
 
 ![First-person gloves, central power station and two posed robot models](docs/screenshots/01-high-five-club.png)
 
@@ -26,17 +26,17 @@ The setup script downloads the pinned official engine and verifies its SHA-256. 
 ## In the playground
 
 - Two main floors, tall ceilings, broad ramps, maze corridors and hiding nooks across a 304 × 240 m building.
-- Independent elastic gloves, slingshots, reels, wall grip, double jump and an air brake.
-- Parallel fist attacks with a ground-punch hop and six regenerating targets.
+- Elastic and fixed-rope gloves, slingshots, pendulum swings, reels, wall grip, double jump and anchoring.
+- Nonlethal charge-and-release parallel punches with additive surface recoil and six regenerating targets.
 - Directional launch pads and linked portals connecting distant spaces.
 - Five timed power stations, sparse speed pickups, distance haze and vision boosts.
-- A red hologram room that suppresses arm abilities, with two walkable exits.
+- Charge feedback, brief speed afterimages and fading punch imprints; six knockback dummies.
 - Original Blender models, an F5 test camera, five-track soundtrack and layered effects.
 - Saved settings and simple click-to-rebind keys.
 
-| Vertical playground | Red suppression room |
+| Vertical playground | Sheltered upper routes |
 | --- | --- |
-| ![Upper and lower traversal routes](docs/screenshots/02-vertical-playground.png) | ![Red scanning field with gloves in view](docs/screenshots/04-red-room.png) |
+| ![Upper and lower traversal routes](docs/screenshots/02-vertical-playground.png) | ![Covered upper terraces](docs/screenshots/infill-terraces.png) |
 
 ## Controls
 
@@ -45,11 +45,13 @@ The setup script downloads the pinned official engine and verifies its SHA-256. 
 | WASD / mouse | Move / look |
 | Space | Jump / double jump |
 | LMB / RMB | Fire or recall that glove |
-| LMB + RMB together | Parallel punch; nearby ground hit gives an upward hop |
-| E | Slingshot from stretched arms |
-| Hold F / MMB | Reel in |
+| LMB + RMB together | Recall extended hands; from idle, hold to charge and release to punch |
+| 1 | Toggle elastic / fixed arms |
+| E | Elastic slingshot / fixed-rope release |
+| Hold F / MMB | Elastic reel; fixed mode pulls automatically |
 | Ctrl | Crouch / stop horizontal momentum in the air |
-| Shift | Grip a wall; Space jumps away |
+| Shift | Anchor / drop quickly; resist knockback |
+| C | Grip a wall; Space jumps away |
 | Q | Recall gloves |
 | F5 / Esc | Camera / menu |
 
@@ -57,14 +59,16 @@ Full controls: [Playing](docs/PLAYING.md). **Music and effects default to 50%; m
 
 ## Where this could go
 
-The working social-game idea is **Blackout Relay**: recover physical charge, negotiate high-fives, restart circuits, and decide whether a helpful teammate is sabotaging handoffs. Alternatives include a hot-potato party mode and cooperative movement assists. These are hypotheses awaiting playtests.
+The working direction is **Fivers vs Watcher**: nimble robots complete physical tasks while a powerful opponent controls stationary towers. Blackouts may allow infiltration, making high-fives a moment of trust. The [new brief and staged backlog](docs/design/IMPLEMENTATION-BACKLOG.md) separate this direction from implemented local movement.
 
 The [research notebook](docs/design/README.md) compares related games and challenges the ideas. It includes faction objectives, high-five input rules, special rooms, weapons/counterplay and a small first multiplayer test.
 
 ## Development
 
-This repository is self-contained. [CONTRIBUTING.md](CONTRIBUTING.md) covers layout, assets, testing and packaging. `Edit.cmd` opens the editor; `Verify.cmd` runs seven suites. Current local verification passed **299 assertions**, followed by a 4K render review. These checks verify mechanics and layout, not human enjoyment or online balance.
+This repository is self-contained. [CONTRIBUTING.md](CONTRIBUTING.md) covers layout, assets, testing and packaging. `Edit.cmd` opens the editor; `Verify.cmd` runs eleven suites. See the [latest movement pass](docs/FIVER-MOVEMENT-PASS.md) for verification results. These checks verify mechanics and layout, not human enjoyment or online balance.
 
 Git excludes engine binaries, caches, personal settings, logs and generated release packages. Editable Blender files and runtime assets are included. The old internal `ParcelPop` user-data identifier is retained so existing key bindings survive the rename; earlier pass documents are historical notes.
 
 See [licenses and asset provenance](licenses/README.md). Godot and Kenney notices do not license the original game code or the five user-supplied songs; no blanket open-source license has been selected for this project.
+
+Latest local iteration: [click-only ceiling traversal](docs/AUTO-CEILING.md). Previous iteration: [fixed arms and nonlethal Fiver movement](docs/FIVER-MOVEMENT-PASS.md). Previous iteration: [denser districts, distributed lighting and source cleanup](docs/ARENA-INFILL.md). Earlier passes cover [the charged punch and Spool courier](docs/CHARGE-AND-SPOOL.md) and [surface recoil and soft gloves](docs/RECOIL-RAVE-PASS.md). The v0.1.0 download remains the original published snapshot.

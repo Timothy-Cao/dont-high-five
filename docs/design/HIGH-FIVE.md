@@ -1,6 +1,6 @@
 # What does a high-five actually do?
 
-**Proposals, not implemented.** A high-five must have a useful everyday meaning before betrayal can change that meaning.
+**Proposals, not implemented.** This is the initial hypothesis. [Pass 1](PASS-01-HIGH-FIVE.md) refines it: celebration can be valuable without a buff; a stored spring must compete with the current powerful recoil; and the current immediate glove shot conflicts with accepting on the first mouse press. The input table below is an experiment to compare, not an approved default. The pass also removes the proposed donor-recharge rebate from the first spring trial.
 
 ## Recommended first experiment: pass the charge
 
@@ -45,7 +45,7 @@ Reject exchanges through walls, with suppressed arms, during recovery, after dis
 
 ### An alley-oop without stealing control
 
-The high-five gives the recipient an eight-second stored spring. They choose when to spend it with Jump and keep steering. The helper gets a small recharge bonus. This captures a rescue fantasy without another player yanking the camera unexpectedly. It also permits betrayal through a bad route recommendation rather than an unavoidable forced fall. Test this before physical body-to-body tethering.
+The high-five gives the recipient an eight-second stored spring. They choose when to spend it with Jump and keep steering. The initial idea gave the helper a small recharge bonus; pass 1 defers that bonus because reciprocal handoffs could become a boost farm. This captures a rescue fantasy without another player yanking the camera unexpectedly. It also permits betrayal through a bad route recommendation rather than an unavoidable forced fall. Test this before physical body-to-body tethering.
 
 ### Bad Battery, repaired after critique
 

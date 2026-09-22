@@ -340,5 +340,33 @@
     "peak_dbfs": -14,
     "rms_dbfs": -25.72,
     "loop": true
+  },
+  "blast_0": {
+    "seconds": 0.46,
+    "peak_dbfs": -8,
+    "rms_dbfs": -23.67,
+    "loop": false,
+    "original_synthesis": true
+  },
+  "blast_1": {
+    "seconds": 0.46,
+    "peak_dbfs": -8,
+    "rms_dbfs": -22.67,
+    "loop": false,
+    "original_synthesis": true
+  },
+  "blast_2": {
+    "seconds": 0.46,
+    "peak_dbfs": -8,
+    "rms_dbfs": -22.96,
+    "loop": false,
+    "original_synthesis": true
+  },
+  "blast_3": {
+    "seconds": 0.46,
+    "peak_dbfs": -8,
+    "rms_dbfs": -23.31,
+    "loop": false,
+    "original_synthesis": true
   }
 }

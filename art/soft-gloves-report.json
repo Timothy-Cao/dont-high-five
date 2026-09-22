@@ -1,0 +1,26 @@
+{
+  "glove_left": {
+    "thumb_x": 0.132,
+    "approx_width_m": 0.29,
+    "positive_scale": true,
+    "style": "Original soft molded toy; no finger joints or nail-like plates"
+  },
+  "fist_left": {
+    "thumb_x": 0.105,
+    "approx_width_m": 0.29,
+    "positive_scale": true,
+    "style": "Original soft molded toy; no finger joints or nail-like plates"
+  },
+  "glove_right": {
+    "thumb_x": -0.132,
+    "approx_width_m": 0.29,
+    "positive_scale": true,
+    "style": "Original soft molded toy; no finger joints or nail-like plates"
+  },
+  "fist_right": {
+    "thumb_x": -0.105,
+    "approx_width_m": 0.29,
+    "positive_scale": true,
+    "style": "Original soft molded toy; no finger joints or nail-like plates"
+  }
+}

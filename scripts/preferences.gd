@@ -18,7 +18,7 @@ func restore(lab: Node3D) -> void:
 	lab.audio_service.effects_volume = number(cfg,"effects",0.5,0,1)
 	lab.player.sensitivity = number(cfg,"sensitivity",0.0022,0.0006,0.004)
 	lab.set_visibility(number(cfg,"brightness",lab.visibility_fill,0.06,0.4))
-	lab.player.camera_motion = flag(cfg,"camera_motion",false)
+	lab.player.camera_motion = flag(cfg,"camera_motion",true)
 	lab.player.preview_enabled = flag(cfg,"trajectory",true)
 	lab.player.grip_lights = flag(cfg,"glove_lights",true)
 	lab.audio_enabled = flag(cfg,"sound",true)

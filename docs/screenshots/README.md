@@ -1,6 +1,6 @@
 # In-engine gallery
 
-Captured at **3840 × 2160** using the actual Godot renderer, original runtime models, current haze and authored camera positions. Images are unretouched. `tests/capture_showcase.gd` reproduces the staging. These are prototype screenshots, not claims of multiplayer gameplay or final visual quality.
+The original release gallery below was captured at **3840 × 2160** using the actual Godot renderer, the models and haze from that release, and authored camera positions. Images are unretouched. `tests/capture_showcase.gd` reproduces the staging. These are prototype screenshots, not claims of multiplayer gameplay or final visual quality.
 
 ## Gloves and characters
 
@@ -31,3 +31,24 @@ Two differently colored courier models are posed for this screenshot only. They 
 ![Music, effects and comfort settings](07-settings.png)
 
 ![Scrollable action-to-key binding list](08-key-bindings.png)
+
+## Latest local arena review
+
+The denser upper maze, terrace stacks and annex bridge bay were captured at **2560 × 1440** with `-- --density-capture`. These are unretouched views of the current local build, newer than the release gallery above.
+
+![Upper maze and window routes](infill-upper-maze.png)
+
+![Stacked terrace routes](infill-terraces.png)
+
+![Amber bridge bay and distributed laser fan](infill-bridge-bay.png)
+
+## Fiver movement pass
+
+2560 × 1440 authored in-engine review frames, 2026-09-21. [Implementation and capture limits](../FIVER-MOVEMENT-PASS.md).
+
+- [Charge pose](fiver-charge.png)
+- [Ball charge: shell sockets and curved forearms](fiver-ball-charge.png)
+- [Afterimages, deliberately staged for readability inspection](fiver-afterimages.png)
+- [Rounded surface stamps](fiver-imprints.png)
+
+Earlier red-field screenshots are historical; the live equipment bay no longer disables arms.

@@ -1,0 +1,26 @@
+[
+  {
+    "file": "blast_0.wav",
+    "peak_db": -8,
+    "seconds": 0.46,
+    "original_synthesis": true
+  },
+  {
+    "file": "blast_1.wav",
+    "peak_db": -8,
+    "seconds": 0.46,
+    "original_synthesis": true
+  },
+  {
+    "file": "blast_2.wav",
+    "peak_db": -8,
+    "seconds": 0.46,
+    "original_synthesis": true
+  },
+  {
+    "file": "blast_3.wav",
+    "peak_db": -8,
+    "seconds": 0.46,
+    "original_synthesis": true
+  }
+]

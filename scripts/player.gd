@@ -17,8 +17,8 @@ var ball_shape := SphereShape3D.new()
 var ball := false
 var crouched := false
 var crouch_shape := CapsuleShape3D.new()
-var walk_speed := 7.0
-var ground_accel := 100.0
+var walk_speed := 3.5
+var ground_accel := 12.0
 var ground_brake := 100.0
 var jump_speed := 8.2
 var double_jump_enabled := true
@@ -36,12 +36,20 @@ var stone := false
 var reeling := false
 var momentum_air := false
 var action_override := {}
-var camera_motion := false
+var camera_motion := true
+var fixed_mode := false
+var fixed_rope = preload("res://scripts/fixed_tether.gd").new()
+var anchored := false
+var equipment_disabled := false
+var movement_fx: Node3D
 var grip_lights := true
 var grounded_time := 0.0
 var launch_gain := 4.2
 var gravity := 24.0
 var air_control := 36.0
+var air_accel := 6.0
+var landing_grace := 0.0
+var floor_recheck := true
 var sensitivity := 0.0022
 var max_speed := 40.0
 var slack_allowance := 0.6
@@ -73,6 +81,7 @@ var target_valid := false
 var target_text := ""
 var preview_tick := 0
 var arm_frame := 0
+var visual_time := 0.0
 var recoil := 0.0
 var ball_rim: MeshInstance3D
 var preview_shape := SphereShape3D.new()
@@ -82,6 +91,7 @@ const HAND_RECOVERY_DURATION := 0.65
 var mouse_down := [false, false]
 var mouse_pressed_at := [-1000, -1000]
 var chord_latched := false
+var chord_had_arms := false
 var punch_enabled:=true
 var combat:Node
 var buffs:Dictionary={}
@@ -200,6 +210,7 @@ func _ready() -> void:
 	follow_camera=Camera3D.new();lab.add_child(follow_camera)
 	follow_camera.near=0.08;follow_camera.far=420;follow_camera.fov=84
 	follow_shape.radius=0.28
+	movement_fx=load("res://scripts/movement_fx.gd").new();movement_fx.player=self;lab.add_child(movement_fx)
 
 func toggle_view() -> void:
 	third_person=not third_person
@@ -276,13 +287,14 @@ func _unhandled_input(event: InputEvent) -> void:
 				if event.pressed: adjust_length(1.0)
 	elif event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode==KEY_F5: toggle_view()
+		elif event.is_action_pressed("pop_arm_mode"): toggle_arm_mode()
 		elif event.is_action_pressed("pop_jump"): request_jump()
 		elif event.is_action_pressed("pop_launch"): launch()
 		elif event.is_action_pressed("pop_recall") or event.keycode==KEY_BACKSPACE: cancel_hands()
 		elif event.is_action_pressed("pop_retry"): retry()
 		elif event.is_action_pressed("pop_reset"): lab.goto_station(lab.station)
 		elif event.is_action_pressed("pop_preview"): preview_enabled=not preview_enabled
-		elif event.keycode in [KEY_1,KEY_2,KEY_3,KEY_4]: lab.goto_station(event.keycode-KEY_1)
+		elif lab.test_world and event.keycode in [KEY_2,KEY_3,KEY_4]: lab.goto_station(event.keycode-KEY_1)
 
 func apply_mouse_motion(event: InputEventMouseMotion) -> void:
 	rotate_y(-event.screen_relative.x*sensitivity)
@@ -295,18 +307,27 @@ func clear_mouse_chord() -> void:
 	mouse_down=[false,false]
 	mouse_pressed_at=[-1000,-1000]
 	chord_latched=false
+	chord_had_arms=false
 
 func handle_glove_button(i: int,pressed: bool,at_ms: int = -1) -> void:
 	if mouse_down[i]==pressed: return
+	if pressed and not mouse_down[0] and not mouse_down[1]:
+		chord_had_arms=hands[0].state!=0 or hands[1].state!=0
 	mouse_down[i]=pressed
 	if not pressed:
+		if combat.charging: combat.release_charge()
 		if not mouse_down[0] and not mouse_down[1]: chord_latched=false
 		return
+	if chord_latched: return
 	var now:=Time.get_ticks_msec() if at_ms<0 else at_ms
 	mouse_pressed_at[i]=now
 	if mouse_down[1-i] and not chord_latched and now-mouse_pressed_at[1-i]<=CHORD_WINDOW_MS:
 		chord_latched=true
-		if combat.begin(): return
+		if chord_had_arms:
+			cancel_hands()
+			return
+		if combat.start_charge(): return
+		return
 	# No chord timeout on the first shot: normal glove placement remains instant.
 	fire_hand(i)
 
@@ -314,6 +335,7 @@ func has_anchor() -> bool:
 	return hands[0].state==2 or hands[1].state==2
 
 func adjust_length(amount: float) -> void:
+	if fixed_mode: return
 	for h in hands:
 		if h.state==2:
 			h.spool_target=clampf(float(h.spool_target)+amount,2,40)
@@ -338,12 +360,15 @@ func set_crouch(value: bool) -> void:
 	collider.position.y=0.525 if value else 0.9
 
 func arms_suppressed() -> bool:
-	return is_instance_valid(lab.arena) and is_instance_valid(lab.arena.suppression_room) and lab.arena.suppression_room.contains(global_position+Vector3.UP*0.9)
+	return equipment_disabled
 
 func fire_hand(i: int) -> void:
-	if arms_suppressed() or stone or hand_recovery>0 or combat.active: return
+	if arms_suppressed() or stone or hand_recovery>0 or combat.active or combat.charging: return
 	# Gloves can be fired in flight to chain a launch into a grapple.
 	var h: Dictionary = hands[i]
+	if fixed_mode and fixed_rope.retiring_hand==i and hands[1-i].state==2:
+		# Fast alternation can reuse the retiring hand before its overlap expires.
+		retract_hand(i);fixed_rope.retiring_hand=-1;fixed_rope.overlap=0
 	if h.state != 0:
 		h.retract_pos = h.glove.global_position
 		h.retract_left = 0.14
@@ -363,16 +388,36 @@ func fire_hand(i: int) -> void:
 	h.state = 1
 	lab.sound("fire")
 
+func retract_hand(index: int) -> void:
+	var h:Dictionary=hands[index]
+	if h.state!=0:
+		h.retract_pos=h.glove.global_position;h.retract_left=0.14
+	h.state=0;h.rest=0
+
 func cancel_hands() -> void:
 	if is_instance_valid(combat): combat.cancel()
-	for h in hands:
-		if h.state!=0:
-			h.retract_pos = h.glove.global_position
-			h.retract_left = 0.14
-		h.state = 0
-		h.rest = 0.0
+	for i in 2: retract_hand(i)
+	fixed_rope.clear()
+
+func toggle_arm_mode() -> void:
+	fixed_mode=not fixed_mode
+	fixed_rope.clear()
+	for i in 2:
+		if hands[i].state!=2: continue
+		if fixed_mode: fixed_rope.attach(self,i)
+		else:
+			hands[i].rest=maxf(3,chest().distance_to(hands[i].point)+slack_allowance)
+			hands[i].spool_target=hands[i].rest
+
+func receive_punch(impulse: Vector3,_strength: float) -> bool:
+	if anchored or held("anchor"): return false
+	velocity+=impulse
+	momentum_air=true;flying=true;flight_time=0;launch_origin=position
+	landing_grace=0.1;jump_lock=0.15;coyote=0;wall_clinging=false;wall_lock=0.2
+	return true
 
 func pull_vector(at: Vector3) -> Vector3:
+	if fixed_mode: return Vector3.ZERO
 	var total := Vector3.ZERO
 	for h in hands:
 		if h.state != 2:
@@ -391,6 +436,7 @@ func elastic_energy(at: Vector3) -> float:
 	return energy
 
 func spring_force(at: Vector3,vel: Vector3) -> Vector3:
+	if fixed_mode: return Vector3.ZERO
 	var force := Vector3.ZERO
 	for h in hands:
 		if h.state != 2: continue
@@ -446,6 +492,9 @@ func shot_velocity(at: Vector3) -> Vector3:
 	return pull.normalized()*minf(max_speed*pull_multiplier(),speed*pull_multiplier())
 
 func launch() -> void:
+	if fixed_mode:
+		cancel_hands();momentum_air=true
+		return
 	if arms_suppressed(): return
 	if not is_on_floor() and not wall_clinging and not has_anchor():
 		lab.notify("Stick a glove first, then stretch or reel.")
@@ -495,8 +544,13 @@ func try_stand() -> bool:
 	return true
 
 func reset_to(p: Vector3) -> void:
+	if is_instance_valid(movement_fx): movement_fx.clear_history()
 	buffs.clear()
-	if is_instance_valid(combat): combat.active=false;combat.pose_fists=false;combat.hit_flash=0
+	if is_instance_valid(combat): combat.active=false;combat.charging=false;combat.charge_time=0;combat.pose_fists=false;combat.hit_flash=0
+	landing_grace=0
+	anchored=false
+	fixed_rope.clear()
+	floor_recheck=true
 	portal_lock=0;pad_lock=0;camera_cut=true;step_distance=0
 	clear_mouse_chord()
 	hand_recovery=0
@@ -524,6 +578,7 @@ func retry() -> void:
 		lab.goto_station(lab.station)
 		return
 	reset_to(last_setup.position)
+	fixed_mode=false
 	rotation.y = last_setup.yaw
 	camera.rotation.x = last_setup.pitch
 	for i in 2:
@@ -536,28 +591,32 @@ func _physics_process(dt: float) -> void:
 	if arms_suppressed(): cancel_hands()
 	var movement_start:=position
 	var was_stone:=stone
+	if fixed_mode: fixed_rope.tick(self,dt)
+	anchored=held("anchor")
 	hand_recovery=maxf(0,hand_recovery-dt)
 	tick_buffs(dt)
 	combat.tick(dt)
-	if combat.active and held("brake"): cancel_hands()
+	if (combat.active or combat.charging) and (held("brake") or anchored or not punch_enabled): cancel_hands()
+	landing_grace=maxf(0,landing_grace-dt)
 	var input:=Vector2(float(held("right"))-float(held("left")),float(held("back"))-float(held("forward")))
 	if testing_input: input=input_override
 	input=input.limit_length(1)
 	var direction:=basis*Vector3(input.x,0,input.y)
-	var was_floor:=is_on_floor()
+	var was_floor:=is_on_floor() and not floor_recheck
+	floor_recheck=false
 	jump_lock=maxf(0,jump_lock-dt)
 	wall_lock=maxf(0,wall_lock-dt)
 	jump_buffer=maxf(0,jump_buffer-dt)
 	coyote=0.10 if was_floor and jump_lock<=0 else maxf(0,coyote-dt)
 	if was_floor and jump_lock<=0: air_jumps=1
-	reeling=not arms_suppressed() and reel_enabled and held("reel") and has_anchor()
+	reeling=not fixed_mode and not arms_suppressed() and reel_enabled and held("reel") and has_anchor()
 	wall_normal=find_wall() if not arms_suppressed() and held("cling") and wall_grip_enabled and hand_recovery<=0 and not was_floor and wall_lock<=0 else Vector3.ZERO
-	wall_clinging=wall_normal.length()>0.5 and not held("brake") and not reeling
-	stone=brake_enabled and held("brake") and not was_floor
+	wall_clinging=wall_normal.length()>0.5 and not held("brake") and not anchored and not reeling
+	stone=(anchored or (brake_enabled and held("brake"))) and not was_floor
 	if stone and not was_stone: lab.sound("brake")
-	if was_floor: set_crouch(brake_enabled and held("brake"))
+	if was_floor: set_crouch(anchored or (brake_enabled and held("brake")))
 	var jumped:=false
-	if jump_buffer>0 and not stone:
+	if jump_buffer>0 and not stone and not anchored:
 		if wall_clinging:
 			velocity=wall_normal*7+Vector3.UP*jump_speed
 			wall_lock=0.25
@@ -567,7 +626,8 @@ func _physics_process(dt: float) -> void:
 			jumped=true
 		elif coyote>0 or (double_jump_enabled and air_jumps>0):
 			if coyote<=0: air_jumps-=1
-			velocity.y=jump_speed
+			# A jump can add lift, but must not erase a freshly earned blast/pad launch.
+			velocity.y=maxf(velocity.y,jump_speed)
 			if reeling: cancel_hands();reeling=false
 			jumped=true
 		if jumped:
@@ -576,7 +636,9 @@ func _physics_process(dt: float) -> void:
 			jump_lock=0.12
 			lab.sound("jump")
 	var before:=velocity
-	if stone:
+	if anchored and was_floor:
+		cancel_hands();velocity=Vector3.DOWN*gravity*dt;momentum_air=false
+	elif stone:
 		momentum_air=false
 		cancel_hands()
 		velocity.x=0
@@ -588,7 +650,7 @@ func _physics_process(dt: float) -> void:
 		if tangent.dot(global_basis.x)<0: tangent=-tangent
 		velocity=tangent*input.x*3+Vector3.UP*(-input.y*3)-wall_normal*0.3
 		air_jumps=1
-	elif reeling:
+	elif reeling and not fixed_mode:
 		momentum_air=true
 		var target:=Vector3.ZERO
 		var count:=0
@@ -603,19 +665,16 @@ func _physics_process(dt: float) -> void:
 	else:
 		var horizontal:=Vector3(velocity.x,0,velocity.z)
 		if was_floor and not jumped and not (flying and flight_time==0):
-			var desired:=direction*((3.0 if crouched else walk_speed)*speed_multiplier())
-			if has_anchor() and not ball:
+			var desired:=direction*((1.75 if crouched else walk_speed)*speed_multiplier())
+			if has_anchor() and not ball and not fixed_mode:
 				var drive: Vector3=((desired-horizontal)*22).limit_length(anchor_drive_limit) if input.length()>0 else -horizontal*12
 				horizontal+=(drive+spring_force(position,velocity))*dt
-			else:
+			elif landing_grace<=0 or held("brake"):
 				var rate:=ground_accel if input.length()>0 else (170.0 if ball else ground_brake)
 				horizontal=horizontal.move_toward(desired,rate*dt)
 		else:
 			if input.length()>0:
-				# Turn toward intent without deleting launch momentum or accelerating without limit.
-				horizontal=horizontal.move_toward(direction*maxf(9*speed_multiplier(),horizontal.length()),air_control*speed_multiplier()*dt)
-			elif not flying and not momentum_air:
-				horizontal=horizontal.move_toward(Vector3.ZERO,7*dt)
+				horizontal=steer_air(horizontal,direction,dt)
 			if has_anchor():
 				var tension:=spring_force(position,velocity)
 				horizontal+=tension*dt
@@ -623,13 +682,16 @@ func _physics_process(dt: float) -> void:
 		velocity.x=horizontal.x
 		velocity.z=horizontal.z
 		velocity.y-=gravity*dt
-	if has_anchor(): constrain_tethers(dt)
+	if has_anchor():
+		if fixed_mode: fixed_rope.constrain(self,dt)
+		else: constrain_tethers(dt)
 	move_and_slide()
+	if fixed_mode: fixed_rope.after_move(self)
 	if flying:
 		flight_time+=dt
 		last_distance=Vector2(position.x-launch_origin.x,position.z-launch_origin.z).length()
 	var bounced:=false
-	if is_on_floor() and before.y<0 and not (brake_enabled and held("brake")):
+	if is_on_floor() and before.y<0 and not anchored and not (brake_enabled and held("brake")):
 		for i in get_slide_collision_count():
 			var hit:=get_slide_collision(i)
 			if hit.get_normal().y>0.7 and hit.get_collider().get_meta("bounce",false):
@@ -643,6 +705,8 @@ func _physics_process(dt: float) -> void:
 				bounced=true
 				lab.sound("bounce")
 	if is_on_floor() and not was_floor and not bounced:
+		# Preserve a brief contact for buffered/manual bunny hops; brake remains immediate.
+		landing_grace=0.10 if Vector2(velocity.x,velocity.z).length()>walk_speed*speed_multiplier()+0.1 else 0.0
 		momentum_air=false
 		if before.y < -3: lab.sound("land")
 		if flying and flight_time>0.12:
@@ -666,10 +730,22 @@ func _physics_process(dt: float) -> void:
 	preview_tick+=1
 	if preview_tick%5==0: update_preview()
 
+func steer_air(horizontal: Vector3,direction: Vector3,dt: float) -> Vector3:
+	var speed:=horizontal.length()
+	var self_limit:=walk_speed*speed_multiplier()
+	if speed<=self_limit+0.01:
+		return horizontal.move_toward(direction*self_limit,air_accel*speed_multiplier()*dt).limit_length(self_limit)
+	# Rotate earned velocity without minting speed or deleting it during a turn.
+	var current:=Vector2(horizontal.x,horizontal.z)
+	var target:=Vector2(direction.x,direction.z)
+	var turn:=clampf(current.angle_to(target),-air_control/22.5*dt,air_control/22.5*dt)
+	current=current.rotated(turn)
+	return Vector3(current.x,0,current.y)
+
 func update_hands(dt: float) -> void:
 	for i in 2:
 		var h: Dictionary = hands[i]
-		if h.state==2:
+		if h.state==2 and not fixed_mode:
 			var requested:=move_toward(h.rest,h.spool_target,8*dt if reeling else 4*dt)
 			if requested<h.rest:
 				# Blocking a requested shortening must never pay out extra rope.
@@ -688,6 +764,7 @@ func update_hands(dt: float) -> void:
 						h.state = 2
 						h.rest = maxf(3.0,chest().distance_to(h.point)+slack_allowance)
 						h.spool_target=h.rest
+						if fixed_mode: fixed_rope.attach(self,i)
 						lab.sound("stick")
 				else:
 					h.state = 0
@@ -699,6 +776,7 @@ func update_hands(dt: float) -> void:
 
 func _process(dt: float) -> void:
 	if lab.paused: return
+	visual_time+=dt
 	recoil = move_toward(recoil,0,dt*5)
 	camera.position.y = lerpf(camera.position.y,0.43 if ball else (0.9 if crouched else 1.58),1-exp(-dt*15))
 	camera.fov = lerpf(camera.fov,84+(clampf(velocity.length()/40,0,1)*5 if camera_motion else 0),1-exp(-dt*5))
@@ -711,6 +789,7 @@ func _process(dt: float) -> void:
 	for i in 2:
 		var h: Dictionary = hands[i]
 		var start := hand_start(i)
+		if third_person and ball: start=global_transform*Vector3(-0.36 if i==0 else 0.36,0.36,-0.38)
 		var end := start
 		if h.state == 1:
 			var duration := maxf(0.08,h.from.distance_to(h.point)/65.0)
@@ -718,6 +797,10 @@ func _process(dt: float) -> void:
 		elif h.state == 2:
 			end = h.point+h.normal*0.08
 		elif h.state==3: end=h.point
+		if combat.charging:
+			var charge:float=combat.charge_fraction()
+			var shake:=sin(visual_time*73)*0.008 if charge>=0.99 else 0.0
+			end=start+camera.global_basis*Vector3((-1.0 if i==0 else 1.0)*(0.06*charge+shake),0.07*charge,0.16*charge)
 		h.retract_left = maxf(0,h.retract_left-dt)
 		if h.state==0 and h.retract_left>0:
 			end = start.lerp(h.retract_pos,pow(h.retract_left/0.14,2))
@@ -741,17 +824,21 @@ func _process(dt: float) -> void:
 			h.glove.rotate_object_local(Vector3.FORWARD,(0.23+wind)*(-1 if i==0 else 1)*smoothstep(0.0,0.35,hand_recovery))
 		h.glove.scale = Vector3.ONE*0.7
 		h.fist.global_position=end;h.fist.global_basis=combat.shot_basis if combat.active else camera.global_basis
-		h.fist.scale=Vector3.ONE*0.9
+		h.fist.scale=Vector3.ONE*0.7
+		if combat.charging:
+			h.fist.rotate_object_local(Vector3.UP,(-1 if i==0 else 1)*lerpf(0.08,0.38,combat.charge_fraction()))
+			h.fist.rotate_object_local(Vector3.RIGHT,-0.25*combat.charge_fraction())
 		if h.state == 2:
 			var direction: Vector3 = h.normal
 			if absf(direction.dot(Vector3.UP))<0.98:
 				h.glove.look_at(end-direction,Vector3.UP)
 		var shoulder := camera.global_transform*Vector3(-0.30 if i==0 else 0.30,-0.42,-0.1)
-		if third_person: shoulder=global_transform*Vector3(-0.325 if i==0 else 0.325,0.95 if crouched else 1.17,0)
+		if third_person: shoulder=avatar.shoulder_position(i)
 		var slack: float = maxf(0,h.rest-chest().distance_to(h.point)) if h.state==2 else 0.0
 		var strain: float = maxf(0,chest().distance_to(h.point)-h.rest)/stretch_limit if h.state==2 else 0.0
 		if h.cord.visible:
-			h.cord.shape_arm(shoulder,end-h.glove.global_basis.y*0.17,slack,strain,h.color)
+			var curl:=global_basis*Vector3(-0.12 if i==0 else 0.12,0.06,0.10) if third_person and ball and h.state==0 else Vector3.ZERO
+			h.cord.shape_arm(shoulder,end-h.glove.global_basis.y*0.17,slack,strain,h.color,curl,0.055 if third_person and ball and h.state==0 else 0.034)
 
 func update_preview() -> void:
 	for dot in preview_dots: dot.hide()

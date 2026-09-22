@@ -8,7 +8,9 @@ const BLUE:=Color("8199ec")
 const WALL:=Color("232738")
 const FLOOR:=Color("202a3c")
 var lab: Node3D
-var suppression_room: Node3D
+var equipment_bay: Node3D
+var rave: Node3D
+var districts: RefCounted
 var travel: Node3D
 var powerups:Node3D
 var dummies:Array[Node3D]=[]
@@ -18,12 +20,6 @@ var pads: Array[Dictionary]=[]
 var openings: Array[Dictionary]=[]
 var pockets: Array[Transform3D]=[]
 var maze_graphs: Array[Dictionary]=[]
-var sparks: Array[Vector3]=[]
-var taken: Array[bool]=[]
-var spark_mesh: MultiMesh
-var collected:=0
-var collect_flash:=0.0
-var collect_chain:=0.0
 var previous_body:=Vector3.ZERO
 var cube:=BoxMesh.new()
 var shapes:=0
@@ -153,10 +149,6 @@ func window_wall(pos: Vector3,width: float,height: float,holes: Array[Rect2],col
 				stripe(pos+basis*Vector3(center.x,y,z),Vector3(hole.size.x,0.11,0.055),color,basis)
 		openings.append({"pos":pos+basis*Vector3(center.x,center.y,0),"size":hole.size,"basis":basis})
 
-func trail(a: Vector3,b: Vector3,count: int) -> void:
-	for i in count:
-		sparks.append(a.lerp(b,float(i)/maxi(1,count-1)))
-
 func light_pool(pos: Vector3,color: Color,range_m:=22.0) -> void:
 	var light:=OmniLight3D.new()
 	add_child(light)
@@ -195,7 +187,7 @@ func build() -> void:
 	build_details()
 	build_hideaways()
 	travel=load("res://scripts/travel.gd").new();travel.lab=lab;add_child(travel)
-	load("res://scripts/annex.gd").new().build(self,travel)
+	load("res://scripts/world/annex.gd").new().build(self,travel)
 	# Four connected corner mazes; two have a second walkable labyrinth overhead.
 	maze(Vector3(-69,0,-69),7,7,5.5,CYAN,971,true)
 	maze(Vector3(30,0,-69),7,7,5.5,BLUE,173,false)
@@ -212,11 +204,11 @@ func build() -> void:
 	platform(Vector3(28,8.5,49),Vector2(7,5),PINK)
 	for pos in [Vector3(0,27,0),Vector3(-49,23,0),Vector3(49,20,0),Vector3(0,25,-49),Vector3(0,13,49),Vector3(-49,15,-49),Vector3(49,14,49),Vector3(49,10,-49),Vector3(-49,10,49)]:
 		light_pool(pos,[CYAN,BLUE,PINK][int(absf(pos.x+pos.z))%3])
-	load("res://scripts/upper_floor.gd").new().build(self)
-	suppression_room=load("res://scripts/suppression_room.gd").new();add_child(suppression_room);suppression_room.build(self)
+	load("res://scripts/world/upper_floor.gd").new().build(self)
+	equipment_bay=load("res://scripts/world/equipment_bay.gd").new();add_child(equipment_bay);equipment_bay.build(self)
+	districts=load("res://scripts/world/districts.gd").new();districts.build(self)
 	flush_batches()
-	# Former pickup trails are removed; only timed, useful power-ups spawn now.
-	sparks.clear()
+	rave=load("res://scripts/world/rave.gd").new();rave.lab=lab;add_child(rave)
 	powerups=load("res://scripts/powerups.gd").new();powerups.lab=lab;add_child(powerups)
 	for pos in [Vector3(-4,0,17),Vector3(14,0,19),Vector3(39,20,14),Vector3(-108,0,-25),Vector3(115,20,33),Vector3(21,20,88)]:
 		var dummy=load("res://scripts/target_dummy.gd").new();dummy.lab=lab;add_child(dummy);dummy.position=pos;dummy.rotation.y=PI;dummies.append(dummy)
@@ -242,11 +234,6 @@ func build_atrium() -> void:
 	window_wall(Vector3(-23,0,0),38,19,[Rect2(-16,0,6,4),Rect2(-5,7,10,6),Rect2(11,0,6,4)],AMBER,PI/2)
 	window_wall(Vector3(23,0,0),38,22,[Rect2(-16,0,6,5),Rect2(-4,9,8,5),Rect2(11,0,6,4)],PINK,PI/2)
 	window_wall(Vector3(0,0,-25),44,24,[Rect2(-18,0,7,5),Rect2(-5,5,10,8),Rect2(5,15,7,5)],BLUE)
-	trail(Vector3(-16,1.2,20),Vector3(-9,1.2,7),4)
-	trail(Vector3(-15,9.7,11),Vector3(19,9.7,11),8)
-	trail(Vector3(8,17.2,19),Vector3(8,17.2,-25),9)
-	trail(Vector3(-17,24.2,-13),Vector3(-7,24.2,-13),3)
-	sparks.append(Vector3(0,17,0))
 
 func build_west() -> void:
 	# A tall shaft with a staggered stack of shelves, several ways up, and open sides.
@@ -256,14 +243,12 @@ func build_west() -> void:
 		var z:=-12.0+i*6
 		platform(Vector3(x,y,z),Vector2(11,9),AMBER,true)
 		bounce(Vector3(x,y+0.14,z),1.7,20.5)
-		trail(Vector3(x-3,y+1.2,z),Vector3(x+3,y+1.2,z),3)
 	wall(Vector3(-68,14,0),Vector3(1.2,28,40),AMBER)
 	window_wall(Vector3(-48,0,-23),42,27,[Rect2(-17,0,7,5),Rect2(-5,9,10,5),Rect2(10,19,8,4)],AMBER)
 	platform(Vector3(-48,26,-19),Vector2(18,6),AMBER)
 	bounce(Vector3(-48,0.14,3),3.5,25)
 	for z in [-15,0,15]:
 		stripe(Vector3(-67.36,14,z),Vector3(0.045,25,0.18),AMBER)
-	trail(Vector3(-48,7,3),Vector3(-48,19,3),4)
 
 func build_east() -> void:
 	# A large room of offset walkways and airborne window shortcuts.
@@ -271,7 +256,6 @@ func build_east() -> void:
 		var z:=-17.0+i*11
 		var y:=4.0+i*3.4
 		platform(Vector3(49,y,z),Vector2(29 if i%2==0 else 20,5),PINK,true)
-		trail(Vector3(41,y+1.2,z),Vector3(56,y+1.2,z),4)
 	ramp(Vector3(67,0,-24),Vector3(67,8.5,-47),3.8,BLUE)
 	platform(Vector3(62,8.5,-47),Vector2(10,6),BLUE)
 	window_wall(Vector3(49,0,-4),39,18,[Rect2(-16,0,6,4),Rect2(-5,5.2,10,3.8),Rect2(12,11,5,3)],PINK)
@@ -279,7 +263,6 @@ func build_east() -> void:
 	bounce(Vector3(58,0.14,9),2.8,24)
 	bounce(Vector3(32,0.14,-15),2.4,19)
 	platform(Vector3(49,21,27),Vector2(24,5),PINK)
-	sparks.append(Vector3(49,13.5,23))
 
 func build_north() -> void:
 	# High galleries circle a void. Low doors and high windows reveal other layers.
@@ -293,9 +276,6 @@ func build_north() -> void:
 	bounce(Vector3(10,8.65,-48),1.8,24)
 	ramp(Vector3(-24,0,-70),Vector3(-4,8.5,-70),4,BLUE)
 	platform(Vector3(0,8.5,-70),Vector2(8,5),BLUE)
-	trail(Vector3(-17,17.2,-34),Vector3(-17,17.2,-67),8)
-	trail(Vector3(18,23.2,-32),Vector3(18,23.2,-66),8)
-	trail(Vector3(-10,1.2,-72),Vector3(20,1.2,-72),6)
 
 func build_south() -> void:
 	# A low, sheltered warren opens unexpectedly into the atrium overhead.
@@ -303,7 +283,6 @@ func build_south() -> void:
 		window_wall(Vector3(0,0,z),43,7,[Rect2(-17,0,5,3.5),Rect2(-3,0,6,3),Rect2(12,3.2,5,1.25)],LIME)
 		platform(Vector3(0,7.2,z),Vector2(43,4),LIME,true)
 		platform(Vector3(14.5,3.2,z+2.5),Vector2(7,5),LIME)
-		sparks.append(Vector3(14.5,3.82,z))
 	for x in [-13,12]:
 		wall(Vector3(x,2,44.5),Vector3(0.7,4,8),LIME)
 		wall(Vector3(-x,2,58),Vector3(0.7,4,7),LIME)
@@ -313,9 +292,6 @@ func build_south() -> void:
 	platform(Vector3(-23,7.2,43),Vector2(4,12),LIME)
 	bounce(Vector3(7,0.14,43),2.2,18)
 	bounce(Vector3(-7,0.14,58),2.2,18)
-	for z in [32,45,58,71]:
-		trail(Vector3(-18,1.1,z),Vector3(18,1.1,z),6)
-	trail(Vector3(-18,8.4,51),Vector3(18,8.4,51),7)
 
 func hideaway(pos: Vector3,color: Color,yaw:=0.0) -> void:
 	# Offset standing entrance, sheltered corner, and a second low escape slot.
@@ -333,8 +309,6 @@ func hideaway(pos: Vector3,color: Color,yaw:=0.0) -> void:
 		block(pos+b*Vector3(x,-0.9,-1.7),Vector3(0.3,1.8,2.9),WALL,true,b)
 	stripe(pos+b*Vector3(1,0.35,-2.18),Vector3(4,0.06,0.04),color,b)
 	stripe(pos+b*Vector3(3.68,0.30,0),Vector3(0.04,0.06,1.8),color,b)
-	sparks.append(pos+b*Vector3(2,1.15,-1))
-	sparks.append(pos+Vector3.UP*5.15)
 
 func build_hideaways() -> void:
 	# Sparse refuges on the edges of the high-speed rooms, at different heights.
@@ -348,7 +322,6 @@ func build_hideaways() -> void:
 	platform(Vector3(0,4.3,71.4),Vector2(18.6,5.8),LIME)
 	for x in [-3,3]:
 		wall(Vector3(x,0.275,71.4),Vector3(0.45,0.55,4.8),LIME)
-	sparks.append(Vector3(1.7,1.15,72.5))
 
 func hoop(pos: Vector3,radius: float,color: Color) -> void:
 	for i in 12:
@@ -429,8 +402,6 @@ func maze(origin: Vector3,nx: int,nz: int,cell: float,color: Color,seed_value: i
 				if not links.has(str(cur)+str(next)):
 					var size:=Vector3(0.6,4.8,cell) if d==Vector2i.RIGHT else Vector3(cell,4.8,0.6)
 					wall(center+Vector3(d.x*cell/2,2.4,d.y*cell/2),size,color)
-			if (x+z*2)%5==0 and not shaft:
-				sparks.append(center+Vector3.UP*1.15)
 			if not upper and not roof and (x*3+z)%11==0:
 				platform(center+Vector3.UP*5.6,Vector2(cell,cell),color)
 			# Sparse glowing floor marks, not a pervasive checkerboard.
@@ -455,7 +426,6 @@ func flush_batches() -> void:
 
 func _physics_process(dt: float) -> void:
 	if not is_instance_valid(lab.player) or lab.paused: return
-	collect_flash=move_toward(collect_flash,0,dt*2.5)
 	var body:Vector3=lab.player.position+Vector3.UP*(0.32 if lab.player.ball else 0.95)
 	if previous_body.distance_to(body)>5: previous_body=body
 	powerups.collect(previous_body,body)

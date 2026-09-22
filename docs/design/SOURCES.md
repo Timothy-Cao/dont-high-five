@@ -73,7 +73,7 @@ Reviewed **2026-09-21**. Store pages establish advertised mechanics, not measure
 ## Existing local evidence
 
 - The user explicitly prefers cleaner, less slippery movement, deliberate recoil/braking and conventional controls. This is stronger evidence for our controller than another game’s marketing language.
-- Current prototype: seven in-engine suites, 299 assertions; 4K screenshots inspected for the actual game, settings, bindings and suppression field. This supports mechanics/layout claims, not multiplayer enjoyment.
+- Initial notebook baseline: seven in-engine suites, 299 assertions. Subsequent local build passes reached ten suites and 400 assertions, including arena infill and surface recoil; see [arena evidence](../ARENA-INFILL.md). The original release gallery is 4K; latest infill captures are 2560 × 1440. These are prior implementation checks, not tests rerun during overnight research, and do not establish multiplayer enjoyment.
 - Prior *Hidden-Reality Social Horror* workspace notes: separation as a trade-off and bounded contradictory information. The new notebook distills the relevant principles so no sibling repository is required.
 - Primary Godot engine release `4.7.2-stable` and the Windows ZIP SHA-256 were checked through GitHub’s release API for the setup script. This is tooling provenance, not game-design evidence.
 
@@ -82,3 +82,35 @@ Reviewed **2026-09-21**. Store pages establish advertised mechanics, not measure
 Most comparables were inspected through primary text, not played or exhaustively watched. No competitor art is copied into this repository. External image retrieval was unreliable, so actual visual review used this prototype’s renders; the next research pass should inspect a few official gameplay sequences before making precise claims about timing, HUDs or animation. No popularity ranking is used as proof that a mechanic will transfer.
 
 Next questions: do people voluntarily exchange charge; do they understand its custody; does first-person speed prevent recognizing another player; does the group ever revise an accusation based on an observed physical event? Those need playtesting.
+
+## Pass 1 additions — 2026-09-21
+
+### S18 — physical cooperation, with a transfer limit
+
+[Heave Ho — official Steam description](https://store.steampowered.com/app/905340/Heave_Ho/) — **primary mechanics text read**. Players grip each other and scenery to traverse, and the description distinguishes cooperative and versus play. Supports a physical helping hypothesis; does not validate first-person forced movement, hidden-role incentives or our networking approach. Linked visuals were not inspected as gameplay sequences.
+
+### S19 — cooperation discovered through a useful shortcut
+
+[Moving Out Monday #6 — User Testing, 17 February 2020](https://store.steampowered.com/news/posts/?appids=996770&enddate=1584360589) — **primary developer post section read in the official announcement feed**. Describes a tester attempt to throw a large item across a balcony leading to cooperative throwing. Relevant inference: give partners a useful spatial opportunity before adding a cooperation requirement. This is the team's retrospective account, not an independent study.
+
+### S20 — shared preparation and commit
+
+[Moving Out Monday #18 — Tips & Tricks, 11 May 2020](https://store.steampowered.com/news/posts/?appids=996770&enddate=1591615244&feed=steam_community_announcements) — **primary instructions section read**. Explains both participants holding an object and preparing a throw before release, with visible directional feedback. Supports separating offer/preparation from commit. It does not establish that matched timing is suitable for our fast first-person handoff.
+
+### S21 — alternatives to sustained holding
+
+[Moving Out Monday #13 — Assist Mode and Accessibility Options, 6 April 2020](https://store.steampowered.com/news/posts/?appids=996770&enddate=1586857128&feed=steam_community_announcements) — **primary accessibility section read**. Describes hold/throw toggles and keyboard remapping. Adaptation: test cancellable toggle-to-offer alongside holding; no claim that this alone makes our controls accessible.
+
+### S22 — a specific failure report, not a present-day bug claim
+
+[PEAK helping-hand bug thread, opened 28 December 2025](https://steamcommunity.com/app/3527290/discussions/2/687493456811011663/) — **full thread text read**, with January follow-ups after the dated opening. Players describe alternating hand/wall grabs and repeated stamina loss. A developer asks for reproduction material and acknowledges escalation. The linked recording was not watched; no reproduction or fix status was established. Adaptation: one fresh acceptance event, idempotent commit and no repeated cost on a failed offer.
+
+### S23 — disagreement prevents overstating S22
+
+[PEAK Helping hand change, 19 August 2025](https://steamcommunity.com/app/3527290/discussions/0/605290750430845669/) — **indexed thread text only; direct open failed**. One participant proposes changing the help mechanic; another says it functions well. A small dated disagreement, not a positive user-study result or community consensus. It weakens the claim that the mechanic itself is broadly unwanted without disputing the separate bug report.
+
+### S24 — celebration is a legitimate alternative
+
+[Portal 2 — official Steam achievement definitions](https://steamcommunity.com/stats/Portal2/achievements/) — **primary achievement page read**. A high-five is explicitly associated with celebrating cooperative calibration, alongside other gesture-related achievements. Counterexample to the claim that every social gesture must grant a mechanical bonus. No completion percentage is used to infer repeat use, enjoyment or applicability to hidden roles.
+
+Pass conclusion and original proposals: [high-five incentives and input arbitration](PASS-01-HIGH-FIVE.md). These additions supplement the initial ledger; they do not turn any proposed interaction into an implemented feature.

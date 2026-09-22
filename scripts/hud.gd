@@ -146,8 +146,8 @@ func show_page(which: String) -> void:
 			label(pages,"No timer. No lives. Just one more launch.",17,DIM)
 		"Controls":
 			label(pages,"LMB / RMB   Place or recall a glove",18)
-			label(pages,"LMB + RMB   Punch; aim at nearby ground to hop",18)
-			label(pages,"Hold MMB   Reel     •     Wheel   Adjust arm length",18,DIM)
+			label(pages,"LMB + RMB   Recall arms; when idle, hold to charge punch",18)
+			label(pages,"Elastic: MMB reels / wheel adjusts. Fixed: alternate clicks.",18,DIM)
 			label(pages,"F5   Camera     •     F11   Fullscreen     •     Esc   Menu",18,DIM)
 			button(pages,"Key bindings",func():show_page("Bindings"))
 		"Bindings":
@@ -244,6 +244,12 @@ func _draw() -> void:
 	if lab.test_world and p.velocity.length()>9:
 		txt(Vector2(size.x-124,40),"%02.0f m/s"%p.velocity.length(),19,DIM)
 	if p.arms_suppressed(): centered(center+Vector2(0,42),"ARMS OFFLINE",14,Color("f49baa"))
+	var mode_label: String="FIXED · AUTO" if p.fixed_mode else "ELASTIC"
+	if p.anchored: mode_label="ANCHORED"
+	centered(Vector2(center.x,size.y-24),mode_label+"  ·  "+lab.controls.prompt("arm_mode"),13,DIM)
+	if p.fixed_mode and p.has_anchor():
+		var active: int=p.fixed_rope.active_hand
+		if active>=0: centered(center+Vector2(0,38),"%.1f m"%p.hands[active].rest,13,DIM)
 	var reticle := Color("9dcfbb") if p.target_valid else PAPER
 	draw_circle(center,6,Color(0.05,0.12,0.13,0.7))
 	draw_arc(center,5,0,TAU,24,reticle,1.5,true)
@@ -263,14 +269,17 @@ func _draw() -> void:
 			var tension := clampf((p.chest().distance_to(h.point)-float(h.rest))/p.stretch_limit,0,1)
 			draw_line(pos+Vector2(-12,15),pos+Vector2(12,15),Color("233b43"),4,true)
 			draw_line(pos+Vector2(-12,15),pos+Vector2(-12+24*tension,15),h.color.lightened(0.2),3,true)
-	var hint := "LMB + RMB together   /   Punch" if welcome_time>0 else ""
+	var hint := "LMB + RMB   /   Hold to charge, release to punch" if welcome_time>0 else ""
 	if p.ball:
 		hint = "%s  Brake"%lab.controls.prompt("brake") if p.velocity.length()>12 else ""
 	elif p.power>0.02:
 		hint = "%s   Launch   •   %.0f m/s   •   hold %s  Reel"%[lab.controls.prompt("launch"),p.shot_velocity(p.position).length(),lab.controls.prompt("reel")]
+	elif attached and p.fixed_mode:
+		hint="LMB / RMB  Alternate grips   •   %s  Release"%lab.controls.prompt("launch")
 	elif attached:
 		hint = "Walk back to stretch  •  hold %s to reel"%lab.controls.prompt("reel")
 	if p.combat.active: hint="PUNCH"
+	elif p.combat.charging: hint="CHARGING"
 	elif p.stone: hint="STONE BRAKE  /  horizontal momentum stopped"
 	elif p.wall_clinging: hint="WALL GRIP  /  %s climb  •  %s wall jump"%[lab.controls.movement_prompt(),lab.controls.prompt("jump")]
 	elif p.reeling: hint="REELING  /  release %s to coast  •  %s jump off"%[lab.controls.prompt("reel"),lab.controls.prompt("jump")]
@@ -282,9 +291,8 @@ func _draw() -> void:
 	if lab.test_world:
 		if not hint.is_empty(): centered(Vector2(center.x,size.y-42),hint,17)
 		txt(Vector2(size.x-106,size.y-22),"Esc  Menu",13,DIM)
-	elif lab.arena.collect_flash>0:
-		var flash:float=lab.arena.collect_flash
-		draw_arc(center,18+(1-flash)*22,0,TAU,40,Color(1,0.85,0.5,flash),2,true)
+	if p.combat.charging:
+		draw_arc(center,22,-PI/2,-PI/2+TAU*maxf(0.01,p.combat.charge_fraction()),48,ORANGE,3,true)
 	if p.combat.hit_flash>0:
 		for side in [-1,1]:
 			draw_line(center+Vector2(side*9,-9),center+Vector2(side*15,-15),ORANGE,2,true)

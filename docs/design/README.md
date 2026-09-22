@@ -6,6 +6,8 @@ The strongest pitch is: **Your hands are how you travel, help your friends, and 
 
 Imagine this moment: you are hanging under a balcony with a charged glove. A friend arrives above you and offers a palm. You can take the quick handoff, climb the slow ramp, or ask them to come down where someone can watch. Later the receiver fails. Was the charge already bad, did your friend switch it, or did the station get sabotaged? Those are actions players can investigate, not arbitrary lies from the game.
 
+**Latest user direction (2026-09-21): Fivers vs Watcher.** Nimble robots complete physical tasks while a powerful opponent controls fixed towers, with occasional blackout/infiltration. This supersedes Blackout Relay as the current working direction; older pages remain research alternatives. Read the [full new brief](FIVER-WATCHER-BRIEF.md), [implementation backlog](IMPLEMENTATION-BACKLOG.md), and [movement decisions and sources](MOVEMENT-MODES.md). The local implementation pass focuses on traversal; Watcher and networked high-fives remain proposals.
+
 ## Start here
 
 1. [Three directions and a recommended round](ROUND-DESIGN.md) — objectives, good-player agency, antagonist tools, and why movement belongs in the loop.
@@ -13,7 +15,8 @@ Imagine this moment: you are hanging under a balcony with a charged glove. A fri
 3. [Rooms and toys](ROOMS-AND-TOOLS.md) — twelve spaces with reasons to visit, risks and escape routes.
 4. [Research and source ledger](SOURCES.md) — thirteen game references, primary evidence, player criticism and confidence limits.
 5. [Playtest kit and failure tests](PLAYTESTS.md) — a short moderated experiment before building a whole online game.
-6. [Overnight research queue](OVERNIGHT.md) — questions to deepen without turning every idea into a feature.
+6. [Pass 1: incentives and input conflicts](PASS-01-HIGH-FIVE.md) — new evidence, counterexamples and revisions to the first handoff experiment.
+7. [Overnight research queue](OVERNIGHT.md) — questions to deepen without turning every idea into a feature.
 
 ## Direction contract
 
@@ -25,7 +28,7 @@ Imagine this moment: you are hanging under a balcony with a charged glove. A fri
 | Pleasure | Controllable movement, a well-timed assist, a narrow escape, a convincing bluff |
 | Tension | The person who makes your trip easier may be creating your next problem |
 | Payoff | Deliver a real object, save a teammate, catch a sabotage, improvise an escape |
-| Initial audience | Six friends, keyboard/mouse, one hidden saboteur; test 8–10 minute rounds |
+| Initial audience | Friends on keyboard/mouse: mobile Fivers versus one tower-bound Watcher; player count and round length unresolved |
 | Tone | Playful suspicion with flashes of danger; avoid horror that punishes exploration |
 | Non-goals | Public matchmaking, dozens of roles, perfect disguise simulation, a huge weapon catalogue |
 
@@ -37,8 +40,8 @@ Player count and round duration are starting hypotheses. The present map is a mo
 
 | Implemented in the local game | Proposed only |
 | --- | --- |
-| Elastic gloves, grapples, slingshots, air control, wall grip, ground-punch hop | Consensual player-to-player high-fives |
-| Two large floors, haze, corridors, hiding nooks, ramps, portals, launch pads | Networked players, roles, voice and round rules |
+| Elastic gloves, grapples, slingshots, air control, wall grip, charged surface recoil | Consensual player-to-player high-fives |
+| Fixed-rope mode, nonlethal dummy knockback, Shift anchoring; two floors, cover and travel | Networked players, roles, voice and round rules |
 | Timed reach/pull/speed/vision/Overdrive stations | Physical objective cargo and corrupted charge |
 | Damageable test targets and F5 courier camera | Player damage, downing, rescue and weapons |
 | Red suppression room: all arm abilities disabled inside; two walkable exits | Killer bypass, fuses, jammer ownership and evidence |

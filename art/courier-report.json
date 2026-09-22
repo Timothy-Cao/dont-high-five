@@ -1,0 +1,15 @@
+{
+  "bones": 12,
+  "vertices": 12444,
+  "triangles": 24660,
+  "clips": [
+    "Idle",
+    "Walk",
+    "Air",
+    "Charge",
+    "Punch",
+    "Land"
+  ],
+  "height_m": 1.784,
+  "representation": "Original skeletal rigid-shell robot; all vertices weighted; no root motion"
+}
