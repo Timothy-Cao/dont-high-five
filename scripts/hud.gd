@@ -21,6 +21,7 @@ var page_scroll: ScrollContainer
 var binding_buttons: Dictionary = {}
 var now_playing: Label
 var skip_track: Button
+var minimap:Control
 
 func style(color: Color, radius := 10) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
@@ -63,6 +64,7 @@ func button(parent: Node, value: String, action: Callable, primary := false) -> 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	minimap=load("res://scripts/minimap.gd").new();minimap.lab=lab;add_child(minimap)
 	menu = PanelContainer.new()
 	add_child(menu)
 	menu.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
@@ -82,7 +84,11 @@ func _ready() -> void:
 	var space := Control.new()
 	space.custom_minimum_size.y=12
 	home.add_child(space)
-	start_button=button(home,"Play",func():lab.started=true;lab.set_paused(false),true)
+	start_button=button(home,"Arena",func():lab.started=true;lab.set_paused(false),true)
+	if lab.session:
+		button(home,"Training",func():show_page("Training"))
+		button(home,"Local playtest",func():show_page("Playtest"))
+		button(home,"Build workshop",func():show_page("Build"))
 	for entry in [["Settings","Settings"]]:
 		nav_buttons[entry[0]]=button(home,entry[1],func():show_page(entry[0]))
 	button(home,"Quit",func():get_tree().quit())
@@ -104,7 +110,7 @@ func _ready() -> void:
 	show_page("Home")
 
 func go_back() -> void:
-	show_page("Controls" if page=="Bindings" else ("Settings" if page in ["Controls","Abilities","Physics","Audio"] else "Home"))
+	show_page("Playtest" if page=="Tasks" else ("Controls" if page=="Bindings" else ("Settings" if page in ["Controls","Abilities","Physics","Audio"] else "Home")))
 
 func show_page(which: String) -> void:
 	page = which
@@ -120,7 +126,7 @@ func show_page(which: String) -> void:
 	header_title.text={"Yard":"Practice areas","Bindings":"Key bindings","Physics":"Advanced tuning"}.get(which,which)
 	if which=="Yard" and not lab.test_world: header_title.text="Explore"
 	var width:=440.0 if which=="Home" else 700.0
-	var height:=300.0 if which=="Home" else 650.0
+	var height:=400.0 if which=="Home" else 650.0
 	menu.offset_left=-width/2
 	menu.offset_right=width/2
 	menu.offset_top=-height/2
@@ -128,6 +134,39 @@ func show_page(which: String) -> void:
 	if which=="Home": start_button.grab_focus()
 	else: back_button.grab_focus()
 	match which:
+		"Tasks":
+			label(pages,"Shortcuts for testing",26)
+			for kind in ["High five","Cargo","Rings","Maintenance","Dummies","Hazards"]:
+				button(pages,kind,func():lab.session.visit_task(kind))
+			label(pages,"Targets and partners are local simulations.",17,DIM)
+		"Build":
+			label(pages,"Build workshop",26)
+			label(pages,"Separate indoor shell · nine reusable parts",17,DIM)
+			button(pages,"Continue building" if lab.builder.active else "Enter workshop",func():lab.builder.enter();lab.set_paused(false),true)
+			button(pages,"Return to main arena",func():lab.builder.leave();show_page("Home"))
+			button(pages,"Load example course · undoable",func():lab.builder.load_map("res://assets/maps/workshop-example.json");show_page("Build"))
+			button(pages,"Save layout",func():lab.builder.save_map();show_page("Build"))
+			button(pages,"Load layout · undoable",func():lab.builder.load_map();show_page("Build"))
+			if FileAccess.file_exists(lab.builder.recovery_path()):
+				button(pages,"Recover autosave · undoable",func():lab.builder.recover_map();show_page("Build"))
+			label(pages,lab.builder.status,16,DIM)
+		"Training":
+			label(pages,"Nine short rooms. Skip or revisit any ability.",18,DIM)
+			for i in 9:
+				button(pages,"%02d   %s"%[i+1,lab.session.training.TITLES[i]],func():lab.session.training.choose(i))
+			button(pages,"Back to Arena",func():lab.session.training.leave() if lab.session.training.active else null;lab.started=true;lab.set_paused(false))
+		"Playtest":
+			label(pages,"Local prototype",26)
+			label(pages,"Test partners simulate other players. F6 switches your role.",17,DIM)
+			button(pages,"Return as Fiver" if lab.session.watcher.active or lab.player.impostor else "Become Watcher",func():lab.session.switch_role();lab.started=true;lab.set_paused(false))
+			check_button("Tower demo: sweeping lasers + hazards",lab.session.watcher.demo_patrol,func(v):lab.session.watcher.demo_patrol=v)
+			check_button("Tower AI · guns + abilities",lab.session.watcher.auto_fire,func(v):lab.session.watcher.auto_fire=v)
+			check_button("8 moving Fivers · mixed speeds",lab.session.objectives.moving_fivers,func(v):lab.session.objectives.set_moving_fivers(v))
+			check_button("Hazard gallery",lab.session.hazards.enabled,func(v):lab.session.hazards.enabled=v)
+			button(pages,"Reset tasks / heal partners",func():lab.session.reset_round();show_page("Playtest"))
+			button(pages,"Visit a task",func():show_page("Tasks"))
+			label(pages,"Watcher: 1–7 / A D towers · LMB fire · RMB scope",17,DIM)
+			label(pages,"Q grenade · W orbital strike · E mine\nR reveal (5s) / F7 blackout · S infiltrate · F6 return",17,DIM)
 		"Yard":
 			if not lab.test_world:
 				label(pages,"Wander anywhere.",29)
@@ -146,9 +185,9 @@ func show_page(which: String) -> void:
 			label(pages,"No timer. No lives. Just one more launch.",17,DIM)
 		"Controls":
 			label(pages,"LMB / RMB   Place or recall a glove",18)
-			label(pages,"LMB + RMB   Punch; aim at nearby ground to hop",18)
-			label(pages,"Hold MMB   Reel     •     Wheel   Adjust arm length",18,DIM)
-			label(pages,"F5   Camera     •     F11   Fullscreen     •     Esc   Menu",18,DIM)
+			label(pages,"LMB + RMB   Recall arms; when idle, hold to charge punch",18)
+			label(pages,"Elastic: MMB reels / wheel adjusts. Fixed: alternate clicks.",18,DIM)
+			label(pages,"2   Punch / zip     •     F5   Camera     •     F6   Role",18,DIM)
 			button(pages,"Key bindings",func():show_page("Bindings"))
 		"Bindings":
 			build_binder()
@@ -157,7 +196,7 @@ func show_page(which: String) -> void:
 			label(pages,"Keep what feels good.",29)
 			check_button("Parallel punch (LMB + RMB)",lab.player.punch_enabled,func(v):lab.player.punch_enabled=v)
 			check_button("Double jump",lab.player.double_jump_enabled,func(v):lab.player.double_jump_enabled=v)
-			check_button("Stone brake / crouch",lab.player.brake_enabled,func(v):lab.player.brake_enabled=v)
+			check_button("Wheel brake / suspension",lab.player.brake_enabled,func(v):lab.player.brake_enabled=v)
 			check_button("Wall grip & wall jump",lab.player.wall_grip_enabled,func(v):lab.player.wall_grip_enabled=v)
 			check_button("Grapple reel",lab.player.reel_enabled,func(v):lab.player.reel_enabled=v)
 			label(pages,"Ringed pads bounce. Walls and platforms accept gloves.",18,DIM)
@@ -165,7 +204,9 @@ func show_page(which: String) -> void:
 			add_slider("Music",0,100,1,lab.audio_service.music_volume*100,func(v):lab.audio_service.music_volume=v/100,true)
 			add_slider("Sound effects",0,100,1,lab.audio_service.effects_volume*100,func(v):lab.audio_service.effects_volume=v/100,true)
 			add_slider("Mouse sensitivity",0.6,4,0.1,lab.player.sensitivity*1000,func(v):lab.player.sensitivity=v/1000)
+			add_slider("Fog distance",50,250,5,lab.fog_distance,func(v):lab.set_fog_distance(v),false," m")
 			add_slider("Brightness",0.06,0.4,0.01,lab.visibility_fill,func(v):lab.set_visibility(v))
+			check_button("Arena overview ("+lab.controls.prompt("minimap")+")",minimap.enabled,func(v):minimap.enabled=v)
 			check_button("Speed FOV effect",lab.player.camera_motion,func(v):lab.player.camera_motion=v)
 			check_button("Fullscreen",lab.player.fullscreen,func(v):lab.player.fullscreen=v;DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if v else DisplayServer.WINDOW_MODE_WINDOWED) if not lab.scripted_run else null)
 			button(pages,"Controls",func():show_page("Controls"))
@@ -201,7 +242,7 @@ func check_button(title: String, checked: bool, action: Callable) -> void:
 	b.toggled.connect(func(v):action.call(v);lab.save_preferences())
 	pages.add_child(b)
 
-func add_slider(title: String, lo: float, hi: float, step: float, value: float, action: Callable, percentage := false) -> void:
+func add_slider(title: String, lo: float, hi: float, step: float, value: float, action: Callable, percentage := false, suffix := "") -> void:
 	var row := HBoxContainer.new()
 	pages.add_child(row)
 	var l := label(row,title,18)
@@ -214,10 +255,10 @@ func add_slider(title: String, lo: float, hi: float, step: float, value: float, 
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slider.custom_minimum_size.y = 42
 	row.add_child(slider)
-	var number := label(row,("%.0f%%"%value) if percentage else ("%.2f"%value),18,ORANGE)
+	var number := label(row,("%.0f%%"%value) if percentage else (("%.0f"%value) if step>=1 else ("%.2f"%value))+suffix,18,ORANGE)
 	number.custom_minimum_size.x = 45
 	number.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	slider.value_changed.connect(func(v):number.text=("%.0f%%"%v) if percentage else ("%.2f"%v);action.call(v);lab.save_preferences())
+	slider.value_changed.connect(func(v):number.text=("%.0f%%"%v) if percentage else (("%.0f"%v) if step>=1 else ("%.2f"%v))+suffix;action.call(v);lab.save_preferences())
 
 func _process(dt: float) -> void:
 	if page=="Audio" and is_instance_valid(now_playing):
@@ -240,10 +281,20 @@ func _draw() -> void:
 		return
 	var p = lab.player
 	var center := size*0.5
+	if lab.builder and lab.builder.active:
+		lab.builder.draw_hud(self)
+		if not lab.builder.testing:return
+	elif lab.session and draw_session(center):return
 	if lab.test_world: txt(Vector2(28,40),lab.station_names[lab.station],15,DIM)
 	if lab.test_world and p.velocity.length()>9:
 		txt(Vector2(size.x-124,40),"%02.0f m/s"%p.velocity.length(),19,DIM)
 	if p.arms_suppressed(): centered(center+Vector2(0,42),"ARMS OFFLINE",14,Color("f49baa"))
+	var mode_label: String="FIXED · AUTO" if p.fixed_mode else "ELASTIC"
+	if p.anchored: mode_label="ANCHORED"
+	centered(Vector2(center.x,size.y-24),mode_label+"  ·  "+lab.controls.prompt("arm_mode")+"    /    "+("ZIP" if p.zip_mode else "PUNCH")+"  ·  "+lab.controls.prompt("attack_mode"),13,DIM)
+	if p.fixed_mode and p.has_anchor():
+		var active: int=p.fixed_rope.active_hand
+		if active>=0: centered(center+Vector2(0,38),"%.1f m"%p.hands[active].rest,13,DIM)
 	var reticle := Color("9dcfbb") if p.target_valid else PAPER
 	draw_circle(center,6,Color(0.05,0.12,0.13,0.7))
 	draw_arc(center,5,0,TAU,24,reticle,1.5,true)
@@ -263,15 +314,18 @@ func _draw() -> void:
 			var tension := clampf((p.chest().distance_to(h.point)-float(h.rest))/p.stretch_limit,0,1)
 			draw_line(pos+Vector2(-12,15),pos+Vector2(12,15),Color("233b43"),4,true)
 			draw_line(pos+Vector2(-12,15),pos+Vector2(-12+24*tension,15),h.color.lightened(0.2),3,true)
-	var hint := "LMB + RMB together   /   Punch" if welcome_time>0 else ""
+	var hint := "LMB + RMB   /   Hold to charge, release to punch" if welcome_time>0 else ""
 	if p.ball:
 		hint = "%s  Brake"%lab.controls.prompt("brake") if p.velocity.length()>12 else ""
 	elif p.power>0.02:
 		hint = "%s   Launch   •   %.0f m/s   •   hold %s  Reel"%[lab.controls.prompt("launch"),p.shot_velocity(p.position).length(),lab.controls.prompt("reel")]
+	elif attached and p.fixed_mode:
+		hint="LMB / RMB  Alternate grips   •   %s  Release"%lab.controls.prompt("launch")
 	elif attached:
 		hint = "Walk back to stretch  •  hold %s to reel"%lab.controls.prompt("reel")
 	if p.combat.active: hint="PUNCH"
-	elif p.stone: hint="STONE BRAKE  /  horizontal momentum stopped"
+	elif p.combat.charging: hint="CHARGING"
+	elif p.stone: hint="WHEEL BRAKE  /  horizontal momentum stopped"
 	elif p.wall_clinging: hint="WALL GRIP  /  %s climb  •  %s wall jump"%[lab.controls.movement_prompt(),lab.controls.prompt("jump")]
 	elif p.reeling: hint="REELING  /  release %s to coast  •  %s jump off"%[lab.controls.prompt("reel"),lab.controls.prompt("jump")]
 	if attached and lab.test_world:
@@ -282,9 +336,8 @@ func _draw() -> void:
 	if lab.test_world:
 		if not hint.is_empty(): centered(Vector2(center.x,size.y-42),hint,17)
 		txt(Vector2(size.x-106,size.y-22),"Esc  Menu",13,DIM)
-	elif lab.arena.collect_flash>0:
-		var flash:float=lab.arena.collect_flash
-		draw_arc(center,18+(1-flash)*22,0,TAU,40,Color(1,0.85,0.5,flash),2,true)
+	if p.combat.charging:
+		draw_arc(center,22,-PI/2,-PI/2+TAU*maxf(0.01,p.combat.charge_fraction()),48,ORANGE,3,true)
 	if p.combat.hit_flash>0:
 		for side in [-1,1]:
 			draw_line(center+Vector2(side*9,-9),center+Vector2(side*15,-15),ORANGE,2,true)
@@ -293,7 +346,7 @@ func _draw() -> void:
 	var names:={"speed":"SPEED","reach":"LONG ARMS","pull":"POWER","vision":"VISION","overdrive":"OVERDRIVE"}
 	for kind in p.buffs:
 		var value:float=p.buffs[kind]
-		txt(Vector2(24,row_y),names[kind]+"  "+str(ceili(value))+"s",16,ORANGE if kind=="overdrive" else PAPER)
+		txt(Vector2(24,row_y),names.get(kind,kind.to_upper())+"  "+str(ceili(value))+"s",16,ORANGE if kind=="overdrive" else PAPER)
 		row_y-=24
 	if lab.message_time>0 and lab.test_world:
 		centered(Vector2(center.x,76),lab.message,16)
@@ -335,3 +388,60 @@ func _input(event: InputEvent) -> void:
 			selected_binding=""
 			show_page("Bindings")
 		else: assign_binding(selected_binding,event.physical_keycode if event.physical_keycode!=0 else event.keycode)
+
+func draw_session(center:Vector2) -> bool:
+	var session=lab.session;var p=lab.player;var w=session.watcher
+	if p.damage_flash>0:draw_rect(Rect2(Vector2.ZERO,size),Color(0.7,0.1,0.12,p.damage_flash*0.35))
+	if not w.active and p.respawn_left<=0:p.damage_feedback.draw(self,get_viewport().get_camera_3d())
+	if p.respawn_left>0:
+		draw_rect(Rect2(Vector2.ZERO,size),Color(0.02,0.04,0.07,0.8))
+		centered(center,"Returning in %d"%ceili(p.respawn_left),26)
+		return true
+	if w.active:
+		if w.towers[w.selected].blind>0:
+			draw_rect(Rect2(Vector2.ZERO,size),Color("0b1420"))
+			centered(center,"EYE DISRUPTED  ·  %.1fs"%w.towers[w.selected].blind,24,ORANGE)
+		else:
+			draw_line(center+Vector2(-12,0),center+Vector2(12,0),PAPER,1.5)
+			draw_line(center+Vector2(0,-12),center+Vector2(0,12),PAPER,1.5)
+			if w.scope:draw_arc(center,minf(size.x,size.y)*0.36,0,TAU,96,Color(0.2,0.4,0.45,0.6),2,true)
+		if w.shot_flash>0:
+			var radius:float=20+w.shot_flash*12
+			for side in [-1,1]:
+				draw_line(center+Vector2(side*radius,-5),center+Vector2(side*radius,5),Color(1,0.65,0.3,w.shot_flash*0.6),2,true)
+		if w.hit_confirm>0:
+			for offset in [Vector2(-1,-1),Vector2(1,-1),Vector2(-1,1),Vector2(1,1)]:
+				draw_line(center+offset*8,center+offset*16,ORANGE,2.5,true)
+		if w.scope:
+			draw_arc(center,25,-PI/2,-PI/2+TAU*(1-clampf(w.cooldowns.gun/w.SNIPER_INTERVAL,0,1)),48,ORANGE,2,true)
+			centered(center+Vector2(0,64),"RECHARGING" if w.cooldowns.gun>0 else "SNIPER READY",13,DIM)
+		else:
+			centered(center+Vector2(0,42),"LMB  MACHINE GUN",13,DIM)
+		txt(Vector2(30,42),("WATCHER  /  EYE %d"%(w.selected+1))+("  ·  BLACKOUT" if w.blackout>0 else ""),22,ORANGE)
+		txt(Vector2(30,70),"Fivers   %d / 7 tasks"%session.objectives.progress(),16,DIM)
+		var row:=""
+		for spec in [["Q","grenade","Grenade"],["W","strike","Blast"],["E","mine","Mine"],["R","reveal","Reveal %.1fs"%w.reveal_left if w.reveal_left>0 else "Reveal"]]:
+			var cooling:bool=w.cooldowns[spec[1]]>0 and not (spec[1]=="reveal" and w.reveal_left>0)
+			row+="%s  %s%s    "%[spec[0],spec[2],"  %.1fs"%w.cooldowns[spec[1]] if cooling else ""]
+		centered(Vector2(center.x,size.y-62),row,17)
+		centered(Vector2(center.x,size.y-32),"1–7 / A D  Towers   ·   LMB  Fire   ·   RMB  Scope / laser   ·   S  Infiltrate   ·   F6  Fiver / F7  Lights",16,DIM)
+		return true
+	if session.training.active:
+		var t=session.training
+		txt(Vector2(30,42),"%02d  /  %s"%[t.room+1,t.TITLES[t.room]],23)
+		txt(Vector2(30,72),t.prompt(),18,DIM)
+		txt(Vector2(30,99),lab.controls.prompt("retry")+"  Reset room  ·  Esc → Training  Skip",14,DIM)
+		if t.room==6:centered(center+Vector2(0,-100),"PULSE  %.1fs"%(2.5-t.pulse),19,ORANGE)
+	else:
+		txt(Vector2(28,40),"IMPOSTOR" if p.impostor else "FIVER",19,ORANGE if p.impostor else PAPER)
+		txt(Vector2(28,66),"%d / 7 tasks"%session.objectives.progress(),16,ORANGE if session.objectives.complete_flash>0 else DIM)
+		draw_rect(Rect2(28,80,110,4),Color("293e48"))
+		draw_rect(Rect2(28,80,110*p.health/100,4),Color("7ddbc7"))
+		txt(Vector2(148,87),"%.0f"%p.health,14,DIM)
+		var hint:String=session.objectives.hint()
+		if p.impostor:hint="Return to a tower base  ·  Stay still %.0fs to self-destruct"%maxf(0,10-w.stationary)
+		elif session.objectives.progress()==7:hint="All tasks complete  ·  Esc → Local playtest to reset"
+		if not hint.is_empty():centered(Vector2(center.x,size.y-62),hint,17)
+		txt(Vector2(size.x-270,40),"F6 Role / F7 Lights   ·   Esc  Menu",14,DIM)
+	if lab.message_time>0:centered(Vector2(center.x,42),lab.message,17)
+	return false

@@ -31,3 +31,11 @@ Separate buses and a master limiter follow [Godot's audio bus workflow](https://
 `assets/audio/sfx/manifest.json` contains durations, peak/RMS measurements and loop flags. `.local/reports/audio-audit.json` records independent PCM checks and byte-for-byte matches against the supplied MP3 originals. All effects passed 48 kHz, peak headroom and negligible DC checks. Engine tests verify track advancement near the actual end, overlapping crossfade decks, twelve complete no-repeat shuffle cycles, sample variation, loops, pause and master mute.
 
 The user supplied the music for this project. On 2026-09-21 the user confirmed permission to redistribute all five tracks and explicitly authorized their inclusion in this public repository and download. This is project distribution permission, not a blanket third-party reuse license; the CC0 notices apply to Kenney's effects, not these songs.
+
+## Watcher weapons
+
+The later [Watcher pass](WATCHER-WEAPONS.md) adds twelve original synthesized variants, raising the complete library to 73 assets including recoil. Machine-gun samples peak at -5 dBFS, sniper at -2 dBFS, and explosion at -3 dBFS, before the existing effects gain/limiter. Those deliberate weapon peaks supersede the earlier blanket -7 dBFS description. See `art/build_watcher_audio.py` and its report for reproducible layers. The twelve files were checked for clipping and quiet endpoints; human audition remains necessary.
+
+## Positional combat pass — 2026-09-22
+
+Unpiloted MG/sniper shots and blasts now use native AudioStreamPlayer3D voices. Twenty-four gun/event voices plus eight reserved impact voices cap one-shot load. Distance attenuates through a 260 m cutoff; when a partition fills, nearer events replace farther ones. Manual gunfire remains immediate 2D feedback. Each already-bounded orbital field owns a spatial player at -11 dB with 24 m unit distance. Effects volume and pause still apply. No HRTF, wall obstruction or room reverb is claimed; headphone auditioning is the next listening check.

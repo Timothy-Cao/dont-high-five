@@ -45,16 +45,15 @@ func run(lab: Node3D) -> void:
 	check(p.position.distance_to(settled)<0.02,"equilibrium stays stable for a further second")
 	var setup: Vector3 = p.position
 	var initial: Vector3 = p.shot_velocity(p.position)
-	p.update_preview()
-	var prediction: Vector3 = p.predicted_end
+	var prediction: Vector3 = p.predict_landing()
 	p.launch()
 	p.input_override = Vector2.ZERO
-	check(p.ball and p.velocity.distance_to(initial)<0.01,"launch switches collision shape and uses the derived vector")
+	check(p.ball and p.velocity.distance_to(initial)<0.01,"launch keeps the robot shape and uses the derived vector")
 	check(p.hands[0].state==0 and p.hands[1].state==0,"launch automatically releases both arms")
 	await frames(220)
 	check(p.position.z<1 and p.is_on_floor() and p.position.y>2.9,"default full draw clears the gap and lands on the raised deck")
 	print("LANDING position=",p.position," preview=",prediction," flight distance=",p.last_distance)
-	check(p.last_landing.distance_to(prediction)<0.65,"preview predicts the actual first landing within 65cm")
+	check(p.last_landing.distance_to(prediction)<0.65,"physics diagnostic predicts the actual first landing within 65cm")
 	p.retry()
 	check(p.position.distance_to(setup)<0.08 and p.hands[0].state==2 and p.hands[1].state==2,"retry restores body and both anchor states")
 	check(p.shot_velocity(p.position).distance_to(initial)<0.1,"restored setup reproduces launch velocity")
@@ -83,7 +82,7 @@ func run(lab: Node3D) -> void:
 	p.reset_to(Vector3(0,0.02,36))
 	p.set_ball(true)
 	await frames(4)
-	check(not p.try_stand(),"ball cannot unfold through a low ceiling")
+	check(not p.try_stand(),"standing clearance check rejects a low ceiling")
 	lab.goto_station(2)
 	await frames(4)
 	p.camera.look_at(Vector3(36,4.5,4))
@@ -102,13 +101,13 @@ func run(lab: Node3D) -> void:
 			p.position.z += draw
 			var v: Vector3 = p.shot_velocity(p.position)
 			var t: float = (-8.5-p.position.z)/v.z if v.z < -0.1 else 100.0
-			var y: float = p.position.y+0.32+v.y*t-0.5*p.gravity*t*t
-			if y>5.04 and y<5.28:
+			var y: float = p.position.y+0.9+v.y*t-0.5*p.gravity*t*t
+			if y>5.95 and y<6.20:
 				chosen = Vector2(height,draw)
 				found = true
 				break
 		if found: break
-	check(found,"a default-tuning shot exists through the ball-sized opening")
+	check(found,"a default-tuning shot exists through the full-height opening")
 	if found:
 		p.reset_to(lab.spawns[2])
 		p.attach_fixture(Vector3(24,chosen.x,5.23),Vector3(32,chosen.x,5.23))
@@ -117,7 +116,7 @@ func run(lab: Node3D) -> void:
 		p.launch()
 		await frames(230)
 		print("WINDOW setup height/draw=",chosen," final=",p.position)
-		check(p.position.z < -10 and p.is_on_floor() and p.position.y>2.9,"ball actually passes through the window and lands beyond it")
+		check(p.position.z < -10 and p.is_on_floor() and p.position.y>2.9,"robot actually passes through the window and lands beyond it")
 	lab.goto_station(0)
 	await frames(4)
 	p.camera.look_at(Vector3(0,2,-55))

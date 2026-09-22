@@ -73,7 +73,7 @@ Reviewed **2026-09-21**. Store pages establish advertised mechanics, not measure
 ## Existing local evidence
 
 - The user explicitly prefers cleaner, less slippery movement, deliberate recoil/braking and conventional controls. This is stronger evidence for our controller than another game’s marketing language.
-- Current prototype: seven in-engine suites, 299 assertions; 4K screenshots inspected for the actual game, settings, bindings and suppression field. This supports mechanics/layout claims, not multiplayer enjoyment.
+- Initial notebook baseline: seven in-engine suites, 299 assertions. Subsequent local build passes reached ten suites and 400 assertions, including arena infill and surface recoil; see [arena evidence](../ARENA-INFILL.md). The original release gallery is 4K; latest infill captures are 2560 × 1440. These are prior implementation checks, not tests rerun during overnight research, and do not establish multiplayer enjoyment.
 - Prior *Hidden-Reality Social Horror* workspace notes: separation as a trade-off and bounded contradictory information. The new notebook distills the relevant principles so no sibling repository is required.
 - Primary Godot engine release `4.7.2-stable` and the Windows ZIP SHA-256 were checked through GitHub’s release API for the setup script. This is tooling provenance, not game-design evidence.
 
@@ -82,3 +82,87 @@ Reviewed **2026-09-21**. Store pages establish advertised mechanics, not measure
 Most comparables were inspected through primary text, not played or exhaustively watched. No competitor art is copied into this repository. External image retrieval was unreliable, so actual visual review used this prototype’s renders; the next research pass should inspect a few official gameplay sequences before making precise claims about timing, HUDs or animation. No popularity ranking is used as proof that a mechanic will transfer.
 
 Next questions: do people voluntarily exchange charge; do they understand its custody; does first-person speed prevent recognizing another player; does the group ever revise an accusation based on an observed physical event? Those need playtesting.
+
+## Pass 1 additions — 2026-09-21
+
+### S18 — physical cooperation, with a transfer limit
+
+[Heave Ho — official Steam description](https://store.steampowered.com/app/905340/Heave_Ho/) — **primary mechanics text read**. Players grip each other and scenery to traverse, and the description distinguishes cooperative and versus play. Supports a physical helping hypothesis; does not validate first-person forced movement, hidden-role incentives or our networking approach. Linked visuals were not inspected as gameplay sequences.
+
+### S19 — cooperation discovered through a useful shortcut
+
+[Moving Out Monday #6 — User Testing, 17 February 2020](https://store.steampowered.com/news/posts/?appids=996770&enddate=1584360589) — **primary developer post section read in the official announcement feed**. Describes a tester attempt to throw a large item across a balcony leading to cooperative throwing. Relevant inference: give partners a useful spatial opportunity before adding a cooperation requirement. This is the team's retrospective account, not an independent study.
+
+### S20 — shared preparation and commit
+
+[Moving Out Monday #18 — Tips & Tricks, 11 May 2020](https://store.steampowered.com/news/posts/?appids=996770&enddate=1591615244&feed=steam_community_announcements) — **primary instructions section read**. Explains both participants holding an object and preparing a throw before release, with visible directional feedback. Supports separating offer/preparation from commit. It does not establish that matched timing is suitable for our fast first-person handoff.
+
+### S21 — alternatives to sustained holding
+
+[Moving Out Monday #13 — Assist Mode and Accessibility Options, 6 April 2020](https://store.steampowered.com/news/posts/?appids=996770&enddate=1586857128&feed=steam_community_announcements) — **primary accessibility section read**. Describes hold/throw toggles and keyboard remapping. Adaptation: test cancellable toggle-to-offer alongside holding; no claim that this alone makes our controls accessible.
+
+### S22 — a specific failure report, not a present-day bug claim
+
+[PEAK helping-hand bug thread, opened 28 December 2025](https://steamcommunity.com/app/3527290/discussions/2/687493456811011663/) — **full thread text read**, with January follow-ups after the dated opening. Players describe alternating hand/wall grabs and repeated stamina loss. A developer asks for reproduction material and acknowledges escalation. The linked recording was not watched; no reproduction or fix status was established. Adaptation: one fresh acceptance event, idempotent commit and no repeated cost on a failed offer.
+
+### S23 — disagreement prevents overstating S22
+
+[PEAK Helping hand change, 19 August 2025](https://steamcommunity.com/app/3527290/discussions/0/605290750430845669/) — **indexed thread text only; direct open failed**. One participant proposes changing the help mechanic; another says it functions well. A small dated disagreement, not a positive user-study result or community consensus. It weakens the claim that the mechanic itself is broadly unwanted without disputing the separate bug report.
+
+### S24 — celebration is a legitimate alternative
+
+[Portal 2 — official Steam achievement definitions](https://steamcommunity.com/stats/Portal2/achievements/) — **primary achievement page read**. A high-five is explicitly associated with celebrating cooperative calibration, alongside other gesture-related achievements. Counterexample to the claim that every social gesture must grant a mechanical bonus. No completion percentage is used to infer repeat use, enjoyment or applicability to hidden roles.
+
+Pass conclusion and original proposals: [high-five incentives and input arbitration](PASS-01-HIGH-FIVE.md). These additions supplement the initial ledger; they do not turn any proposed interaction into an implemented feature.
+
+## Local pilot additions — 2026-09-21
+
+### S25 — asymmetry does not imply identical counterplay
+
+[Panoptic — official Steam description](https://store.steampowered.com/app/541930/Panoptic/) — **primary mechanics text read**. An Overseer searches for a small Challenger among a crowd and uses a charging eye attack. Inference for this pilot: expose the Watcher's intent before firing. Rejected transfer: one-hit crowd stealth as the default balance for a fast, conspicuous movement game. The prototype uses weak ordinary damage and short, visible warning intervals instead.
+
+### S26 — blockers can be part of the design, not a coverage bug
+
+[Team Panoptes, Early Access Update 4, 19 September 2019](https://steamcommunity.com/app/541930/discussions/0/1626286205694793087/) — **primary developer update read**. Describes optional roaming Watchers, authored blinding zones and changes to the visibility of their lights. Adaptation: preserve real blind spots and make unattended pressure optional. It does not justify any numerical coverage target for our arena.
+
+### S27 — mobility as a response to a large threat
+
+[DAVIGO — official developer site](https://www.davigogame.com/) — **primary mechanics text read**. Its PC Knight uses a grapple, hammer and rockets against a VR Giant; the developer explicitly requires both roles to play. Adaptation: test role perspectives separately, retaining clear physical counterplay. Counterexample: a local bot sampler cannot validate the social or competitive experience of a game that needs human opponents. The site's linked gameplay image retrieval returned no inspectable image in this tool session, so no animation/timing claim is made from it.
+
+### S28 — asymmetric scope comparator, not balance evidence
+
+[BOSSGARD — official Steam description](https://store.steampowered.com/app/865980/BOSSGARD/) — **primary description read**. Large boss versus smaller opponents offers a useful role-contrast comparison. It does not establish our weapon values, number of towers or task exposure. No player-review consensus or popularity statistic is used as proof.
+
+Earlier S19–S23 remain relevant to physical cargo, clear preparation/commit and avoiding repeated interaction costs. This pass adds no new verified player-study findings. All art, meshes and sounds used by the pilot are existing original assets or original procedural geometry; competitor media was not copied.
+
+## Overnight pass 2 additions — 2026-09-22 UTC
+
+### S29
+
+[Valve / Bad Robot, Introducing PASS Time, 18 August 2015](https://www.teamfortress.com/post.php?id=17833) — **primary announcement and mechanics text read**. The ball occupies the weapon role; passing, interceptions, jump pads and carrier benefits support its sports premise. Useful comparator for the cost and pleasure of carrying. Historical beta description, not verified present-day rules. No gameplay sequence watched.
+
+### S30
+
+[Valve, Meet Your Match — PASS Time update notes](https://www.teamfortress.com/meetyourmatch/war.php) — **primary PASS Time section read**. Team proximity grants healing/speed benefits, isolated carriers are marked for death, and passing contributes toward a special goal. This is a counterexample to assuming a physical ball alone guarantees cooperation. We reject importing the solo-carrier punishment before our one-hand route is proven. The retrieved page did not show a publication date; no exact date inferred here.
+
+### S31
+
+[Valve, TF2 update, 10 September 2015](https://www.teamfortress.com/post.php?id=18360) — **primary patch notes read**. Includes abandoned-ball reset, prolonged-holder recovery by teammates, easier catches and stuck-ball fixes. Supports explicitly designing possession/recovery failure states. Does not prove our game needs forced stealing or the same restrictions.
+
+### S32
+
+[Embark, Improving Cashout Mode in Season 3, 24 September 2024](https://www.reachthefinals.com/patchnotes/cashoutblog) — **primary design retrospective read**, including incentive changes and caveats about feedback/data. Describes late-steal incentives undermining initial deposits and moving some reward to the deposit. Inference: preserve meaningful completed work, and test whether objective incentives reward avoidance. This is developer-reported evidence from a multi-team mode; no causal effect size or scoring percentage is transferred to our game.
+
+### S33
+
+[Embark, Cashout Spawn Changes, 2 February 2026](https://www.reachthefinals.com/patchnotes/971) — **primary patch explanation read**. Pairs vaults with cashout stations to make destinations clearer and reduce unintended encounter concentrations. Transfer route pairing as a design question; reject copying its numeric distance band to a different controller. A stated positive live-test outcome is not independent evidence for Don’t High Five.
+
+### S34
+
+[Ghost Ship Games, Update 32 announcement and hotfix feed, October 2020](https://store.steampowered.com/news/posts/?appids=548430&enddate=1604331155&feed=steam_community_announcements) — **primary 22 October announcement sections read**, especially On-Site Refining and throw controls. Task pipelines also provide traversal; carrying/tool overlap prompted input changes. Inference: useful infrastructure can be its own spatial reward. Do not import procedural pipeline construction or treat maintenance downtime as universally enjoyable. The direct community announcement returned only an image wrapper; the official store feed supplied the actual text. Wiki/search leads were used to locate it, not as decisive mechanics evidence.
+
+### S35
+
+[Deep Rock Galactic player thread, Tips to speed up pipeline?, 5 December 2020](https://steamcommunity.com/app/548430/discussions/1/2974028351334767669/) — **opening and all 14 replies read; dated player accounts**. One player asks about long missions; another praises complementary class jobs. Others disagree on tunnel safety and whether efficiency removes creative movement. Anecdotal and contradictory, not community consensus, current bug evidence or a controlled comparison. Transfer: observe maneuvering room, coordination costs and reasons for route preference alongside completion time. Two Reddit leads could not be opened; their snippets are not used to establish findings.
+
+Pass deliverable: [movement-integrated objective comparison and cheapest next test](PASS-02-OBJECTIVES.md). No gameplay footage, live session or human study was inspected in this run. All six sketches and test criteria are original proposals, not externally established results.

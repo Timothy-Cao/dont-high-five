@@ -1,0 +1,80 @@
+[gd_scene format=3]
+
+[node name="PlaytestLayout" type="Node3D"]
+
+[node name="Eye01" type="Marker3D" parent="."]
+position = Vector3(0, 36, -40)
+gizmo_extents = 2.0
+metadata/kind = "tower"
+metadata/base_y = 0.0
+
+[node name="Eye02" type="Marker3D" parent="."]
+position = Vector3(132, 10, 0)
+gizmo_extents = 2.0
+metadata/kind = "tower"
+metadata/base_y = 0.0
+
+[node name="Eye03" type="Marker3D" parent="."]
+position = Vector3(-132, 15, 40)
+gizmo_extents = 2.0
+metadata/kind = "tower"
+metadata/base_y = 0.0
+
+[node name="Eye04" type="Marker3D" parent="."]
+position = Vector3(0, 28, -104)
+gizmo_extents = 2.0
+metadata/kind = "tower"
+metadata/base_y = 0.0
+
+[node name="Eye05" type="Marker3D" parent="."]
+position = Vector3(-36, 15, 40)
+gizmo_extents = 2.0
+metadata/kind = "tower"
+metadata/base_y = 0.0
+
+[node name="Eye06" type="Marker3D" parent="."]
+position = Vector3(68, 36, 104)
+gizmo_extents = 2.0
+metadata/kind = "tower"
+metadata/base_y = 20.0
+
+[node name="Eye07" type="Marker3D" parent="."]
+position = Vector3(68, 28, 0)
+gizmo_extents = 2.0
+metadata/kind = "tower"
+metadata/base_y = 0.0
+
+[node name="Ring01" type="Marker3D" parent="."]
+position = Vector3(0, 11, 11)
+gizmo_extents = 2.0
+metadata/kind = "ring"
+
+[node name="Ring02" type="Marker3D" parent="."]
+position = Vector3(8, 18, -20)
+gizmo_extents = 2.0
+metadata/kind = "ring"
+
+[node name="Ring03" type="Marker3D" parent="."]
+position = Vector3(41, 23, -19)
+gizmo_extents = 2.0
+metadata/kind = "ring"
+
+[node name="Cargo" type="Marker3D" parent="."]
+position = Vector3(-106, 0.7, -22)
+gizmo_extents = 2.0
+metadata/kind = "cargo"
+
+[node name="Delivery" type="Marker3D" parent="."]
+position = Vector3(-100, 0, -12)
+gizmo_extents = 2.0
+metadata/kind = "delivery"
+
+[node name="HighFive" type="Marker3D" parent="."]
+position = Vector3(-18, 0, 26)
+gizmo_extents = 2.0
+metadata/kind = "social"
+
+[node name="Maintenance" type="Marker3D" parent="."]
+position = Vector3(-12, 24.2, -13)
+gizmo_extents = 2.0
+metadata/kind = "maintenance"

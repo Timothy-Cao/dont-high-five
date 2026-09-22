@@ -1,28 +1,49 @@
 extends Node
 
 const PREFIX := "pop_"
-const DEFAULTS := {"forward":KEY_W,"back":KEY_S,"left":KEY_A,"right":KEY_D,"jump":KEY_SPACE,"launch":KEY_E,"reel":KEY_F,"brake":KEY_CTRL,"cling":KEY_SHIFT,"recall":KEY_Q,"retry":KEY_R,"reset":KEY_T,"preview":KEY_P}
-const TITLES := {"forward":"Forward","back":"Backward","left":"Strafe left","right":"Strafe right","jump":"Jump / double jump","launch":"Slingshot","reel":"Reel in (hold)","brake":"Crouch / stone brake","cling":"Wall grip (hold)","recall":"Recall gloves","retry":"Retry shot","reset":"Return to area","preview":"Trajectory"}
+const DEFAULTS := {"forward":KEY_W,"back":KEY_S,"left":KEY_A,"right":KEY_D,"jump":KEY_SPACE,"launch":KEY_E,"reel":KEY_F,"brake":KEY_CTRL,"cling":KEY_C,"anchor":KEY_SHIFT,"arm_mode":KEY_1,"attack_mode":KEY_2,"interact":KEY_V,"recall":KEY_Q,"retry":KEY_R,"reset":KEY_T,"minimap":KEY_M}
+const TITLES := {"forward":"Forward","back":"Backward","left":"Strafe left","right":"Strafe right","jump":"Jump / double jump","launch":"Slingshot","reel":"Reel in (hold)","brake":"Suspension / wheel brake","cling":"Wall grip (hold)","anchor":"Anchor / drop (hold)","arm_mode":"Elastic / fixed arms","attack_mode":"Punch / parallel zip","interact":"Interact / calibrate","recall":"Recall gloves","retry":"Retry shot","reset":"Return to area","minimap":"Toggle local map"}
 var keys: Dictionary = DEFAULTS.duplicate()
 var changed := false
 
 func _ready() -> void:
 	var cfg := ConfigFile.new()
-	if cfg.load("user://user_bindings.cfg")==OK:
-		var candidate: Dictionary = DEFAULTS.duplicate()
-		for action in DEFAULTS:
-			var key = cfg.get_value("keys",action,DEFAULTS[action])
-			if key is int and permitted(key): candidate[action]=key
-		var used := {}
-		var valid := true
-		for key in candidate.values():
-			if used.has(key): valid=false
-			used[key]=true
-		if valid: keys=candidate
+	if cfg.load("user://user_bindings.cfg")==OK: restore_bindings(cfg)
 	apply()
 
+func restore_bindings(cfg: ConfigFile) -> void:
+	var candidate: Dictionary = DEFAULTS.duplicate()
+	for action in DEFAULTS:
+		var key = cfg.get_value("keys",action,DEFAULTS[action])
+		if key is int and permitted(key): candidate[action]=key
+	# Preserve old custom bindings. A newly introduced default never silently
+	# takes a key from a user's saved action.
+	if not cfg.has_section_key("keys","anchor"):
+		if candidate.cling==KEY_SHIFT: candidate.cling=KEY_C
+		for action in ["cling","anchor","arm_mode"]:
+			var occupied:=[]
+			for other in candidate:
+				if other!=action: occupied.append(candidate[other])
+			if candidate[action] in occupied:
+				for fallback in [KEY_G,KEY_H,KEY_J,KEY_K,KEY_L,KEY_U,KEY_I]:
+					if fallback not in occupied: candidate[action]=fallback;break
+	for action in ["attack_mode","interact","minimap"]:
+		if cfg.has_section_key("keys",action):continue
+		var occupied:=[]
+		for other in candidate:
+			if other!=action:occupied.append(candidate[other])
+		if candidate[action] in occupied:
+			for fallback in [KEY_G,KEY_H,KEY_J,KEY_K,KEY_L,KEY_U,KEY_I]:
+				if fallback not in occupied:candidate[action]=fallback;break
+	var used := {}
+	var valid := true
+	for key in candidate.values():
+		if used.has(key): valid=false
+		used[key]=true
+	if valid: keys=candidate
+
 func permitted(key: int) -> bool:
-	return key>0 and key not in [KEY_ESCAPE,KEY_TAB,KEY_F5,KEY_F11,KEY_1,KEY_2,KEY_3,KEY_4]
+	return key>0 and key not in [KEY_ESCAPE,KEY_TAB,KEY_F5,KEY_F11,KEY_F6,KEY_F7,KEY_3,KEY_4]
 
 func apply() -> void:
 	changed=true

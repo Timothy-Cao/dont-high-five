@@ -59,7 +59,7 @@ func update_player(p: CharacterBody3D,from: Vector3,dt: float) -> void:
 			if absf(hit.x)>1.64 or absf(hit.y)>2.2-half_height+0.02: continue
 			var partner:=i+1 if i%2==0 else i-1
 			if transfer(p,i,partner,hit): return
-	if p.pad_lock<=0 and not p.held("brake"):
+	if p.pad_lock<=0 and not p.held("brake") and not p.held("anchor"):
 		for pad in launch_pads:
 			var local:Vector3=pad.basis.inverse()*(p.position-pad.pos)
 			if absf(local.x)<2.05 and absf(local.z)<2.6 and local.y>=-0.05 and local.y<0.18 and p.velocity.y<=0.1:
@@ -78,9 +78,16 @@ func transfer(p: CharacterBody3D,source: int,destination: int,local_hit: Vector3
 	q.shape=p.collider.shape;q.transform=Transform3D(Basis.IDENTITY,arrival+p.collider.position)
 	q.collision_mask=1;q.exclude=[p.get_rid()]
 	if not get_world_3d().direct_space_state.intersect_shape(q,1).is_empty(): return false
+	var cargo_arrival:=Vector3.ZERO
+	if p.has_cargo():
+		cargo_arrival=arrival+rotation*(p.cargo.global_position-p.global_position)
+		var cq:=PhysicsShapeQueryParameters3D.new();var cs:=SphereShape3D.new();cs.radius=0.48;cq.shape=cs;cq.transform.origin=cargo_arrival;cq.collision_mask=1;cq.exclude=[p.get_rid()]
+		if not get_world_3d().direct_space_state.intersect_shape(cq,1).is_empty():return false
 	p.cancel_hands();p.clear_mouse_chord()
 	p.position=arrival;p.velocity=rotation*p.velocity
 	p.global_basis=rotation*p.global_basis
+	if p.has_cargo():
+		p.cargo.global_position=cargo_arrival;p.cargo.velocity=p.velocity;p.hands[p.cargo_hand].point=cargo_arrival
 	p.portal_lock=0.65;p.wall_lock=0.2;p.wall_clinging=false
 	p.flying=true;p.flight_time=0;p.launch_origin=arrival;p.momentum_air=true
 	p.camera_cut=true

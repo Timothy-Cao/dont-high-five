@@ -340,5 +340,161 @@
     "peak_dbfs": -14,
     "rms_dbfs": -25.72,
     "loop": true
+  },
+  "blast_0": {
+    "seconds": 0.46,
+    "peak_dbfs": -8,
+    "rms_dbfs": -23.67,
+    "loop": false,
+    "original_synthesis": true
+  },
+  "blast_1": {
+    "seconds": 0.46,
+    "peak_dbfs": -8,
+    "rms_dbfs": -22.67,
+    "loop": false,
+    "original_synthesis": true
+  },
+  "blast_2": {
+    "seconds": 0.46,
+    "peak_dbfs": -8,
+    "rms_dbfs": -22.96,
+    "loop": false,
+    "original_synthesis": true
+  },
+  "blast_3": {
+    "seconds": 0.46,
+    "peak_dbfs": -8,
+    "rms_dbfs": -23.31,
+    "loop": false,
+    "original_synthesis": true
+  },
+  "watcher_mg_0": {
+    "file": "watcher_mg_0.wav",
+    "seconds": 0.27,
+    "peak_dbfs": -5,
+    "rms_dbfs": -24.19,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_mg_1": {
+    "file": "watcher_mg_1.wav",
+    "seconds": 0.27,
+    "peak_dbfs": -5,
+    "rms_dbfs": -22.43,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_mg_2": {
+    "file": "watcher_mg_2.wav",
+    "seconds": 0.27,
+    "peak_dbfs": -5,
+    "rms_dbfs": -22.5,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_mg_3": {
+    "file": "watcher_mg_3.wav",
+    "seconds": 0.27,
+    "peak_dbfs": -5,
+    "rms_dbfs": -24.06,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_sniper_0": {
+    "file": "watcher_sniper_0.wav",
+    "seconds": 1.8,
+    "peak_dbfs": -2,
+    "rms_dbfs": -25.09,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_sniper_1": {
+    "file": "watcher_sniper_1.wav",
+    "seconds": 1.8,
+    "peak_dbfs": -2,
+    "rms_dbfs": -23.1,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_sniper_2": {
+    "file": "watcher_sniper_2.wav",
+    "seconds": 1.8,
+    "peak_dbfs": -2,
+    "rms_dbfs": -26.11,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_sniper_3": {
+    "file": "watcher_sniper_3.wav",
+    "seconds": 1.8,
+    "peak_dbfs": -2,
+    "rms_dbfs": -22.52,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_blast_0": {
+    "file": "watcher_blast_0.wav",
+    "seconds": 1.35,
+    "peak_dbfs": -3,
+    "rms_dbfs": -23.59,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_blast_1": {
+    "file": "watcher_blast_1.wav",
+    "seconds": 1.35,
+    "peak_dbfs": -3,
+    "rms_dbfs": -23.15,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_blast_2": {
+    "file": "watcher_blast_2.wav",
+    "seconds": 1.35,
+    "peak_dbfs": -3,
+    "rms_dbfs": -23.97,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_blast_3": {
+    "file": "watcher_blast_3.wav",
+    "seconds": 1.35,
+    "peak_dbfs": -3,
+    "rms_dbfs": -22.76,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_orbital_0": {
+    "file": "watcher_orbital_0.wav",
+    "seconds": 4.6,
+    "peak_dbfs": -3,
+    "rms_dbfs": -14.13,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_orbital_1": {
+    "file": "watcher_orbital_1.wav",
+    "seconds": 4.6,
+    "peak_dbfs": -3,
+    "rms_dbfs": -13.83,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_orbital_2": {
+    "file": "watcher_orbital_2.wav",
+    "seconds": 4.6,
+    "peak_dbfs": -3,
+    "rms_dbfs": -13.95,
+    "original_synthesis": true,
+    "loop": false
+  },
+  "watcher_orbital_3": {
+    "file": "watcher_orbital_3.wav",
+    "seconds": 4.6,
+    "peak_dbfs": -3,
+    "rms_dbfs": -14.93,
+    "original_synthesis": true,
+    "loop": false
   }
 }

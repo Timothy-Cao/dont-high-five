@@ -39,20 +39,8 @@ def export(name):
     bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'art'/f'{name}.blend'))
 pink=mat('Magenta charge',(.76,.17,.56),.4,0,1.2)
 blue=mat('Violet charge',(.27,.36,.95),.4,0,1.1)
-for side,name,shell in [(-1,'fist_left',amber),(1,'fist_right',teal)]:
-    reset()
-    box('padded_palm',(0,0,0),(.43,.32,.35),shell,.085)
-    for i in range(4):
-        x=-.153+i*.102
-        egg('knuckle_'+str(i),(x,.075,-.153),(.056,.095,.073),shell)
-        box('finger_seam_'+str(i),(x,-.05,-.12),(.088,.12,.08),rubber,.029)
-        box('knuckle_plate_'+str(i),(x,.11,-.205),(.063,.045,.023),steel,.012)
-    egg('tucked_thumb',(side*.215,-.08,.012),(.095,.105,.17),shell)
-    box('wrist_seal',(0,-.24,.04),(.32,.15,.23),rubber,.045)
-    box('cuff',(0,-.31,.04),(.39,.08,.27),steel,.022)
-    box('charge_strip',(0,-.30,-.104),(.30,.022,.025),gold if side<0 else glow,.008)
-    export(name)
 reset()
+
 egg('weighted_base',(0,.16,0),(1.1,.18,1.1),rubber)
 ring('base_trim',(0,.20,0),.94,.035,steel)
 box('capacitor_pedestal',(0,.53,0),(1.15,.67,1.15),teal,.16)
@@ -102,3 +90,7 @@ for r in [.39,.22]:ring('target_ring',(0,1.85,-.389),r,.042,glow,True)
 egg('bullseye',(0,1.85,-.41),(.10,.10,.032),gold)
 export('target_dummy')
 print('Built two fists, station, five power silhouettes and spring dummy.')
+
+# Current original soft gloves and matching fists share one source.
+import runpy
+runpy.run_path(str(ROOT/"art/build_soft_gloves.py"),run_name="__main__")

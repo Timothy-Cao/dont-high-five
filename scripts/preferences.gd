@@ -17,9 +17,10 @@ func restore(lab: Node3D) -> void:
 	lab.audio_service.music_volume = number(cfg,"music",0.5,0,1)
 	lab.audio_service.effects_volume = number(cfg,"effects",0.5,0,1)
 	lab.player.sensitivity = number(cfg,"sensitivity",0.0022,0.0006,0.004)
+	lab.set_fog_distance(number(cfg,"fog_distance",100.0,50,250))
 	lab.set_visibility(number(cfg,"brightness",lab.visibility_fill,0.06,0.4))
-	lab.player.camera_motion = flag(cfg,"camera_motion",false)
-	lab.player.preview_enabled = flag(cfg,"trajectory",true)
+	lab.hud.minimap.enabled = flag(cfg,"minimap",true)
+	lab.player.camera_motion = flag(cfg,"camera_motion",true)
 	lab.player.grip_lights = flag(cfg,"glove_lights",true)
 	lab.audio_enabled = flag(cfg,"sound",true)
 	lab.player.fullscreen = flag(cfg,"fullscreen",false)
@@ -29,8 +30,8 @@ func restore(lab: Node3D) -> void:
 func save(lab: Node3D) -> Error:
 	var cfg := ConfigFile.new()
 	var values := {"music":lab.audio_service.music_volume,"effects":lab.audio_service.effects_volume,
-		"sensitivity":lab.player.sensitivity,"brightness":lab.visibility_fill,
-		"camera_motion":lab.player.camera_motion,"trajectory":lab.player.preview_enabled,
+		"sensitivity":lab.player.sensitivity,"brightness":lab.visibility_fill,"fog_distance":lab.fog_distance,
+		"camera_motion":lab.player.camera_motion,"minimap":lab.hud.minimap.enabled,
 		"glove_lights":lab.player.grip_lights,"sound":lab.audio_enabled,"fullscreen":lab.player.fullscreen}
 	for key in values: cfg.set_value("settings",key,values[key])
 	return cfg.save(path)

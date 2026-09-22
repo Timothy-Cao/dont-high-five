@@ -25,10 +25,10 @@ try {
     }
     if ($Mode -eq 'Import') { exit 0 }
     if ($Mode -eq 'Verify') {
-        foreach ($suite in @('verify','metrics','polish','arena-verify','expansion-verify','combat-power','settings-verify')) {
+        foreach ($suite in @('verify','metrics','polish','arena-verify','expansion-verify','combat-power','settings-verify','charge-verify','recoil-verify','density-verify','fixed-verify','pilot-verify','wrap-verify','carry-night-verify','orbital-verify','crowd-verify','workshop-verify','reveal-verify','minimap-verify','refinement-verify')) {
             Invoke-CheckedEngine ($suite + '.log') @('--headless','--',('--' + $suite))
         }
-        Write-Host 'All seven suites passed. Reports and logs are in .local/.'
+        Write-Host 'All twenty suites passed. Reports and logs are in .local/.'
         exit 0
     }
     $arguments = @('--path', ('"' + $projectRoot + '"'), '--log-file', ('"' + (Join-Path $logRoot ($Mode.ToLower() + '.log')) + '"'))

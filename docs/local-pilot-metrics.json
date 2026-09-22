@@ -1,0 +1,36 @@
+{
+  "checks": 87,
+  "coverage": {
+    "floor_samples": 368,
+    "per_eye_counts": [
+      55,
+      43,
+      30,
+      34,
+      32,
+      27,
+      35
+    ],
+    "union_fraction": 0.597826086956522,
+    "visible_any": 220
+  },
+  "failures": 0,
+  "verification": {
+    "suites": {
+      "verify": 37,
+      "metrics": 43,
+      "polish": 24,
+      "arena-verify": 65,
+      "expansion-verify": 54,
+      "combat-power": 44,
+      "settings-verify": 24,
+      "charge-verify": 32,
+      "recoil-verify": 19,
+      "density-verify": 48,
+      "fixed-verify": 47,
+      "pilot-verify": 87
+    },
+    "total_assertions": 524,
+    "failures": 0
+  }
+}

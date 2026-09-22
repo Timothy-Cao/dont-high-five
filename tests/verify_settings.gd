@@ -19,21 +19,32 @@ func run(lab: Node3D) -> void:
 		check(AudioServer.is_bus_mute(a.music_bus)==(volume==0) and AudioServer.is_bus_mute(a.effects_bus)==(volume==0),"zero mutes and positive volume unmutes both buses: "+str(volume))
 	a.music_volume=0.5;a.effects_volume=0.5
 	var prefs=load("res://scripts/preferences.gd").new();prefs.path="res://.local/settings-test.cfg"
-	a.music_volume=0.32;a.effects_volume=0.71;p.sensitivity=0.0031;p.camera_motion=true
+	a.music_volume=0.32;a.effects_volume=0.71;p.sensitivity=0.0031;p.camera_motion=true;hud.minimap.enabled=false
+	lab.set_fog_distance(175)
 	check(prefs.save(lab)==OK,"preferences save to an isolated test file")
-	a.music_volume=0.5;a.effects_volume=0.5;p.sensitivity=0.0022;p.camera_motion=false
+	a.music_volume=0.5;a.effects_volume=0.5;p.sensitivity=0.0022;p.camera_motion=false;hud.minimap.enabled=true
+	lab.set_fog_distance(100)
 	prefs.restore(lab)
-	check(absf(a.music_volume-0.32)<0.001 and absf(a.effects_volume-0.71)<0.001 and absf(p.sensitivity-0.0031)<0.00001 and p.camera_motion,"audio and input preferences survive a reload")
+	check(lab.fog_distance==175,"fog distance survives a preferences reload")
+	check(absf(a.music_volume-0.32)<0.001 and absf(a.effects_volume-0.71)<0.001 and absf(p.sensitivity-0.0031)<0.00001 and p.camera_motion and not hud.minimap.enabled,"audio, input and minimap preferences survive a reload")
 	var cfg:=ConfigFile.new();cfg.set_value("settings","music",99);cfg.set_value("settings","effects","invalid");cfg.set_value("settings","camera_motion",false);cfg.save(prefs.path)
 	prefs.restore(lab)
+	check(lab.fog_distance==100,"older settings without fog distance receive the denser 100 m default")
+	cfg.set_value("settings","fog_distance",999);cfg.save(prefs.path);prefs.restore(lab)
+	check(lab.fog_distance==250,"out-of-range saved fog distance is bounded")
 	check(a.music_volume==1 and a.effects_volume==0.5 and not p.camera_motion,"malformed preferences are bounded or replaced with defaults")
 	DirAccess.remove_absolute(prefs.path)
 	lab.set_paused(true);hud.show_page("Settings")
 	await frames(2)
 	var sliders=hud.pages.find_children("*","HSlider",true,false)
 	sliders[0].value=50;sliders[1].value=50
+	sliders[3].value=100;await get_tree().process_frame;await get_tree().process_frame
+	var dense:float=lab.environment.fog_density
+	sliders[3].value=200;await get_tree().process_frame;await get_tree().process_frame
+	check(lab.fog_distance==200 and is_equal_approx(lab.environment.fog_density,dense*0.5),"fog slider changes live haze and longer distance means clearer air")
+	sliders[3].value=100
 	check(a.music_volume==0.5 and a.effects_volume==0.5,"visible Settings sliders update the real audio service")
-	check(hud.pages.find_children("*","CheckButton",true,false).size()==2,"ordinary Settings has only camera-motion and fullscreen toggles")
+	check(hud.pages.find_children("*","CheckButton",true,false).size()==3,"ordinary Settings offers minimap, camera-motion and fullscreen toggles")
 	hud.show_page("Bindings");await frames(2)
 	check(hud.binding_buttons.size()==lab.controls.keys.size(),"simple action list exposes every keyboard binding")
 	var old_jump:int=lab.controls.keys.jump;var old_reel:int=lab.controls.keys.reel
@@ -47,22 +58,18 @@ func run(lab: Node3D) -> void:
 	lab.controls.reset_bindings(false);hud.show_page("Bindings");await frames(2)
 	check(hud.page_scroll.get_v_scroll_bar().max_value>hud.page_scroll.size.y,"long binding list scrolls instead of stretching the menu")
 	check(hud.get_global_rect().encloses(hud.menu.get_global_rect()),"binding menu fits the baseline viewport")
-	# The new red room always applies to everyone, with two usable walking exits.
+	# The bay remains as cover but no longer disables equipment or blocks hands.
 	lab.set_paused(false);p.reset_to(Vector3(112,20.05,-82));await frames(3)
-	check(p.arms_suppressed(),"entering the red room disables arm equipment")
-	p.fire_hand(0);check(p.hands[0].state==0,"suppression prevents glove fire")
-	check(not p.combat.begin(),"suppression prevents punching")
-	p.attach_fixture(Vector3(108,26,-82),Vector3(116,26,-82));p.action_override={"reel":true,"cling":true};await frames(3)
-	check(not p.has_anchor() and not p.reeling and not p.wall_clinging,"field clears existing anchors and prevents reel and wall grip")
-	p.action_override={};p.input_override=Vector2(0,1);await frames(195)
-	check(p.position.z> -71 and not p.arms_suppressed(),"south field can be walked through and equipment returns outside")
-	p.input_override=Vector2.ZERO;p.hand_recovery=0;p.fire_hand(0)
-	check(p.hands[0].state==1,"gloves work again after leaving the field")
-	p.reset_to(Vector3(112,20.05,-82));p.input_override=Vector2(0,-1);await frames(195)
-	check(p.position.z< -93 and not p.arms_suppressed(),"north exit is also freely walkable")
-	p.input_override=Vector2.ZERO;p.reset_to(Vector3(112,20.05,-94));p.camera.look_at(Vector3(112,21.6,-82));p.fire_hand(0)
-	check(not p.hands[0].hit and p.hands[0].point.z< -90,"red doorway blocks incoming glove anchors")
-	p.cancel_hands();p.hand_recovery=0;p.combat.begin();await frames(20)
-	check(not p.combat.active,"red doorway stops incoming punches")
+	check(not p.arms_suppressed(),"former field bay allows all arm equipment")
+	p.fire_hand(0);check(p.hands[0].state==1,"bay permits immediate glove fire")
+	p.cancel_hands();check(p.combat.begin(),"bay permits punching")
+	p.cancel_hands();p.hand_recovery=0
+	p.input_override=Vector2(0,1);await frames(410)
+	check(p.position.z> -71,"south equipment-bay exit remains walkable")
+	p.reset_to(Vector3(112,20.05,-82));p.input_override=Vector2(0,-1);await frames(410)
+	check(p.position.z< -93,"north equipment-bay exit remains walkable")
+	p.input_override=Vector2.ZERO
+	var barrier:=PhysicsRayQueryParameters3D.create(Vector3(112,22,-94),Vector3(112,22,-82),8)
+	check(p.get_world_3d().direct_space_state.intersect_ray(barrier).is_empty(),"former hologram doorway has no invisible projectile barrier")
 	print("SETTINGS AND ROOM RESULT: ",checks-failures,"/",checks)
 	get_tree().quit(1 if failures else 0)

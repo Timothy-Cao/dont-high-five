@@ -6,6 +6,8 @@ The strongest pitch is: **Your hands are how you travel, help your friends, and 
 
 Imagine this moment: you are hanging under a balcony with a charged glove. A friend arrives above you and offers a palm. You can take the quick handoff, climb the slow ramp, or ask them to come down where someone can watch. Later the receiver fails. Was the charge already bad, did your friend switch it, or did the station get sabotaged? Those are actions players can investigate, not arbitrary lies from the game.
 
+**Latest user direction (2026-09-21): Fivers vs Watcher.** Nimble robots complete physical tasks while a powerful opponent controls fixed towers, with occasional blackout/infiltration. This supersedes Blackout Relay as the current working direction; older pages remain research alternatives. Read the [full new brief](FIVER-WATCHER-BRIEF.md), [implementation backlog](IMPLEMENTATION-BACKLOG.md), and [movement decisions and sources](MOVEMENT-MODES.md). The local pilot now includes role switching, tasks, cargo and simulated high-fives. Networking and human reciprocal high-fives remain unimplemented. See [current implementation evidence](../LOCAL-PILOT.md).
+
 ## Start here
 
 1. [Three directions and a recommended round](ROUND-DESIGN.md) — objectives, good-player agency, antagonist tools, and why movement belongs in the loop.
@@ -13,7 +15,9 @@ Imagine this moment: you are hanging under a balcony with a charged glove. A fri
 3. [Rooms and toys](ROOMS-AND-TOOLS.md) — twelve spaces with reasons to visit, risks and escape routes.
 4. [Research and source ledger](SOURCES.md) — thirteen game references, primary evidence, player criticism and confidence limits.
 5. [Playtest kit and failure tests](PLAYTESTS.md) — a short moderated experiment before building a whole online game.
-6. [Overnight research queue](OVERNIGHT.md) — questions to deepen without turning every idea into a feature.
+6. [Pass 1: incentives and input conflicts](PASS-01-HIGH-FIVE.md) — new evidence, counterexamples and revisions to the first handoff experiment.
+7. [Pass 2: movement-integrated objectives](PASS-02-OBJECTIVES.md) — six physical jobs, two recommended experiments and failure criteria.
+8. [Overnight research queue](OVERNIGHT.md) — questions to deepen without turning every idea into a feature.
 
 ## Direction contract
 
@@ -25,7 +29,7 @@ Imagine this moment: you are hanging under a balcony with a charged glove. A fri
 | Pleasure | Controllable movement, a well-timed assist, a narrow escape, a convincing bluff |
 | Tension | The person who makes your trip easier may be creating your next problem |
 | Payoff | Deliver a real object, save a teammate, catch a sabotage, improvise an escape |
-| Initial audience | Six friends, keyboard/mouse, one hidden saboteur; test 8–10 minute rounds |
+| Initial audience | Friends on keyboard/mouse: mobile Fivers versus one tower-bound Watcher; player count and round length unresolved |
 | Tone | Playful suspicion with flashes of danger; avoid horror that punishes exploration |
 | Non-goals | Public matchmaking, dozens of roles, perfect disguise simulation, a huge weapon catalogue |
 
@@ -35,18 +39,13 @@ Player count and round duration are starting hypotheses. The present map is a mo
 
 ## What exists today
 
-| Implemented in the local game | Proposed only |
-| --- | --- |
-| Elastic gloves, grapples, slingshots, air control, wall grip, ground-punch hop | Consensual player-to-player high-fives |
-| Two large floors, haze, corridors, hiding nooks, ramps, portals, launch pads | Networked players, roles, voice and round rules |
-| Timed reach/pull/speed/vision/Overdrive stations | Physical objective cargo and corrupted charge |
-| Damageable test targets and F5 courier camera | Player damage, downing, rescue and weapons |
-| Red suppression room: all arm abilities disabled inside; two walkable exits | Killer bypass, fuses, jammer ownership and evidence |
-| Minimal settings and persistent keyboard bindings | Other special rooms in this notebook |
+The [published v0.2.0](../RELEASE-0.2.md) is the stable movement snapshot with afterimages and automatic fixed arms. The newer [local pilot](../LOCAL-PILOT.md) additionally includes cargo, seven task points, simulated healing high-fives, local Fiver/Watcher switching, seven eyes and weapons, optional auto-fire, health/respawn, and nine Training rooms. Its 12 suites / 524 assertions are implementation checks, not evidence of multiplayer enjoyment; this research run did not rerun them.
 
-The two couriers posed in the GitHub hero screenshot are visual staging. They do not imply working multiplayer or a working high-five. The red room is a universal field; there is no secret-role exception in the current build.
+Networking, human reciprocal input, voice, full round rules, and the new objective consequences in pass 2 remain proposals. Arm/leg suppression zones were removed. The high-five test partners are local simulations; screenshot staging and bots do not imply working multiplayer. The [backlog](IMPLEMENTATION-BACKLOG.md) is the detailed implemented-versus-proposed reference.
 
-## My recommendation
+## Earlier recommendation — archived alternative
+
+This predates the user’s Fiver/Watcher choice. The current objective recommendation is [one-hand delivery and elevated route repair](PASS-02-OBJECTIVES.md), to discuss and test before expanding match rules. The following remains an alternative, not the active implementation plan.
 
 Begin with **Blackout Relay**: recover and hand off physical charge, complete three circuits, then escape. Keep the first antagonist kit to one tamper action and one conspicuous emergency overclock. Try a pure cooperative version first: if the handoff is not fun when everyone is friendly, hidden roles will not fix it.
 
@@ -67,3 +66,7 @@ The earlier workspace concept *Hidden-Reality Social Horror* supplied two valuab
 ## Workflow review
 
 The existing conversation already settled camera, tone, movement, engine and first-pass art priorities, so another direction interview would add little. The design skills were useful for separating evidence from hypotheses, keeping the menu small, and treating control loss as a visible state. The danger was scope inflation: a thirteen-game comparison is useful only if it removes features as well as suggesting them. No multiplayer fun or commercial readiness has been validated. Next proof: a two-person handoff and a six-person moderated round, not a longer feature list.
+
+Current implementation: [local Fiver / Watcher review](../LOCAL-PILOT.md), [point-by-point disposition](IMPLEMENTATION-BACKLOG.md), [editable map workflow](../MAP-EDITING.md). Published tester snapshot: [movement release 0.2](../RELEASE-0.2.md).
+
+- [Pre-map refinement roadmap](PRE-MAP-ROADMAP.md): current shipped refinements, ten ROI-ranked next steps, creative experiments and primary sources (2026-09-22).

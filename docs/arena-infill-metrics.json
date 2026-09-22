@@ -1,0 +1,15 @@
+{
+  "added_shapes": 496,
+  "after": {
+    "cover_within_10m": 0.615691489361702,
+    "mean_nearest_wall_m": 9.22662378459218,
+    "samples": 1504
+  },
+  "before": {
+    "cover_within_10m": 0.514627659574468,
+    "mean_nearest_wall_m": 10.9046646020514,
+    "samples": 1504
+  },
+  "checks": 48,
+  "failures": 0
+}

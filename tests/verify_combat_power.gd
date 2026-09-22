@@ -15,14 +15,14 @@ func run(lab:Node3D) -> void:
 	lab.started=true;lab.set_paused(false);p.testing_input=true
 	powers.testing=true
 	await frames(5)
-	check(not p.has_method("begin_zip"),"quick zip is removed from the controller")
-	check(a.sparks.is_empty(),"old decorative collectible trails are removed")
+	check(not p.zip_mode,"default attack mode is punch, with optional zip selected explicitly")
+	check(not a.has_method("trail"),"old decorative collectible trails are removed")
 	check(lab.visibility_fill<0.2 and lab.environment.fog_density>0.015,"arena starts darker with stronger distance haze")
 	check(exp(-lab.environment.fog_density*150)<0.1 and exp(-lab.environment.fog_density*25)>0.5,"haze strongly obscures half-map distance while preserving close range")
 	p.reset_to(Vector3(-114,0.05,17));p.camera.position.y=1.58;p.camera.rotation=Vector3.ZERO
 	await frames(8)
 	var before:Vector3=p.position
-	check(c.begin(),"punch fires into open space without requiring a grapple target")
+	check(c.begin(1.0),"punch fires into open space without requiring a grapple target")
 	var start_left:Vector3=p.hands[0].point;var start_right:Vector3=p.hands[1].point
 	await frames(8)
 	var left:Vector3=p.hands[0].point-start_left;var right:Vector3=p.hands[1].point-start_right
@@ -36,41 +36,42 @@ func run(lab:Node3D) -> void:
 	p.reset_to(Vector3(-114,0.05,17));p.camera.position.y=1.58
 	await frames(8);p.camera.look_at(p.position+Vector3(0,0,-1))
 	p.velocity=Vector3(6,0,3)
-	c.begin()
+	c.begin(1.0)
 	var initial_y:float=p.position.y;var apex:=initial_y;var peak_v:=0.0
 	for tick in 150:
 		await frames(1);apex=maxf(apex,p.position.y);peak_v=maxf(peak_v,p.velocity.y)
-	check(c.hopped and peak_v>9.5 and peak_v<10.6,"two floor contacts apply exactly one bounded ground-hop impulse")
-	check(apex-initial_y>2.0 and apex-initial_y<2.5,"ground punch produces a useful roughly 2.3 m hop")
-	check(Vector2(p.velocity.x,p.velocity.z).length()<0.01,"ground punch cancels horizontal momentum for a straight-up hop")
-	# Attack real dummy geometry, then verify shielding and respawn.
+	print("GROUND BLAST METRICS hopped=",c.hopped," peak=",peak_v," apex=",apex-initial_y," impulse=",c.recoil_applied," velocity=",p.velocity," pos=",p.position)
+	check(c.hopped and peak_v>22 and peak_v<24.5,"two floor contacts apply exactly one bounded ground-hop impulse")
+	check(apex-initial_y>=10 and apex-initial_y<12.5,"ground punch produces at least ten meters of charged lift")
+	check(Vector2(p.velocity.x,p.velocity.z).length()>5.5,"ground punch preserves incoming horizontal momentum")
+	# Attack real moving dummy geometry; paired fists award one additive impulse.
 	var dummy=a.dummies[0]
+	dummy.reset_target()
 	p.reset_to(dummy.position+Vector3(0,0.05,7));p.camera.position.y=1.58
 	await frames(8);p.camera.look_at(dummy.position+Vector3.UP*1.85)
-	c.begin();await frames(65)
-	print("DUMMY HEALTH ",dummy.health," damage=",dummy.damage_received)
-	check(absf(dummy.health-40)<0.01,"each of the two fists deals one 30-damage hit")
+	var target_start:Vector3=dummy.position
+	c.begin(1.0);await frames(65)
+	check(dummy.hits_received==1 and dummy.knocked_out,"paired fists deliver one nonlethal recipient hit")
+	check(dummy.position.distance_to(target_start)>3,"actual target body travels away from a charged punch")
 	await frames(40)
-	check(absf(dummy.health-40)<0.01,"remaining projectile and recovery frames cannot repeat damage")
-	c.begin();await frames(60)
-	check(dummy.health==0 and dummy.respawn>0 and dummy.collision_layer==0,"destroyed dummy deflates and stops blocking movement")
+	check(dummy.hits_received==1,"projectile recovery cannot repeat a target impulse")
 	dummy.respawn=0.02;await frames(6)
-	check(dummy.health==100 and dummy.collision_layer==1,"dummy recharges with full health and collision")
+	check(not dummy.knocked_out and dummy.position.distance_to(dummy.home)<0.1,"dummy recovers at its home without health or death")
 	p.hand_recovery=0
 	var wall=lab.box(dummy.position+Vector3(0,1.6,3),Vector3(4,4,0.3),lab.INK)
-	await frames(2);c.begin();await frames(65)
-	check(dummy.health==100,"solid cover stops fist damage before the dummy")
+	await frames(2);c.begin(1.0);await frames(65)
+	check(dummy.hits_received==1,"solid cover stops fist knockback before the dummy")
 	wall.queue_free();await frames(2)
 	p.reset_to(dummy.position+Vector3(0,0.05,7));p.camera.position.y=1.58
 	p.camera.look_at(dummy.position+Vector3.UP*1.85);p.grant_buff("overdrive",20)
-	c.begin();await frames(90)
-	check(dummy.health==0,"Overdrive makes one two-fist attack strong enough to topple a full-health dummy")
+	c.begin(1.0);await frames(90)
+	check(dummy.hits_received==2 and dummy.last_impulse.length()>30,"Overdrive increases knockback, never introduces damage")
 	# Stat bonuses are temporary, bounded, and never multiply with repeated pickups.
 	p.reset_to(Vector3(-114,0.05,17));p.rotation.y=0
 	p.grant_buff("speed",8);p.grant_buff("speed",8)
 	check(is_equal_approx(p.speed_multiplier(),1.3),"repeated speed pickups refresh duration without multiplying speed")
-	p.input_override=Vector2(0,-1);await frames(30)
-	check(absf(p.velocity.z+9.1)<0.1,"speed pickup changes actual walking speed from 7 to 9.1 m/s")
+	p.input_override=Vector2(0,-1);await frames(60)
+	check(absf(p.velocity.z+4.55)<0.1,"speed pickup changes actual walking speed from 3.5 to 4.55 m/s")
 	p.input_override=Vector2.ZERO;p.grant_buff("overdrive",20)
 	check(p.hand_range()>38 and p.pull_multiplier()>1.6 and p.speed_multiplier()>1.4 and p.vision_multiplier()>1.7,"central Overdrive raises all four stats above corner bonuses")
 	p.grant_buff("speed",8)
@@ -80,9 +81,9 @@ func run(lab:Node3D) -> void:
 	p.tick_buffs(30)
 	check(p.buffs.is_empty() and p.speed_multiplier()==1 and p.hand_range()==25.5,"expired boosts restore base stats")
 	p.grant_buff("vision",18);await frames(3)
-	check(lab.environment.fog_density<0.012 and p.hands[0].lamp.omni_range>20,"vision boost reduces haze and extends actual glove illumination")
+	check(is_equal_approx(lab.environment.fog_density,lab.base_fog_density()/p.vision_multiplier()) and p.hands[0].lamp.omni_range>20,"vision boost reduces the chosen haze and extends actual glove illumination")
 	p.reset_to(Vector3(-114,0.05,17));await frames(3)
-	check(is_equal_approx(lab.environment.fog_density,0.018),"reset clears the vision bonus and restores baseline haze")
+	check(is_equal_approx(lab.environment.fog_density,lab.base_fog_density()),"reset clears the vision bonus and restores the chosen baseline haze")
 	# Longer arm buff affects actual hits, while expiry preserves existing anchors.
 	var reach_wall=lab.box(Vector3(-114,8,-16),Vector3(8,16,0.5),lab.INK)
 	p.camera.position.y=1.58;p.camera.rotation=Vector3.ZERO
@@ -134,7 +135,7 @@ func run(lab:Node3D) -> void:
 	for z in [-85,85]:
 		p.reset_to(Vector3(-136,0.05,z));p.rotation.y=0;p.camera.rotation=Vector3.ZERO
 		p.input_override=Vector2(1,0)
-		for tick in 2400:
+		for tick in 4800:
 			await frames(1)
 			if p.position.x> -12: break
 		print("RAMP END ",z," ",p.position)

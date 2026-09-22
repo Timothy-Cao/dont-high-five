@@ -1,0 +1,18 @@
+{
+  "checks": 124,
+  "coverage": {
+    "floor_samples": 368,
+    "per_eye_counts": [
+      55,
+      43,
+      31,
+      34,
+      34,
+      31,
+      35
+    ],
+    "union_fraction": 0.614130434782609,
+    "visible_any": 226
+  },
+  "failures": 0
+}

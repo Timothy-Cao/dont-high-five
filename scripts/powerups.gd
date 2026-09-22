@@ -1,5 +1,7 @@
 extends Node3D
-const COLORS={"reach":Color("65e3ce"),"pull":Color("efb75b"),"speed":Color("ef83c4"),"vision":Color("98a6ff"),"overdrive":Color("ffce79")}
+const P=preload("res://scripts/gameplay/props.gd")
+const ROTATION=["reach","charge","pull","invisible","speed","toughness","vision","max_charge","insulation"]
+const COLORS={"charge":Color("ff9966"),"invisible":Color("bdadf5"),"toughness":Color("70bdf0"),"max_charge":Color("ffd16a"),"insulation":Color("a1edb5"),"reach":Color("65e3ce"),"pull":Color("efb75b"),"speed":Color("ef83c4"),"vision":Color("98a6ff"),"overdrive":Color("ffce79")}
 var lab:Node3D
 var stations:Array[Dictionary]=[]
 var motes:Array[Dictionary]=[]
@@ -11,13 +13,25 @@ var pickups:=0
 var testing:=false
 func _ready() -> void:
 	rng.randomize()
-	add_station(Vector3(0,20,0),"overdrive",22,65)
+	add_station(Vector3(0,20,0),"overdrive",22,30)
 	var kinds:=["reach","pull","speed","vision"]
 	var positions:=[Vector3(-136,0,-101),Vector3(136,0,-101),Vector3(136,0,101),Vector3(-136,0,101)]
-	for i in 4: add_station(positions[i],kinds[i],4+i*6,30+i*2)
+	for i in 4: add_station(positions[i],kinds[i],4+i*6,30)
 	call_deferred("prepare_candidates")
 func icon(kind: String,pos: Vector3,scale_size:=1.0) -> Node3D:
-	var node:Node3D=load("res://assets/power_"+kind+".glb").instantiate()
+	var node:Node3D
+	if ResourceLoader.exists("res://assets/power_"+kind+".glb"):
+		node=load("res://assets/power_"+kind+".glb").instantiate()
+	else:
+		node=Node3D.new()
+		var color:Color=COLORS[kind]
+		var shell=P.orb(node,Vector3.ZERO,0.23,color,0.8)
+		if kind=="toughness":shell.scale=Vector3(1,1.6,0.4)
+		elif kind=="charge":shell.scale=Vector3(0.5,1.7,0.5)
+		elif kind=="max_charge":shell.scale=Vector3(1.2,1.2,1.2)
+		P.ring(node,Vector3.ZERO,0.42,color,true)
+		if kind in ["insulation","max_charge"]:P.ring(node,Vector3.ZERO,0.52,color)
+		if kind=="invisible":shell.hide()
 	add_child(node);node.position=pos;node.scale=Vector3.ONE*scale_size
 	return node
 func add_station(pos: Vector3,kind: String,first: float,period: float) -> void:
@@ -30,7 +44,7 @@ func add_station(pos: Vector3,kind: String,first: float,period: float) -> void:
 	ring.mesh=torus;ring.material_override=lab.mat(COLORS[kind],0.65);add_child(ring);ring.position=pos+Vector3.UP*0.055
 	var light:=OmniLight3D.new();add_child(light);light.position=pos+Vector3.UP*2.0
 	light.light_color=COLORS[kind];light.light_energy=0.4;light.omni_range=6;light.light_cull_mask=1
-	stations.append({"pos":pos,"kind":kind,"timer":first,"period":period,"available":false,"token":token,"light":light,"ring":ring})
+	stations.append({"cycle":maxi(0,ROTATION.find(kind)),"base":base,"pos":pos,"kind":kind,"timer":first,"period":period,"available":false,"token":token,"light":light,"ring":ring})
 func prepare_candidates() -> void:
 	# Candidate locations are validated against both full-body clearance and a real floor.
 	var body:=CapsuleShape3D.new();body.radius=0.45;body.height=1.8
@@ -43,6 +57,7 @@ func prepare_candidates() -> void:
 				var hit:=get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(pos,pos-Vector3.UP*1.5,1))
 				if hit.is_empty() or hit.normal.y<0.9 or absf(hit.position.y-y)>0.15: continue
 				candidates.append(Vector3(x,y+1.15,z))
+	call_deferred("expose_stations")
 func spawn_mote() -> bool:
 	if motes.size()>=8 or candidates.is_empty(): return false
 	for attempt in 30:
@@ -62,7 +77,7 @@ func collect(from: Vector3,to: Vector3) -> void:
 		var nearest:=Geometry3D.get_closest_point_to_segment(center,from,to)
 		if nearest.distance_to(center)>1.6 or not lab.player.ray(nearest,center).is_empty(): continue
 		lab.player.grant_buff(station.kind,20 if station.kind=="overdrive" else 18)
-		station.available=false;station.timer=station.period;station.token.hide();pickups+=1
+		station.rotate=station.kind!="overdrive";station.available=false;station.timer=station.period;station.token.hide();pickups+=1
 		lab.sound("success",0.8 if station.kind=="overdrive" else 1.0)
 	for i in range(motes.size()-1,-1,-1):
 		var mote:Dictionary=motes[i]
@@ -74,7 +89,13 @@ func tick(dt: float) -> void:
 	for station in stations:
 		if not station.available:
 			station.timer=maxf(0,station.timer-dt)
-			if station.timer==0: station.available=true;station.token.show()
+			if station.timer==0:
+				if station.get("rotate",false):
+					station.cycle=(station.cycle+1)%ROTATION.size();station.kind=ROTATION[station.cycle]
+					station.token.queue_free();station.token=icon(station.kind,station.pos+Vector3.UP*1.65)
+					station.ring.material_override=lab.mat(COLORS[station.kind],0.65);station.light.light_color=COLORS[station.kind]
+					station.rotate=false
+				station.available=true;station.token.show()
 		station.token.position=station.pos+Vector3.UP*(1.65+sin(elapsed*2)*0.12)
 		station.token.rotation.y=elapsed*0.8
 		station.light.light_energy=1.8 if station.available else 0.35
@@ -88,3 +109,20 @@ func tick(dt: float) -> void:
 func _physics_process(dt: float) -> void:
 	if lab.paused or testing: return
 	tick(dt)
+
+func expose_stations() -> void:
+	if not lab.session:return
+	for station in stations:
+		if station.kind=="overdrive":continue
+		var best:Vector3=station.pos;var score:=INF
+		for candidate in candidates:
+			var base:Vector3=candidate-Vector3.UP*1.15
+			if signf(base.x)!=signf(station.pos.x) or signf(base.z)!=signf(station.pos.z):continue
+			var distance:float=base.distance_to(station.pos)
+			if distance>=score or distance>85:continue
+			var exposed:=false
+			for tower in lab.session.watcher.towers:
+				if tower.pos.distance_to(base)<130 and lab.player.ray(tower.pos,base+Vector3.UP*1.65).is_empty():exposed=true;break
+			if exposed:best=base;score=distance
+		var offset:Vector3=best-station.pos
+		station.pos=best;station.base.position+=offset;station.token.position+=offset;station.ring.position+=offset;station.light.position+=offset

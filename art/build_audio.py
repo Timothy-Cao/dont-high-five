@@ -83,6 +83,9 @@ for kind in ['wind','creak','reel','room']:
 (OUT/'manifest.json').write_text(json.dumps(manifest,indent=2))
 print('Built',len(manifest),'48 kHz effects; no sample clipping.')
 
+import runpy
+runpy.run_path(str(ROOT/'art/build_blast_audio.py'),run_name='__main__')
+runpy.run_path(str(ROOT/'art/build_watcher_audio.py'),run_name='__main__')
 if "--effects-only" in sys.argv: sys.exit(0)
 
 # Measure original music without re-encoding it; apply level matching at playback.

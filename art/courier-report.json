@@ -1,0 +1,17 @@
+{
+  "bones": 9,
+  "vertices": 19344,
+  "triangles": 38300,
+  "clips": [
+    "Idle",
+    "Walk",
+    "Air",
+    "Charge",
+    "Punch",
+    "Land",
+    "Brake",
+    "Hang"
+  ],
+  "height_m": 1.784,
+  "representation": "Original nine-bone unicycle; independently driven wheel and brakes; no root motion"
+}

@@ -20,6 +20,7 @@ var rng:=RandomNumberGenerator.new()
 var music_bus: int
 var effects_bus: int
 var ambience_bus: int
+var spatial:Node3D
 
 func bus(title: String) -> int:
 	var index:=AudioServer.get_bus_index(title)
@@ -37,7 +38,7 @@ func _ready() -> void:
 	playlist=JSON.parse_string(FileAccess.get_file_as_string("res://assets/audio/music/playlist.json"))
 	for i in 2:
 		var deck:=AudioStreamPlayer.new();deck.bus="Music";add_child(deck);decks.append(deck)
-	for kind in ["fire","stick","cancel","launch","jump","bounce","land","brake","portal","pad","success","ui","step"]:
+	for kind in ["fire","stick","cancel","launch","jump","bounce","land","brake","portal","pad","success","ui","step","blast","watcher_mg","watcher_sniper","watcher_blast"]:
 		samples[kind]=[];voices[kind]=[];last_variant[kind]=-1
 		for i in (5 if kind=="step" else 4):
 			samples[kind].append(load("res://assets/audio/sfx/%s_%d.wav"%[kind,i]))
@@ -50,6 +51,7 @@ func _ready() -> void:
 		var voice:=AudioStreamPlayer.new();voice.bus="Ambience";voice.stream=stream;voice.volume_db=-80
 		add_child(voice);loops[kind]=voice;voice.play()
 	start_track(false)
+	spatial=preload("res://scripts/spatial_audio.gd").new();spatial.lab=lab;add_child(spatial)
 
 func next_track() -> int:
 	if bag.is_empty():
@@ -71,17 +73,24 @@ func start_track(crossfade:=true) -> void:
 func title() -> String:
 	return str(playlist[current_track].title) if current_track>=0 else ""
 
-func play(kind: String,pitch:=1.0) -> void:
-	if not lab.audio_enabled or (lab.paused and kind!="ui") or not samples.has(kind): return
+func sample_variant(kind:String) -> AudioStream:
 	var count:int=samples[kind].size()
 	var variant:=rng.randi_range(0,count-2)
 	if int(last_variant[kind])<0: variant=rng.randi_range(0,count-1)
 	elif variant>=int(last_variant[kind]): variant+=1
 	variant=variant%count;last_variant[kind]=variant
+	return samples[kind][variant]
+
+func play_at(kind:String,at:Vector3,pitch:=1.0) -> AudioStreamPlayer3D:
+	if not lab.audio_enabled or lab.paused or not samples.has(kind):return null
+	return spatial.play_at(sample_variant(kind),at,pitch*rng.randf_range(0.96,1.04),-2.0,kind in ["blast","watcher_blast"])
+
+func play(kind: String,pitch:=1.0) -> void:
+	if not lab.audio_enabled or (lab.paused and kind!="ui") or not samples.has(kind): return
 	var voice:AudioStreamPlayer=voices[kind][0]
 	for candidate in voices[kind]:
 		if not candidate.playing: voice=candidate;break
-	voice.stop();voice.stream=samples[kind][variant]
+	voice.stop();voice.stream=sample_variant(kind)
 	voice.pitch_scale=clampf(pitch*rng.randf_range(0.96,1.04),0.5,1.8)
 	voice.volume_db=-5 if kind in ["step","success"] else -2
 	voice.play()
@@ -106,8 +115,9 @@ func update_mix(dt: float) -> void:
 	var p=lab.player
 	var speed:float=p.velocity.length()
 	loops.wind.volume_db=lerpf(-70,-14,smoothstep(7,38,speed))
-	loops.creak.volume_db=-80 if p.power<0.04 else lerpf(-29,-16,clampf(p.power,0,1))
-	loops.creak.pitch_scale=0.75+clampf(p.power,0,1)*0.65
+	var tension:float=maxf(p.power,0.15+p.combat.charge_fraction()*0.65 if p.combat.charging else 0.0)
+	loops.creak.volume_db=-80 if tension<0.04 else lerpf(-29,-16,clampf(tension,0,1))
+	loops.creak.pitch_scale=0.75+clampf(tension,0,1)*0.65
 	loops.reel.volume_db=move_toward(loops.reel.volume_db,-20 if p.reeling else -80,dt*100)
 	loops.room.volume_db=-29
 

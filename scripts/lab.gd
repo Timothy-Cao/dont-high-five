@@ -11,6 +11,8 @@ var scripted_run := false
 var controls: Node
 var environment: Environment
 var visibility_fill := 0.12
+# Approximate base Fiver distance at which exponential haze obscures 90%.
+var fog_distance:=100.0
 var world_hints: Array[Label3D] = []
 var rounded_mesh: Mesh
 var player: CharacterBody3D
@@ -28,6 +30,8 @@ var audio_enabled := true
 var audio_service: Node
 var started := false
 var arena: Node3D
+var session:Node3D
+var builder:Node3D
 var test_world:=false
 var world_limits:=Vector2(156,124)
 
@@ -46,6 +50,10 @@ func _ready() -> void:
 	player = PAWN.new()
 	player.lab = self
 	add_child(player)
+	if not test_world:
+		session=load("res://scripts/gameplay/session.gd").new();session.lab=self;add_child(session);session.build()
+	if not test_world:
+		builder=load("res://scripts/world/map_builder.gd").new();builder.lab=self;add_child(builder)
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	hud = HUD.new()
@@ -54,34 +62,7 @@ func _ready() -> void:
 	build_audio()
 	if not scripted_run: preferences.restore(self)
 	goto_station(0)
-	if "--showcase" in args:
-		var showcase = load("res://tests/capture_showcase.gd").new();add_child(showcase)
-		showcase.call_deferred("run",self)
-	elif "--settings-verify" in args:
-		var test = load("res://tests/verify_settings.gd").new();add_child(test)
-		test.call_deferred("run",self)
-	elif "--combat-capture" in args:
-		call_deferred("capture_combat_power")
-	elif "--combat-power" in args:
-		call_deferred("run_combat_power")
-	elif "--expansion-capture" in args:
-		call_deferred("capture_expansion")
-	elif "--expansion-verify" in args:
-		call_deferred("run_expansion_verification")
-	elif "--arena-verify" in args:
-		call_deferred("run_arena_verification")
-	elif "--arena-capture" in args:
-		call_deferred("capture_arena")
-	elif "--polish" in OS.get_cmdline_user_args():
-		call_deferred("run_polish")
-	elif "--metrics" in OS.get_cmdline_user_args():
-		call_deferred("run_metrics")
-	elif "--verify" in OS.get_cmdline_user_args():
-		call_deferred("run_verification")
-	elif "--capture" in OS.get_cmdline_user_args():
-		started = true
-		call_deferred("capture_views")
-	else:
+	if not load("res://tests/runner.gd").new().start(self,args):
 		set_paused(true)
 
 func save_preferences() -> void:
@@ -181,10 +162,10 @@ func build_world() -> void:
 	if not test_world:
 		e.ambient_light_energy=0.17
 		visibility_fill=0.17
-		e.fog_density=0.018
+		e.fog_density=2.302585/fog_distance
 		e.fog_light_color=Color("0c1323")
 		e.fog_light_energy=0.7
-		arena=load("res://scripts/arena.gd").new()
+		arena=load("res://scripts/world/arena.gd").new()
 		arena.lab=self
 		add_child(arena)
 		arena.build()
@@ -241,13 +222,13 @@ func build_world() -> void:
 	panel(24,7,5,3,5)
 	panel(32,7,5,3,5)
 	postal_sign("03   LETTER BOX",Vector3(28,10.5,5),10)
-	var hole_y := 5.15
+	var hole_y := 5.9
 	box(Vector3(23,5,-9),Vector3(7,10,1),Color("a36f60"),false)
 	box(Vector3(33,5,-9),Vector3(7,10,1),Color("a36f60"),false)
 	box(Vector3(28,2.3,-9),Vector3(3,4.6,1),CREAM)
-	box(Vector3(28,7.85,-9),Vector3(3,4.3,1),CREAM)
+	box(Vector3(28,8.6,-9),Vector3(3,2.8,1),CREAM)
 	# 1.1m opening admits the 0.64m ball but excludes the 1.8m standing body.
-	gate = box(Vector3(28,hole_y,-9),Vector3(3,1.1,0.6),GOLD,false) as StaticBody3D
+	gate = box(Vector3(28,hole_y,-9),Vector3(3,2.6,0.6),GOLD,false) as StaticBody3D
 	gate.set_meta("gate",true)
 	box(Vector3(28,4.58,-8.45),Vector3(3.4,0.12,0.25),INK,false,false)
 	label3("LETTERS & RUBBER EMPLOYEES",Vector3(28,8,-8.45),0.007,INK)
@@ -302,6 +283,9 @@ func decorate_yard() -> void:
 			label3("POST",Vector3(x,2.6,z+3.55),0.012,INK)
 
 func goto_station(i: int) -> void:
+	if builder and builder.active:player.reset_to(builder.ORIGIN+builder.test_start);return
+	if session and session.training.active:
+		session.training.restart();return
 	station = i
 	player.reset_to(spawns[i])
 	player.rotation.y = 0
@@ -325,13 +309,15 @@ func hit_button() -> void:
 
 func set_paused(value: bool) -> void:
 	paused = value
+	if value and session:
+		session.watcher.firing=false;session.watcher.scope=false
 	if not scripted_run: Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if value else Input.MOUSE_MODE_CAPTURED
 	if is_instance_valid(hud):
 		hud.menu.visible = value
-		hud.start_button.text = "Resume" if started else "Play"
+		hud.start_button.text = "Resume" if started else "Arena"
 		if value:
 			player.clear_mouse_chord()
-			if player.combat.active: player.cancel_hands()
+			if player.combat.active or player.combat.charging: player.cancel_hands()
 			hud.show_page("Home")
 
 func _notification(what: int) -> void:
@@ -340,8 +326,8 @@ func _notification(what: int) -> void:
 
 func _process(delta: float) -> void:
 	if not test_world and is_instance_valid(player):
-		environment.fog_density=0.018/player.vision_multiplier()
-		environment.ambient_light_energy=visibility_fill*(1.15 if player.vision_multiplier()>1 else 1.0)
+		environment.fog_density=base_fog_density()*(2.0/9.0 if session and session.watcher.active else (0.5 if session and session.training.active else 1.0))/player.vision_multiplier()
+		environment.ambient_light_energy=visibility_fill*(1.15 if player.vision_multiplier()>1 else 1.0)*(0.0 if session and session.watcher.blackout>0 else 1.0)
 	if controls.changed and world_hints.size()==2:
 		world_hints[0].text="HOLD "+controls.prompt("cling")+"  /  WALL GRIP"
 		world_hints[1].text="HOLD "+controls.prompt("reel")+" OR MMB  /  REEL TO YOUR GLOVES"
@@ -364,170 +350,6 @@ func build_audio() -> void:
 
 func sound(kind: String,pitch:=1.0) -> void:
 	if is_instance_valid(audio_service): audio_service.play(kind,pitch)
-
-func run_verification() -> void:
-	var test = load("res://tests/verify.gd").new()
-	add_child(test)
-	await test.run(self)
-
-func run_arena_verification() -> void:
-	var test=load("res://tests/verify_arena.gd").new()
-	add_child(test)
-	await test.run(self)
-
-func capture_arena() -> void:
-	if "--4k" in OS.get_cmdline_user_args(): get_window().size=Vector2i(3840,2160)
-	started=true
-	set_paused(false)
-	player.testing_input=true
-	player.set_physics_process(false)
-	DirAccess.make_dir_recursive_absolute("res://.local/captures/arena")
-	var views:=[
-		["01-arrival",Vector3(-14,0.05,23),Vector3(0,12,-12)],
-		["02-upper-atrium",Vector3(-10,23.05,-8.3),Vector3(3,12,17)],
-		["03-amber-shaft",Vector3(-48,0.05,19),Vector3(-48,17,-4)],
-		["04-violet-galleries",Vector3(62,4.05,-17),Vector3(45,11,18)],
-		["05-low-tunnels",Vector3(0,0.05,32),Vector3(0,2,62)],
-		["06-maze",Vector3(-65,0.05,-65),Vector3(-42,2,-50)],
-		["07-upper-maze",Vector3(32.75,8.55,32.75),Vector3(32.75,10,43)],
-		["08-north-galleries",Vector3(-17,16.05,-68),Vector3(14,16,-30)]
-	]
-	var performance_report:={}
-	if "--balance-capture" in OS.get_cmdline_user_args():
-		views=[
-			["09-atrium-refuge",Vector3(-11,10.05,-12),Vector3(-16,11.7,-22)],
-			["10-inside-refuge",Vector3(-14,10.05,-23),Vector3(-18,11.4,-18)],
-			["11-amber-refuge",Vector3(-54,14.05,19),Vector3(-64.5,13.5,14)],
-			["12-violet-refuge",Vector3(56,14.25,16),Vector3(64,11.5,18)],
-			["13-hopping-passage",Vector3(-7,0.05,71.4),Vector3(7,1.4,71.4)]
-		]
-	for view in views:
-		player.reset_to(view[1])
-		player.camera.position.y=1.58
-		player.camera.look_at(view[2])
-		await get_tree().create_timer(0.3).timeout
-		if "--benchmark" in OS.get_cmdline_user_args():
-			var intervals:Array[float]=[]
-			var previous:=Time.get_ticks_usec()
-			for frame in 60:
-				await get_tree().process_frame
-				var now:=Time.get_ticks_usec()
-				intervals.append((now-previous)/1000.0)
-				previous=now
-			intervals.sort()
-			performance_report[view[0]]={"median_ms":intervals[30],"p95_ms":intervals[57],"samples":60}
-		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png("res://.local/captures/arena/"+view[0]+".png")
-	print("ARENA CAPTURES: ",views.size(),"; sparks=",arena.sparks.size(),"; collision boxes=",arena.shapes,"; draw batches=",arena.batches.size())
-	if not performance_report.is_empty():
-		var file:=FileAccess.open("res://.local/reports/arena-render-metrics.json",FileAccess.WRITE)
-		file.store_string(JSON.stringify({"resolution":str(get_window().size),"views":performance_report,"scenario":"60 frame stationary samples across "+str(views.size())+" arena viewpoints; other desktop apps may be running"},"  "))
-		print("ARENA RENDER METRICS ",JSON.stringify(performance_report))
-	if "--balance-capture" in OS.get_cmdline_user_args():
-		goto_station(0)
-		player.set_physics_process(true)
-		await get_tree().create_timer(0.15).timeout
-		player.camera.look_at(Vector3(-14,7.8,11))
-		var did_punch:bool=player.combat.begin()
-		for tick in 180:
-			await get_tree().physics_frame
-			if player.hand_recovery>0: break
-		print("RECOVERY CAPTURE started=",did_punch," recovery=",player.hand_recovery)
-		player.camera.rotation.x=0
-		for shot in [["14-gloves-returning",0.12],["15-gloves-winding",0.65],["16-gloves-readying",1.05]]:
-			await get_tree().create_timer(shot[1]).timeout
-			await RenderingServer.frame_post_draw
-			get_viewport().get_texture().get_image().save_png("res://.local/captures/arena/"+shot[0]+".png")
-		set_paused(true)
-		hud.show_page("Controls")
-		await get_tree().process_frame
-		await get_tree().process_frame
-		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png("res://.local/captures/arena/17-controls-balance.png")
-	get_tree().quit()
-
-func run_polish() -> void:
-	var test=load("res://tests/verify_polish.gd").new()
-	add_child(test)
-	test.run(self)
-
-func run_metrics() -> void:
-	var test=load("res://tests/verify_movement.gd").new()
-	add_child(test)
-	await test.run(self)
-
-func capture_views() -> void:
-	if "--4k" in OS.get_cmdline_user_args(): get_window().size = Vector2i(3840,2160)
-	await get_tree().process_frame
-	await get_tree().process_frame
-	set_paused(false)
-	if "--benchmark" in OS.get_cmdline_user_args():
-		await get_tree().create_timer(1).timeout
-		var intervals: Array[float]=[]
-		var previous:=Time.get_ticks_usec()
-		var end:=previous+3000000
-		while Time.get_ticks_usec()<end:
-			await get_tree().process_frame
-			var now:=Time.get_ticks_usec()
-			intervals.append((now-previous)/1000.0)
-			previous=now
-		intervals.sort()
-		var total:=0.0
-		for interval in intervals: total+=interval
-		var report:={"resolution":str(get_window().size),"frames":intervals.size(),"mean_frame_ms":total/intervals.size(),"median_frame_ms":intervals[intervals.size()/2],"p95_frame_ms":intervals[int(intervals.size()*0.95)],"scenario":"standing in first-class bay, glove lights on, other desktop apps running"}
-		print("RENDER BENCHMARK ",JSON.stringify(report))
-		var file:=FileAccess.open("res://.local/reports/render-metrics.json",FileAccess.WRITE)
-		file.store_string(JSON.stringify(report,"  "))
-	await get_tree().create_timer(0.3).timeout
-	DirAccess.make_dir_recursive_absolute("res://.local/captures")
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/01-sandbox.png")
-	player.camera.rotation.x=-0.55
-	await get_tree().create_timer(0.2).timeout
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/08-shadow-check.png")
-	player.camera.rotation.x=0
-	player.attach_fixture(Vector3(-4,7,5),Vector3(4,7,5))
-	player.testing_input = true
-	player.input_override = Vector2(0,1)
-	await get_tree().create_timer(5).timeout
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/02-drawn.png")
-	player.launch()
-	player.input_override = Vector2.ZERO
-	await get_tree().create_timer(0.45).timeout
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/03-flight.png")
-	set_paused(true)
-	await get_tree().process_frame
-	await get_tree().process_frame
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/04-tuning.png")
-	hud.show_page("Physics")
-	await get_tree().process_frame
-	await get_tree().process_frame
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/05-physics.png")
-	for page_name in ["Controls","Bindings","Abilities","Settings"]:
-		hud.show_page(page_name)
-		await get_tree().process_frame
-		await get_tree().process_frame
-		get_viewport().get_texture().get_image().save_png("res://.local/captures/"+page_name.to_lower()+".png")
-	set_paused(false)
-	goto_station(3)
-	player.camera.rotation.x=0.3
-	await get_tree().create_timer(0.2).timeout
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/06-vertical-lab.png")
-	player.camera.look_at(Vector3(0,17,27))
-	player.fire_hand(0)
-	await get_tree().create_timer(0.5).timeout
-	player.action_override={"reel":true}
-	await get_tree().create_timer(0.8).timeout
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/07-grapple.png")
-	player.action_override={}
-	goto_station(3)
-	await get_tree().create_timer(0.1).timeout
-	player.camera.look_at(Vector3(0,17,27))
-	player.combat.begin()
-	await get_tree().create_timer(0.1).timeout
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/09-punch-extension.png")
-	await get_tree().create_timer(0.3).timeout
-	get_viewport().get_texture().get_image().save_png("res://.local/captures/10-punch-recovery.png")
-	get_tree().quit()
 
 func glow_box(pos: Vector3,size: Vector3,color: Color,energy:=1.0) -> Node3D:
 	var item:=box(pos,size,color,false,false)
@@ -562,22 +384,6 @@ func set_visibility(value: float) -> void:
 	visibility_fill=value
 	environment.ambient_light_energy=value
 
-func run_expansion_verification() -> void:
-	var test=load("res://tests/verify_expansion.gd").new()
-	add_child(test)
-	await test.run(self)
-
-func capture_expansion() -> void:
-	var capture=load("res://tests/capture_expansion.gd").new()
-	add_child(capture)
-	await capture.run(self)
-
-func run_combat_power() -> void:
-	var test=load("res://tests/verify_combat_power.gd").new()
-	add_child(test)
-	await test.run(self)
-
-func capture_combat_power() -> void:
-	var capture=load("res://tests/capture_combat_power.gd").new()
-	add_child(capture)
-	await capture.run(self)
+func base_fog_density() -> float:return 2.302585/fog_distance
+func set_fog_distance(value:float) -> void:
+	fog_distance=clampf(value,50,250) if is_finite(value) else 100.0

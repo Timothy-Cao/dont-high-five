@@ -1,43 +1,61 @@
 extends Node3D
-## Visual-only rigid-part prototype. Movement remains owned by the player controller.
+## Original skeletal courier. In-place clips; the controller alone owns motion.
 var body: Node3D
-var ball_shell: MeshInstance3D
-var feet: Array[Node3D]=[]
-var foot_rest: Array[Vector3]=[]
-var gait:=0.0
+var wheel_angle:=0.0
+var lean:=Vector2.ZERO
+var suspension:=0.0
+var skeleton: Skeleton3D
+var animator: AnimationPlayer
+var clips: Dictionary={}
+var current_clip:=""
+var was_grounded:=true
+var land_time:=0.0
 
 func _ready() -> void:
 	body=load("res://assets/courier.glb").instantiate();add_child(body)
+	preload("res://scripts/gameplay/props.gd").soften_visor(body)
 	for piece in body.find_children("*","GeometryInstance3D",true,false): piece.layers=4
-	for name in ["left_foot","right_foot","sole_-1","sole_1"]:
-		var foot=body.find_child(name,true,false)
-		if foot: feet.append(foot);foot_rest.append(foot.position)
-	ball_shell=MeshInstance3D.new()
-	var sphere:=SphereMesh.new();sphere.radius=0.32;sphere.height=0.64;sphere.radial_segments=40;sphere.rings=20
-	ball_shell.mesh=sphere
-	var mat:=StandardMaterial3D.new();mat.albedo_color=Color("7ca99c");mat.roughness=0.55
-	ball_shell.material_override=mat;ball_shell.position.y=0.32;ball_shell.layers=4
-	add_child(ball_shell)
-	for axis in [Vector3.RIGHT,Vector3.FORWARD]:
-		var band:=MeshInstance3D.new();var ring:=TorusMesh.new();ring.inner_radius=0.305;ring.outer_radius=0.328;ring.rings=40;ring.ring_segments=6
-		band.mesh=ring;band.rotation=axis*PI/2;band.layers=4
-		var rubber:=StandardMaterial3D.new();rubber.albedo_color=Color("172d36")
-		band.material_override=rubber;ball_shell.add_child(band)
+	skeleton=body.find_children("*","Skeleton3D",true,false)[0]
+	animator=body.find_children("*","AnimationPlayer",true,false)[0]
+	# Manual advancement freezes with the game and permits deterministic pose reviews.
+	animator.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	for key in animator.get_animation_list():
+		var short:=String(key).get_slice("/",String(key).get_slice_count("/")-1)
+		clips[short]=key
+		if short in ["Idle","Walk","Air"]: animator.get_animation(key).loop_mode=Animation.LOOP_LINEAR
 
-func pose(p: CharacterBody3D,dt: float) -> void:
-	body.visible=not p.ball;ball_shell.visible=p.ball
-	var speed:=Vector2(p.velocity.x,p.velocity.z).length()
-	if p.ball:
-		var local_velocity:Vector3=p.global_basis.inverse()*p.velocity
-		var axis:=Vector3.UP.cross(Vector3(local_velocity.x,0,local_velocity.z))
-		if axis.length()>0.01: ball_shell.rotate(axis.normalized(),speed*dt/0.32)
-		return
-	gait+=speed*dt*4.2
-	var walking:=p.is_on_floor() and speed>0.25
-	body.scale.y=lerpf(body.scale.y,0.60 if p.crouched else 1.0,1-exp(-dt*18))
-	body.position.y=absf(sin(gait))*0.025 if walking else 0
-	for i in feet.size():
-		var phase:float=gait+(PI if i%2 else 0)
-		var offset:=Vector3(0,maxf(0,sin(phase))*0.065,cos(phase)*0.10) if walking else Vector3.ZERO
-		feet[i].position=foot_rest[i]+offset
+func pose(p:CharacterBody3D,dt:float) -> void:
+	body.show()
+	var local:Vector3=p.global_basis.inverse()*p.velocity
+	var speed:=Vector2(local.x,local.z).length()
+	var grounded:=p.is_on_floor()
+	if grounded and not was_grounded:land_time=0.32
+	was_grounded=grounded;land_time=maxf(0,land_time-dt)
+	var attached:bool=p.has_anchor()
+	var clip:="Walk" if grounded and speed>0.25 else "Idle"
+	if not grounded:clip="Hang" if attached else "Air"
+	if land_time>0:clip="Land"
+	if p.crouched or p.stone:clip="Brake"
+	if p.combat.pose_fists:clip="Punch"
+	if p.combat.charging:clip="Charge"
+	if current_clip!=clip:animator.play(clips[clip],0.13);current_clip=clip
+	if clip=="Charge":animator.seek(p.combat.charge_fraction()*animator.get_animation(clips[clip]).length,true)
+	elif clip=="Brake":animator.seek(minf(0.6,animator.current_animation_position+dt),true)
+	else:animator.advance(dt)
+	wheel_angle=fposmod(wheel_angle+local.z*dt/0.43,TAU)
+	skeleton.set_bone_pose_rotation(skeleton.find_bone("wheel"),Quaternion(Vector3.RIGHT,wheel_angle))
+	var desired:=Vector2(clampf(local.z*0.006,-0.16,0.16),clampf(-local.x*0.008,-0.20,0.20))
+	if attached and not grounded:desired.x=-0.12
+	if p.has_cargo():desired.y+=0.08 if p.cargo_hand==0 else -0.08
+	lean=lean.lerp(desired,1-exp(-dt*8))
+	var spine:=skeleton.find_bone("spine")
+	skeleton.set_bone_pose_rotation(spine,skeleton.get_bone_pose_rotation(spine)*Quaternion.from_euler(Vector3(lean.x,0,lean.y)))
+	# Compress the chassis, never scale the entire robot or its tire.
+	suspension=lerpf(suspension,-0.10 if p.crouched and clip!="Brake" else 0.0,1-exp(-dt*16))
+	var hips:=skeleton.find_bone("hips")
+	skeleton.set_bone_pose_position(hips,skeleton.get_bone_pose_position(hips)+Vector3(0,suspension,0))
+	body.scale=Vector3.ONE
 
+func shoulder_position(i: int) -> Vector3:
+	var bone:=skeleton.find_bone("shoulder_L" if i==0 else "shoulder_R")
+	return skeleton.to_global(skeleton.get_bone_global_pose(bone).origin)
