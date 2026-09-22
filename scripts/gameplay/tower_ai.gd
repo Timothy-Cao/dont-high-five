@@ -14,6 +14,7 @@ func update(dt:float) -> void:
 	for i in states.size():
 		var state:Dictionary=states[i];var tower:Dictionary=watcher.towers[i]
 		if is_instance_valid(state.beam):state.beam.hide()
+		if watcher.single_tower and i!=watcher.selected:state.ready=false;state.history.clear();continue
 		if watcher.demo_patrol and not watcher.auto_fire and tower.blind<=0 and not (watcher.active and i==watcher.selected):
 			demo_step(i,state,tower,dt)
 		if tower.blind>0 or not watcher.auto_fire or (watcher.active and i==watcher.selected):

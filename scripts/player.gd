@@ -281,7 +281,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		lab.hud.minimap.enabled=not lab.hud.minimap.enabled;lab.save_preferences();return
 	if lab.session and event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_F7:
 		lab.session.watcher.cut_power();return
-	if lab.session and not (lab.builder and lab.builder.active) and lab.session.handle_input(event): return
+	if lab.session and not (lab.builder and lab.builder.active and not lab.builder.testing) and lab.session.handle_input(event): return
 	if respawn_left>0: return
 	if event is InputEventMouseMotion and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
 		apply_mouse_motion(event)
@@ -771,7 +771,8 @@ func _physics_process(dt: float) -> void:
 	if lab.session and lab.session.training.active:
 		if position.y<lab.session.training.origin().y-8: lab.session.training.restart()
 	elif position.y < -12 or absf(position.x)>lab.world_limits.x or absf(position.z)>lab.world_limits.y: retry()
-	if lab.arena and not (lab.session and lab.session.training.active): lab.arena.travel.update_player(self,movement_start,dt)
+	if lab.builder and lab.builder.testing:lab.session.objectives.travel.update_player(self,movement_start,dt)
+	elif lab.arena and not (lab.session and lab.session.training.active):lab.arena.travel.update_player(self,movement_start,dt)
 
 	update_hands(dt)
 	power=clampf(shot_velocity(position).length()/max_speed,0,1)

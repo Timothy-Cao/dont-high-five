@@ -7,6 +7,12 @@ var active:=false
 var selected:=0
 var auto_fire:=false
 var demo_patrol:=true
+var pressure:="Patrol"
+var single_tower:=false
+func set_pressure(value:String) -> void:
+	if value not in ["Peaceful","One tower","Patrol","Chaos"]:return
+	pressure=value;single_tower=value=="One tower";auto_fire=value in ["One tower","Chaos"];demo_patrol=value=="Patrol"
+	if lab.builder and lab.builder.testing and lab.session.watcher==self:lab.builder.pressure=value
 var reveal:Node3D
 var reveal_left:=0.0
 var scope:=false
@@ -64,7 +70,7 @@ func build() -> void:
 	reveal=load("res://scripts/gameplay/watcher_reveal.gd").new();reveal.watcher=self;add_child(reveal)
 	darkness=load("res://scripts/gameplay/blackout.gd").new();darkness.lab=lab;darkness.process_priority=100;add_child(darkness)
 func enter() -> void:
-	if active:return
+	if active or towers.is_empty():return
 	saved_position=lab.player.position;saved_rotation=lab.player.rotation;saved_health=lab.player.health
 	lab.player.cancel_hands(true);lab.player.clear_mouse_chord();lab.player.velocity=Vector3.ZERO;lab.player.collision_layer=0;lab.player.impostor=false
 	active=true;firing=false;scope=false;camera.current=true;select(selected)
@@ -74,6 +80,7 @@ func leave() -> void:
 	lab.player.reset_to(saved_position);lab.player.rotation=saved_rotation;lab.player.health=saved_health;lab.player.collision_layer=2
 	lab.player.camera.current=not lab.player.third_person;lab.player.follow_camera.current=lab.player.third_person
 func select(index:int) -> void:
+	if towers.is_empty():return
 	selected=posmod(index,towers.size());camera.position=towers[selected].pos;yaw=atan2(camera.position.x,camera.position.z);pitch=-0.4
 	camera.rotation=Vector3(pitch,yaw,0)
 func infiltrate() -> void:

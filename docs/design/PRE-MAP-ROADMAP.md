@@ -11,6 +11,8 @@
 
 ## Ranked next work
 
+Update 2026-09-22: the functional palette, group move/copy/delete, and pressure presets below are implemented locally. Group rotation remains deferred. See `docs/WORKSHOP-ITERATION.md` for verification and current limitations. Next ROI is traversal measurements, flash controls, then a measured stress test before adding dense art.
+
 | Order | Candidate / concrete outcome | Return and cost | Acceptance before calling it done |
 | --- | --- | --- | --- |
 | 1 | **Functional workshop palette:** place start points, Watcher eyes, rings, cargo/socket, lights and linked portal endpoints using stable IDs | Very high; medium. Nine architectural pieces alone cannot author the complete game | Save/reload every prop, reject unpaired portals, preserve undo, play the user's one map with real roles and goals |

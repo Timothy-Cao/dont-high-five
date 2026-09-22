@@ -90,12 +90,6 @@ func strike_visual(pos:Vector3,_normal:Vector3) -> Node3D:
 	var mat:=ShaderMaterial.new();mat.shader=load("res://shaders/orbital_warning.gdshader");circle.material_override=mat
 	root.set_meta("warning_material",mat)
 	return root
-func strike_column(pos:Vector3) -> void:
-	var end:=pos+Vector3.UP*30
-	var hit:=get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(pos+Vector3.UP*0.2,end,1))
-	if not hit.is_empty():end=hit.position
-	var column=P.beam(watcher,pos,end,Color("ff1544"),0.24);column.material_override=beam_material(Color(1,0.01,0.04,1));watcher.add_effect(column,0.28)
-	var core=P.beam(watcher,pos,end,Color("fff1ce"),0.06);core.material_override=beam_material(Color(1,0.65,0.42,1));watcher.add_effect(core,0.17)
 func _process(dt:float) -> void:
 	if watcher.lab.paused:
 		muzzle_light.light_energy=0;hide_scope();return

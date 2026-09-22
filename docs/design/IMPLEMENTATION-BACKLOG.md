@@ -51,7 +51,7 @@ See [REFINEMENT-TODO.md](REFINEMENT-TODO.md) for the ranked discussion backlog. 
 
 Implemented: original nine-bone unicycle with eight clips and velocity-driven wheel, Q grenades at 0.25 s with small bounces, R two-minute mines at 2 s, nine reusable Blender modules, empty-shell workshop with snap/rotate/delete/undo/redo/save/load/F7, and main-arena panel/reel identity. See [pass notes](../WHEEL-AND-WORKSHOP.md).
 
-Next useful refinements: move/duplicate selections; creator-set spawn; tower/task/portal modules; authored lighting modules; load-time geometry validation beyond the current schema checks; saved-map selection on launch; wheel contact on steep slopes; animation LOD and triangle/draw-call profiling with many players. Networking remains separate.
+Workshop follow-up implemented: group move/copy/delete, creator-set spawn, working tower/cargo/socket/ring/light/portal parts and pressure presets. See [current iteration](../WORKSHOP-ITERATION.md). Remaining: group rotation/gizmo; load-time geometry validation beyond schema/spawn checks; saved-map launch shortcut; wheel contact on steep slopes; animation LOD and measured triangle/draw-call profiling. Networking remains separate.
 
 
 Current controls and visual simplification: [Reveal and patrol pass](../REVEAL-AND-PATROL.md). Blackout moved to F7; E is mine, R is reveal; ambient tower patrols default on.

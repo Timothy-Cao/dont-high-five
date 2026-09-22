@@ -31,6 +31,12 @@ var pad_lock:=0.0
 var saved_position:=Vector3.ZERO
 var saved_rotation:=Vector3.ZERO
 var saved_auto:=false
+var saved_session:Node3D
+var runtime:Node3D
+var pressure:="Peaceful"
+var palette:=0
+var saved_health:=100.0
+var selection:Node3D
 var preview_mat:StandardMaterial3D
 func _ready() -> void:
 	specs=Kit.catalogue()
@@ -56,12 +62,16 @@ func _ready() -> void:
 			fixture.get_child(0).material_override=P.material(Color("88babb"),1.2)
 	preview_mat=StandardMaterial3D.new();preview_mat.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA;preview_mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
 	select_part(0)
+	selection=preload("res://scripts/world/workshop_selection.gd").new();selection.builder=self;add_child(selection)
 func enter() -> void:
-	if active:return
+	if active:
+		if testing:toggle_test()
+		return
 	if lab.session.training.active:lab.session.training.leave()
 	lab.session.watcher.leave()
 	if lab.session.watcher.blackout>0:lab.session.watcher.cut_power()
 	saved_auto=lab.session.watcher.auto_fire;lab.session.watcher.auto_fire=false
+	saved_session=lab.session;saved_health=lab.player.health
 	saved_position=lab.player.position;saved_rotation=lab.player.rotation
 	lab.player.cancel_hands(true);lab.player.velocity=Vector3.ZERO
 	active=true;testing=false;work_light.show();lab.started=true;shell.show();lab.arena.hide();lab.session.hide()
@@ -71,27 +81,61 @@ func enter() -> void:
 	lab.set_paused(false);status="Empty workshop · choose a part, point and place"
 func leave() -> void:
 	if not active:return
+	selection.clear()
+	if testing:toggle_test()
 	if dirty:save_recovery()
 	active=false;testing=false;shell.hide();preview.hide();lab.arena.show();lab.session.show()
 	lab.arena.process_mode=Node.PROCESS_MODE_INHERIT;lab.session.process_mode=Node.PROCESS_MODE_INHERIT
 	lab.session.watcher.auto_fire=saved_auto
-	lab.player.reset_to(saved_position);lab.player.rotation=saved_rotation
+	lab.player.reset_to(saved_position);lab.player.rotation=saved_rotation;lab.player.health=saved_health
 	lab.player.camera.current=not lab.player.third_person;lab.player.follow_camera.current=lab.player.third_person
 	lab.set_paused(true)
 func toggle_test(from_cursor:=false) -> void:
+	selection.clear()
 	if not testing:
+		var problems:=validate_playtest()
+		if not problems.is_empty():status=problems;return
 		test_start=Vector3(0,.05,24)
+		for entry in entries:
+			if specs[entry.part].id=="spawn":test_start=Kit.vector(entry.pos)+Vector3.UP*.05
 		if from_cursor:
 			var hit:=ray()
 			if hit.is_empty() or not safe_test_spot(hit.position,hit.normal):
 				status="Point at a walkable surface with room for your robot";return
 			test_start=hit.position-ORIGIN+Vector3.UP*.05
-	testing=not testing;work_light.visible=not testing;lab.player.cancel_hands();lab.player.clear_mouse_chord();lab.player.velocity=Vector3.ZERO
+		if not safe_test_spot(ORIGIN+test_start,Vector3.UP):status="Player start is blocked · move it into clear space";return
+	testing=not testing;work_light.visible=not testing;lab.player.cancel_hands(true);lab.player.clear_mouse_chord();lab.player.velocity=Vector3.ZERO
 	if testing:
 		lab.player.reset_to(ORIGIN+test_start);lab.player.rotation.y=camera.rotation.y
+		if not from_cursor:
+			for entry in entries:
+				if specs[entry.part].id=="spawn":lab.player.rotation.y=entry.yaw*PI/2
+		lab.player.health=100;lab.player.respawn_left=0;lab.player.collision_layer=2
+		runtime=preload("res://scripts/world/workshop_session.gd").new();runtime.lab=lab;runtime.builder=self;add_child(runtime)
+		lab.session=runtime;runtime.build()
+		for node in pieces.get_children():
+			if specs[entries[node.get_meta("entry")].part].get("gameplay",false):node.hide()
 		lab.player.camera.current=not lab.player.third_person;lab.player.follow_camera.current=lab.player.third_person
-	else:camera.current=true
+	else:
+		if runtime.watcher.blackout>0:runtime.watcher.cut_power()
+		runtime.watcher.leave();runtime.process_mode=Node.PROCESS_MODE_DISABLED;runtime.hide()
+		lab.session=saved_session;runtime.queue_free();runtime=null
+		lab.player.health=saved_health;lab.player.respawn_left=0;lab.player.collision_layer=2
+		for node in pieces.get_children():node.show()
+		camera.current=true
+	lab.hud.minimap.invalidate()
 	preview.visible=not testing;status="F7 returns to editing" if testing else "Editing · F7 to playtest"
+func validate_playtest() -> String:
+	var counts:Dictionary={}
+	for entry in entries:
+		var id:String=specs[entry.part].id;counts[id]=int(counts.get(id,0))+1
+	for id in ["spawn","portal_a","portal_b"]:
+		if counts.get(id,0)>1:return "Only one "+id.replace("_"," ")+" is supported"
+	if counts.get("tower",0)>7:return "Use at most seven Watcher towers"
+	if counts.get("portal_a",0)!=counts.get("portal_b",0):return "Place both Portal A and Portal B before playtesting"
+	return ""
+func select_palette(value:int) -> void:
+	palette=posmod(value,2);select_part(0 if palette==0 else 9)
 func safe_test_spot(at:Vector3,normal:Vector3) -> bool:
 	var local:=at-ORIGIN
 	if normal.y<0.7 or absf(local.x)>150.7 or absf(local.z)>118.7 or local.y<-.1 or local.y>41.8:return false
@@ -105,6 +149,7 @@ func pick_part(index:int) -> bool:
 	status="Picked "+str(specs[selected].name)+" · rotation copied";return true
 func select_part(index:int) -> void:
 	selected=posmod(index,specs.size())
+	palette=0 if selected<9 else 1
 	if is_instance_valid(preview):preview.queue_free()
 	preview=Kit.make(specs[selected],false);add_child(preview)
 	for mesh in preview.find_children("*","MeshInstance3D",true,false):mesh.material_override=preview_mat;mesh.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -114,6 +159,7 @@ func snapshot() -> void:
 	if undo_stack.size()>64:undo_stack.pop_front()
 	redo_stack.clear();dirty=true
 func rebuild() -> void:
+	selection.clear()
 	revision+=1
 	for child in pieces.get_children():pieces.remove_child(child);child.queue_free()
 	for i in entries.size():
@@ -182,18 +228,31 @@ func load_map(path:="") -> bool:
 		var pos:=Kit.vector(row.pos)
 		if absf(pos.x)>150 or absf(pos.z)>118 or pos.y<0 or pos.y>42:status="Part outside workshop";return false
 		row.part=int(row.part);row.yaw=int(row.yaw)
-	snapshot();entries=rows;dirty=false;rebuild();status="Loaded arena";return true
+	var resume_test:=testing
+	if resume_test:toggle_test()
+	snapshot();entries=rows;dirty=false;rebuild()
+	if resume_test:toggle_test()
+	if not resume_test or testing:status="Loaded arena"
+	return true
 func handle_input(event:InputEvent) -> bool:
 	if not active:return false
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode==KEY_F7 and not lab.paused:toggle_test(event.shift_pressed);return true
-		if event.keycode==KEY_F6:return true
+		if event.keycode==KEY_F6 and not testing:return true
 	if testing or lab.paused:return false
 	if event is InputEventMouseMotion:
 		camera.rotation.y-=event.screen_relative.x*lab.player.sensitivity
 		camera.rotation.x=clampf(camera.rotation.x-event.screen_relative.y*lab.player.sensitivity,-1.5,1.5);return true
 	if event is InputEventMouseButton and event.pressed:
-		if event.button_index==MOUSE_BUTTON_LEFT:place()
+		if selection.pending:
+			if event.button_index==MOUSE_BUTTON_LEFT and selection.valid:selection.commit()
+			elif event.button_index==MOUSE_BUTTON_RIGHT:selection.cancel()
+			return true
+		if event.button_index==MOUSE_BUTTON_LEFT:
+			if event.ctrl_pressed:
+				var hit:=ray()
+				if not hit.is_empty() and hit.collider.has_meta("entry"):selection.toggle(hit.collider.get_meta("entry"))
+			else:place()
 		elif event.button_index==MOUSE_BUTTON_RIGHT:
 			var hit:=ray()
 			if not hit.is_empty() and hit.collider.has_meta("entry"):remove(hit.collider.get_meta("entry"))
@@ -204,28 +263,39 @@ func handle_input(event:InputEvent) -> bool:
 		elif event.button_index==MOUSE_BUTTON_WHEEL_DOWN:select_part(selected-1)
 		return true
 	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode==KEY_ESCAPE and (selection.pending or not selection.indices.is_empty()):
+			if selection.pending:selection.cancel()
+			else:selection.clear()
+			return true
 		if event.keycode in [KEY_ESCAPE,KEY_TAB,KEY_F11]:return false
+		if selection.pending:return true
 		if event.ctrl_pressed:
 			match event.keycode:
+				KEY_D:selection.begin(true)
 				KEY_S:save_map()
 				KEY_L:load_map()
 				KEY_Z:undo()
 				KEY_Y:undo(true)
-		elif event.keycode>=KEY_1 and event.keycode<=KEY_9:select_part(event.keycode-KEY_1)
+		elif event.keycode>=KEY_1 and event.keycode<=KEY_9:
+			var index:int=event.keycode-KEY_1+(9 if palette==1 else 0)
+			if index<specs.size():select_part(index)
+		elif event.keycode==KEY_B:select_palette(palette+1)
+		elif event.keycode==KEY_X:selection.begin(false)
+		elif event.keycode==KEY_DELETE:selection.remove()
 		elif event.keycode==KEY_R:yaw=posmod(yaw+1,4)
 		elif event.keycode==KEY_G:grid=1.0 if grid==0.5 else (2.0 if grid==1 else 0.5)
 		elif event.keycode==KEY_PAGEUP:elevation+=grid
 		elif event.keycode==KEY_PAGEDOWN:elevation-=grid
 		return true
 	return true
-func ray() -> Dictionary:
-	return get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(camera.global_position,camera.global_position-camera.global_basis.z*100,1))
-func can_place(at:Vector3,part_index:int,turn:int) -> bool:
+func ray(exclude:Array[RID]=[]) -> Dictionary:
+	return get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(camera.global_position,camera.global_position-camera.global_basis.z*100,33,exclude))
+func can_place(at:Vector3,part_index:int,turn:int,exclude:Array[RID]=[]) -> bool:
 	var spec:Dictionary=specs[part_index];var bounds:=Kit.vector(spec.bounds);var basis:=Basis(Vector3.UP,turn*PI/2)
 	var size:Vector3=(basis*bounds).abs()
 	if absf(at.x)+size.x/2>151.7 or absf(at.z)+size.z/2>119.7 or at.y<0 or at.y+size.y>43.7:return false
-	if AABB(at-Vector3(size.x/2,0,size.z/2),size).intersects(AABB(Vector3(-0.7,0,23.3),Vector3(1.4,2,1.4))):return false
-	var q:=PhysicsShapeQueryParameters3D.new();q.collision_mask=1;q.margin=0.001
+	if spec.id!="spawn" and AABB(at-Vector3(size.x/2,0,size.z/2),size).intersects(AABB(Vector3(-0.7,0,23.3),Vector3(1.4,2,1.4))):return false
+	var q:=PhysicsShapeQueryParameters3D.new();q.collision_mask=33;q.margin=0.001;q.exclude=exclude
 	var shape:=BoxShape3D.new();shape.size=bounds*0.985;q.shape=shape;q.transform=Transform3D(basis,ORIGIN+at+Vector3.UP*bounds.y/2)
 	# Conservative bounds prevent accidental intersections and keep editing predictable.
 	return get_world_3d().direct_space_state.intersect_shape(q,1).is_empty()
@@ -247,6 +317,7 @@ func _physics_process(dt:float) -> void:
 	if Input.is_physical_key_pressed(KEY_CTRL):movement=Vector3.ZERO
 	var up:=float(Input.is_physical_key_pressed(KEY_SPACE))-float(Input.is_physical_key_pressed(KEY_C))
 	camera.position+=(camera.basis*movement+Vector3.UP*up).limit_length(1)*dt*(30 if Input.is_physical_key_pressed(KEY_SHIFT) else 12)
+	if selection.pending:selection.update();return
 	var hit:=ray();valid=false;preview.hide()
 	if hit.is_empty():return
 	var bounds:=Kit.vector(specs[selected].bounds);var basis:=Basis(Vector3.UP,yaw*PI/2);var extents:Vector3=(basis*bounds).abs()/2
@@ -256,11 +327,12 @@ func _physics_process(dt:float) -> void:
 	preview.position=ORIGIN+candidate;preview.basis=basis;preview.show()
 	preview_mat.albedo_color=Color(0.2,0.95,0.8,0.48) if valid else Color(1,0.18,0.2,0.48)
 func draw_hud(hud:Control) -> void:
-	hud.txt(Vector2(28,40),"WORKSHOP  /  "+("PLAYTEST" if testing else "BUILD"),22)
+	if testing:
+		hud.centered(Vector2(hud.size.x/2,18),"WORKSHOP · "+pressure+" · F7 edit / F6 role",14);return
+	hud.txt(Vector2(28,40),"WORKSHOP  /  BUILD",22)
 	hud.txt(Vector2(28,70),"Your arena%s · %d / %d parts"%[" *" if dirty else "",entries.size(),LIMIT],16)
-	if testing:hud.centered(Vector2(hud.size.x/2,40),"F7  Return to editing",17);return
 	hud.draw_circle(hud.size/2,3,Color.WHITE)
-	hud.centered(Vector2(hud.size.x/2,hud.size.y-105),"%d  %s  ·  %.1f m grid  ·  %d°"%[selected+1,specs[selected].name,grid,yaw*90],21)
-	hud.centered(Vector2(hud.size.x/2,hud.size.y-76),"LMB place · RMB delete · MMB pick · 1–9 / Wheel parts · R rotate · G grid · PgUp/PgDn height",16)
-	hud.centered(Vector2(hud.size.x/2,hud.size.y-49),"WASD fly · Space/C rise/fall · Ctrl+Z/Y undo/redo · Ctrl+S/L save/load · F7 test · Shift+F7 test here",16)
+	hud.centered(Vector2(hud.size.x/2,hud.size.y-105),"%s · %d  %s · %.1f m · %d°"%["PARTS" if palette==0 else "GAMEPLAY",selected+1 if palette==0 else selected-8,specs[selected].name,grid,yaw*90],21)
+	hud.centered(Vector2(hud.size.x/2,hud.size.y-76),"B palette · 1–9 / Wheel part · LMB place · RMB delete · MMB pick · R rotate · G grid · PgUp/Dn height",15)
+	hud.centered(Vector2(hud.size.x/2,hud.size.y-49),"Ctrl+click select · X move · Ctrl+D copy · Ctrl+Z/Y undo/redo · Ctrl+S/L save/load · F7 test · Shift+F7 test here",15)
 	hud.centered(Vector2(hud.size.x/2,hud.size.y-22),status,15)

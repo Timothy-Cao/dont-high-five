@@ -126,7 +126,9 @@ func show_page(which: String) -> void:
 	header_title.text={"Yard":"Practice areas","Bindings":"Key bindings","Physics":"Advanced tuning"}.get(which,which)
 	if which=="Yard" and not lab.test_world: header_title.text="Explore"
 	var width:=440.0 if which=="Home" else 700.0
-	var height:=400.0 if which=="Home" else 650.0
+	var height:=400.0 if which=="Home" else (740.0 if which=="Build" else 650.0)
+	height=minf(height,get_viewport_rect().size.y-48)
+	pages.add_theme_constant_override("separation",8 if which=="Build" else 12)
 	menu.offset_left=-width/2
 	menu.offset_right=width/2
 	menu.offset_top=-height/2
@@ -141,15 +143,23 @@ func show_page(which: String) -> void:
 			label(pages,"Targets and partners are local simulations.",17,DIM)
 		"Build":
 			label(pages,"Build workshop",26)
-			label(pages,"Separate indoor shell · nine reusable parts",17,DIM)
 			button(pages,"Continue building" if lab.builder.active else "Enter workshop",func():lab.builder.enter();lab.set_paused(false),true)
-			button(pages,"Return to main arena",func():lab.builder.leave();show_page("Home"))
-			button(pages,"Load example course · undoable",func():lab.builder.load_map("res://assets/maps/workshop-example.json");show_page("Build"))
-			button(pages,"Save layout",func():lab.builder.save_map();show_page("Build"))
-			button(pages,"Load layout · undoable",func():lab.builder.load_map();show_page("Build"))
+			var tabs:=HBoxContainer.new();pages.add_child(tabs)
+			for i in 2:
+				button(tabs,["Architecture","Gameplay"][i],func():lab.builder.select_palette(i);show_page("Build"),lab.builder.palette==i).size_flags_horizontal=Control.SIZE_EXPAND_FILL
+			var parts:=GridContainer.new();parts.columns=3;pages.add_child(parts)
+			for i in range(0 if lab.builder.palette==0 else 9,9 if lab.builder.palette==0 else lab.builder.specs.size()):
+				button(parts,str(lab.builder.specs[i].name),func():lab.builder.select_part(i);lab.builder.enter();lab.set_paused(false)).size_flags_horizontal=Control.SIZE_EXPAND_FILL
+			pressure_selector(true)
+			var saves:=HBoxContainer.new();pages.add_child(saves)
+			button(saves,"Save",func():lab.builder.save_map();show_page("Build")).size_flags_horizontal=Control.SIZE_EXPAND_FILL
+			button(saves,"Load",func():lab.builder.load_map();show_page("Build")).size_flags_horizontal=Control.SIZE_EXPAND_FILL
 			if FileAccess.file_exists(lab.builder.recovery_path()):
-				button(pages,"Recover autosave · undoable",func():lab.builder.recover_map();show_page("Build"))
-			label(pages,lab.builder.status,16,DIM)
+				button(saves,"Recover",func():lab.builder.recover_map();show_page("Build")).size_flags_horizontal=Control.SIZE_EXPAND_FILL
+			var extras:=HBoxContainer.new();pages.add_child(extras)
+			button(extras,"Example course",func():lab.builder.load_map("res://assets/maps/workshop-example.json");show_page("Build")).size_flags_horizontal=Control.SIZE_EXPAND_FILL
+			button(extras,"Return to arena",func():lab.builder.leave();show_page("Home")).size_flags_horizontal=Control.SIZE_EXPAND_FILL
+			label(pages,lab.builder.status,15,DIM)
 		"Training":
 			label(pages,"Nine short rooms. Skip or revisit any ability.",18,DIM)
 			for i in 9:
@@ -157,16 +167,17 @@ func show_page(which: String) -> void:
 			button(pages,"Back to Arena",func():lab.session.training.leave() if lab.session.training.active else null;lab.started=true;lab.set_paused(false))
 		"Playtest":
 			label(pages,"Local prototype",26)
-			label(pages,"Test partners simulate other players. F6 switches your role.",17,DIM)
+			label(pages,"Your placed objects · F6 switches role" if lab.builder.active else "Test partners simulate other players. F6 switches your role.",17,DIM)
 			button(pages,"Return as Fiver" if lab.session.watcher.active or lab.player.impostor else "Become Watcher",func():lab.session.switch_role();lab.started=true;lab.set_paused(false))
-			check_button("Tower demo: sweeping lasers + hazards",lab.session.watcher.demo_patrol,func(v):lab.session.watcher.demo_patrol=v)
-			check_button("Tower AI · guns + abilities",lab.session.watcher.auto_fire,func(v):lab.session.watcher.auto_fire=v)
-			check_button("8 moving Fivers · mixed speeds",lab.session.objectives.moving_fivers,func(v):lab.session.objectives.set_moving_fivers(v))
-			check_button("Hazard gallery",lab.session.hazards.enabled,func(v):lab.session.hazards.enabled=v)
-			button(pages,"Reset tasks / heal partners",func():lab.session.reset_round();show_page("Playtest"))
-			button(pages,"Visit a task",func():show_page("Tasks"))
-			label(pages,"Watcher: 1–7 / A D towers · LMB fire · RMB scope",17,DIM)
-			label(pages,"Q grenade · W orbital strike · E mine\nR reveal (5s) / F7 blackout · S infiltrate · F6 return",17,DIM)
+			pressure_selector(lab.builder.active)
+			check_button("Blackout",lab.session.watcher.blackout>0,func(_v):lab.session.watcher.cut_power())
+			if not lab.builder.active:
+				check_button("8 moving Fivers · mixed speeds",lab.session.objectives.moving_fivers,func(v):lab.session.objectives.set_moving_fivers(v))
+				check_button("Hazard gallery",lab.session.hazards.enabled,func(v):lab.session.hazards.enabled=v)
+			button(pages,"Reset tasks / heal" if lab.builder.active else "Reset tasks / heal partners",func():lab.session.reset_round();show_page("Playtest"))
+			if not lab.builder.active:button(pages,"Visit a task",func():show_page("Tasks"))
+			label(pages,"Watcher: A / D towers · LMB fire · RMB scope",17,DIM)
+			label(pages,"Q grenade · W orbital strike · E mine\nR reveal (5s) · S infiltrate · F6 return",17,DIM)
 		"Yard":
 			if not lab.test_world:
 				label(pages,"Wander anywhere.",29)
@@ -232,6 +243,16 @@ func show_page(which: String) -> void:
 			label(pages,"Slack changes apply when a glove next sticks.\nMaximum extra stretch: 5.5 m. Gloves stay attached.",17,DIM)
 			button(pages,"Restore defaults",func():lab.player.launch_gain=4.2;lab.player.gravity=24;lab.player.air_control=36;lab.player.spring_stiffness=2.6;lab.player.slack_allowance=0.6;show_page("Physics"))
 
+func pressure_selector(workshop:bool) -> void:
+	label(pages,"Tower pressure",18)
+	var choices:=["Peaceful","One tower","Patrol","Chaos"]
+	var picker:=OptionButton.new();pages.add_child(picker);picker.custom_minimum_size.y=42
+	for choice in choices:picker.add_item(choice)
+	picker.select(maxi(0,choices.find(lab.builder.pressure if workshop else lab.session.watcher.pressure)))
+	picker.item_selected.connect(func(index):
+		if workshop:lab.builder.pressure=choices[index]
+		if not workshop or lab.builder.testing:lab.session.watcher.set_pressure(choices[index]))
+	label(pages,"Peaceful: no AI · One tower: aim practice\nPatrol: roaming lasers + hazards · Chaos: all towers",15,DIM)
 func check_button(title: String, checked: bool, action: Callable) -> void:
 	var b := CheckButton.new()
 	b.text = title
@@ -284,7 +305,7 @@ func _draw() -> void:
 	if lab.builder and lab.builder.active:
 		lab.builder.draw_hud(self)
 		if not lab.builder.testing:return
-	elif lab.session and draw_session(center):return
+	if lab.session and draw_session(center):return
 	if lab.test_world: txt(Vector2(28,40),lab.station_names[lab.station],15,DIM)
 	if lab.test_world and p.velocity.length()>9:
 		txt(Vector2(size.x-124,40),"%02.0f m/s"%p.velocity.length(),19,DIM)
@@ -418,13 +439,13 @@ func draw_session(center:Vector2) -> bool:
 		else:
 			centered(center+Vector2(0,42),"LMB  MACHINE GUN",13,DIM)
 		txt(Vector2(30,42),("WATCHER  /  EYE %d"%(w.selected+1))+("  ·  BLACKOUT" if w.blackout>0 else ""),22,ORANGE)
-		txt(Vector2(30,70),"Fivers   %d / 7 tasks"%session.objectives.progress(),16,DIM)
+		txt(Vector2(30,70),"Fivers   %d / %d tasks"%[session.objectives.progress(),session.objectives.total()],16,DIM)
 		var row:=""
 		for spec in [["Q","grenade","Grenade"],["W","strike","Blast"],["E","mine","Mine"],["R","reveal","Reveal %.1fs"%w.reveal_left if w.reveal_left>0 else "Reveal"]]:
 			var cooling:bool=w.cooldowns[spec[1]]>0 and not (spec[1]=="reveal" and w.reveal_left>0)
 			row+="%s  %s%s    "%[spec[0],spec[2],"  %.1fs"%w.cooldowns[spec[1]] if cooling else ""]
 		centered(Vector2(center.x,size.y-62),row,17)
-		centered(Vector2(center.x,size.y-32),"1–7 / A D  Towers   ·   LMB  Fire   ·   RMB  Scope / laser   ·   S  Infiltrate   ·   F6  Fiver / F7  Lights",16,DIM)
+		centered(Vector2(center.x,size.y-32),"1–%d / A D  Towers   ·   LMB  Fire   ·   RMB  Scope   ·   S  Infiltrate   ·   F6  Fiver   ·   F7  %s"%[w.towers.size(),"Edit" if lab.builder.active else "Lights"],16,DIM)
 		return true
 	if session.training.active:
 		var t=session.training
@@ -434,14 +455,14 @@ func draw_session(center:Vector2) -> bool:
 		if t.room==6:centered(center+Vector2(0,-100),"PULSE  %.1fs"%(2.5-t.pulse),19,ORANGE)
 	else:
 		txt(Vector2(28,40),"IMPOSTOR" if p.impostor else "FIVER",19,ORANGE if p.impostor else PAPER)
-		txt(Vector2(28,66),"%d / 7 tasks"%session.objectives.progress(),16,ORANGE if session.objectives.complete_flash>0 else DIM)
+		if session.objectives.total()>0:txt(Vector2(28,66),"%d / %d tasks"%[session.objectives.progress(),session.objectives.total()],16,ORANGE if session.objectives.complete_flash>0 else DIM)
 		draw_rect(Rect2(28,80,110,4),Color("293e48"))
 		draw_rect(Rect2(28,80,110*p.health/100,4),Color("7ddbc7"))
 		txt(Vector2(148,87),"%.0f"%p.health,14,DIM)
 		var hint:String=session.objectives.hint()
 		if p.impostor:hint="Return to a tower base  ·  Stay still %.0fs to self-destruct"%maxf(0,10-w.stationary)
-		elif session.objectives.progress()==7:hint="All tasks complete  ·  Esc → Local playtest to reset"
+		elif session.objectives.total()>0 and session.objectives.progress()==session.objectives.total():hint="All tasks complete  ·  Esc → Local playtest to reset"
 		if not hint.is_empty():centered(Vector2(center.x,size.y-62),hint,17)
-		txt(Vector2(size.x-270,40),"F6 Role / F7 Lights   ·   Esc  Menu",14,DIM)
+		txt(Vector2(size.x-270,40),"F6 Role / F7 %s   ·   Esc  Menu"%("Edit" if lab.builder.active else "Lights"),14,DIM)
 	if lab.message_time>0:centered(Vector2(center.x,42),lab.message,17)
 	return false

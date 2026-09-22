@@ -70,6 +70,8 @@ func collect_geometry() -> void:
 	if not (lab.builder and lab.builder.active) and lab.arena:
 		for pad in lab.arena.travel.launch_pads:markers.append({"pos":pad.pos,"kind":"pad"})
 		for portal in lab.arena.travel.portals:markers.append({"pos":portal.base,"kind":"portal"})
+	elif lab.builder.testing:
+		for portal in lab.session.objectives.travel.portals:markers.append({"pos":portal.base,"kind":"portal"})
 func cross_section(item:Dictionary,y:float) -> PackedVector2Array:
 	if not item.box:return item.footprint
 	var crossings:=PackedVector2Array()
@@ -136,7 +138,7 @@ func marker_in_view(point:Vector3,_at:=Vector3.ZERO) -> bool:
 	return absf(point.x)<156 and absf(point.z)<124
 func actor_markers() -> Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	if context=="workshop":return result
+	if context=="workshop" and not lab.builder.testing:return result
 	var w=lab.session.watcher
 	for i in w.towers.size():result.append({"pos":w.towers[i].pos,"kind":"tower","id":i+1,"selected":w.active and w.selected==i})
 	for fiver in lab.session.objectives.partners:

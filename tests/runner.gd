@@ -1,6 +1,8 @@
 extends RefCounted
 ## Explicit developer-only entry points; normal play has no active test nodes.
 const CASES={
+	"--workshop-gameplay-capture":"res://tests/capture_workshop_gameplay.gd",
+	"--workshop-gameplay-verify":"res://tests/verify_workshop_gameplay.gd",
 	"--refinement-capture":"res://tests/capture_refinement.gd",
 	"--refinement-verify":"res://tests/verify_refinement.gd",
 	"--minimap-verify":"res://tests/verify_minimap.gd",

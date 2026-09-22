@@ -15,7 +15,7 @@ jobs:
       - name: Install pinned Godot runtime
         shell: pwsh
         run: ./tools/Setup-Godot.ps1
-      - name: Import and run all twenty suites
+      - name: Import and run all regression suites
         shell: pwsh
         run: ./tools/Run.ps1 -Mode Verify
       - name: Keep verification logs

@@ -8,15 +8,21 @@ Open **Esc → Build workshop → Enter / continue workshop**. The new workspace
 | --- | --- |
 | WASD / mouse | Fly / look |
 | Space / C / Shift | Up / down / fly faster |
-| 1–9 or mouse wheel | Choose floor, wall, column, ramp, window, perch, fin, canopy or launch pad |
+| B | Switch Architecture / Gameplay palette (also in the Build menu) |
+| 1–9 or mouse wheel | Choose a part in the palette / cycle all parts |
 | LMB / RMB | Place / delete the indicated part |
 | Middle mouse | Pick an existing part and copy its rotation |
+| Ctrl+LMB | Add/remove a part from the selection |
+| X / Ctrl+D | Move / duplicate the selected group; point and LMB to confirm |
+| Delete | Delete the selected group |
+| Esc during group placement | Cancel without changing the layout; Esc again clears selection |
 | R | Rotate 90 degrees |
 | G | Cycle 0.5, 1 and 2 m snapping |
 | Page Up / Page Down | Offset placement vertically by one grid step |
 | Ctrl+Z / Ctrl+Y | Undo / redo |
 | Ctrl+S / Ctrl+L | Save / load your arena |
-| F7 | Playtest from entrance / return to editing |
+| F7 | Playtest from placed start (or entrance) / return to editing |
+| F6 during playtest | Switch Fiver / a placed Watcher tower |
 | Shift+F7 | Playtest from the pointed walkable surface (requires clear headroom) |
 | R during playtest | Retry at the current test start |
 | Esc | Menu, return to main arena |
@@ -27,7 +33,11 @@ One working arena saves versioned JSON under `user://maps/workshop-1.json` (the 
 
 `assets/arena_kit/catalog.json` defines stable part IDs, metre dimensions, simple collision and launch-pad behavior. GLBs live beside it; editable Blender sources are `art/kit_*.blend`. `art/build_arena_kit.py` regenerates all nine. Keep IDs stable as art improves so saved layouts remain usable. Bottom-center pivots and 90-degree rotations make pieces predictable to assemble.
 
-This is a block-building prototype: no move gizmo, selection groups, arbitrary scaling, objective/portal/tower placement or multiplayer editing yet. The example course is optional; loading a map replaces the workshop layout, not the authored arena.
+The Gameplay palette contains Player start, Watcher tower, Carry core, Cargo socket, Traversal ring, Soft light, Portal A and Portal B. These become real gameplay objects in F7 playtests. A placed start includes its rotation. Rings count crossings in either direction and respect rotation; each socket accepts one core. Portals carry momentum and reject blocked exits. Place both ends of the one portal pair, at most one start, and at most seven towers. Save files retain stable IDs for all parts.
+
+**Tower pressure** in Build / Local playtest offers Peaceful (default in workshop), One tower (selected tower AI), Patrol (lasers and occasional hazards), or Chaos (all tower AI). Blackout is available in Local playtest; F7 remains reserved for edit/play in workshop. The overview shows placed towers and portal locations. Ending a playtest resets temporary cargo/task/weapon state while preserving the saved layout; returning to the original arena restores its session and your health.
+
+Group moves and copies preserve spacing and existing rotations. Blocked placements leave the original group untouched; each confirmed edit or group deletion takes one undo step. No arbitrary scaling, group rotation, axis gizmo or multiplayer editing yet. The example course is optional; loading a map replaces the workshop layout, not the authored arena.
 
 ## Existing arena placements
 

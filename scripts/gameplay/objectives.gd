@@ -35,6 +35,7 @@ func progress() -> int:
 	var value:=int(delivered)+int(highfive_done)+int(maintenance_done)+int(dummy_done)
 	for ring in rings:value+=int(ring.done)
 	return value
+func total() -> int:return 7
 func reset_tasks() -> void:
 	delivered=false;highfive_done=false;maintenance_done=false;dummy_done=false;maintenance_step=0
 	for dummy in lab.arena.dummies:dummy.reset_target()

@@ -7,7 +7,7 @@ Open `project.godot` in Godot 4.7.2. On Windows, `tools/Setup-Godot.ps1` install
 | Directory | Responsibility |
 | --- | --- |
 | `scripts/` | Controller, combat, travel, power-ups, audio, menus and world orchestration |
-| `scripts/world/` | Shared arena geometry, district layouts, floor openings, equipment bay and rave effects |
+| `scripts/world/` | Arena geometry, districts, workshop placement/group editing and isolated workshop gameplay |
 | `scripts/gameplay/` | Local session, Watcher, training, cargo, tasks, test partners and hazards |
 | `scenes/` | Main scene and editable playtest placement markers |
 | `shaders/` | Carpet and portal shaders |
@@ -25,7 +25,7 @@ Open `project.godot` in Godot 4.7.2. On Windows, `tools/Setup-Godot.ps1` install
 ./tools/Run.ps1 -Mode Verify
 ```
 
-Twelve suites cover controller feel, collisions, arena routes, audio/settings, fixed arms, character animation and the local Fiver/Watcher systems. Script errors and failed assertions stop verification. Tests isolate settings writes and never capture the desktop or inject system input. See `docs/LOCAL-PILOT.md` for the latest actual results.
+Twenty-one suites cover controller feel, collisions, arena routes, audio/settings, fixed arms, character animation, Fiver/Watcher systems, minimap and workshop gameplay/editing. Script errors and failed assertions stop verification. Tests isolate settings writes and never capture the desktop or inject system input. Current workshop results and limits are in `docs/WORKSHOP-ITERATION.md`.
 
 `tests/capture_showcase.gd` uses authored cameras and posed models to reproduce the gallery with `-- --showcase`. It requires a rendering-capable Godot instance; headless verification uses the dummy renderer. Screenshot characters are cosmetic staging, not connected clients. There is no multiplayer implementation yet.
 
@@ -49,4 +49,4 @@ New arena structures belong in `scripts/world/districts.gd` or the relevant exis
 
 Run `python tools/Audit-Source.py` after moving resources or editing asset generators. It checks literal resource paths, duplicate script UIDs and Python syntax; engine tests cover dynamically constructed asset paths. Move a script's `.uid` together with its source. Keep historical screenshots/notes labeled with their pass; they are not current feature documentation.
 
-For collaborative map edits, start with [the map authoring guide](docs/MAP-EDITING.md). Eye/task markers are editable Godot nodes; the bulk architecture remains in the district builders.
+For map edits, start with [the map authoring guide](docs/MAP-EDITING.md). The in-game workshop saves architecture and working gameplay parts together; the original arena remains in the district builders and Godot marker scene.

@@ -19,7 +19,7 @@ func run(lab:Node3D) -> void:
 	check(w.cooldowns.grenade<0.00001 and w.grenade(),"grenades repeat at 0.25 seconds")
 	for bomb in w.bombs:bomb.node.queue_free()
 	w.bombs.clear()
-	w.cooldowns.mine=0;check(w.throw_mine() and not w.throw_mine(),"R mine reserves a two-second cooldown")
+	w.cooldowns.mine=0;check(w.throw_mine() and not w.throw_mine(),"E mine reserves a two-second cooldown")
 	var mine=w.mines.back();mine.position=Vector3(0,140.3,0);mine.velocity=Vector3.ZERO
 	lab.box(Vector3(0,139.5,0),Vector3(50,1,50),lab.INK);await frames(110)
 	check(mine.landed and mine.armed,"thrown mine settles then arms")
@@ -43,7 +43,7 @@ func run(lab:Node3D) -> void:
 	var original:Vector3=p.position;b.enter();await frames(3)
 	check(b.active and not b.testing and b.camera.current and b.entries.is_empty(),"builder opens an empty separate shell with free camera")
 	check(not lab.arena.visible and lab.session.process_mode==Node.PROCESS_MODE_DISABLED,"original arena and its simulation are isolated")
-	check(b.specs.size()==9,"nine reusable module definitions load")
+	check(b.specs.size()==17,"nine architectural and eight gameplay module definitions load")
 	var edit_position:Vector3=b.camera.position
 	lab.set_paused(true);var event:=InputEventKey.new();event.keycode=KEY_F7;event.pressed=true
 	b.handle_input(event);await frames(3)
