@@ -183,8 +183,8 @@ func _draw() -> void:
 	if not lab.session.watcher.active:
 		draw_circle(here,7,Color("0a151d"))
 		draw_colored_polygon(PackedVector2Array([here+dir*6,here-dir*4+right*4,here-dir*4-right*4]),Color("fff0be"))
-	text(Vector2(12,size.y-35),"▲ YOU   ● FIVER   ▣ TOWER",11,Color("b4ceca"))
-	text(Vector2(12,size.y-21),"↑ / ↓ OTHER FLOOR",10,Color("91aaa9"))
+	text(Vector2(12,size.y-35),"▲ YOU   ● HIGH FIVER",11,Color("b4ceca"))
+	text(Vector2(12,size.y-21),"▣ TOWER   ↑ / ↓ OTHER FLOOR",10,Color("91aaa9"))
 	text(Vector2(12,size.y-7),lab.controls.prompt("minimap")+" HIDE",11,Color("91aaa9"))
 	var length:=50*MAP_SIZE/(RANGE*2)
 	draw_line(Vector2(size.x-12-length,size.y-11),Vector2(size.x-12,size.y-11),Color("c9d8d5"),2)

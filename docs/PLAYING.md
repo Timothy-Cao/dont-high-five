@@ -9,7 +9,7 @@ Explore a 304 × 240 m glow-in-the-dark building with two main floors, tall ceil
 | Input | Action |
 | --- | --- |
 | WASD + mouse | Move and look |
-| F6 | Switch Fiver / Watcher role |
+| F6 | Switch High Fiver / Watcher role |
 | M | Toggle the local floor-aware minimap |
 | F7 | Toggle arena blackout for either role; in workshop, edit/playtest instead |
 | 2 | Toggle punch / parallel zip |
@@ -66,23 +66,23 @@ The atrium now has a slowly rotating mirrorball, two sweeping laser fans and mov
 
 The upper floor has open corridor bays, terrace stacks and annex bridges. A single ground maze remains in the northwest. Covered ground loops and upper concourse alcoves provide cover between open movement lanes. See [the arena infill notes](ARENA-INFILL.md).
 
-## Local Fiver / Watcher pilot
+## Local High Fiver / Watcher pilot
 
 The source build extends the released movement build. **Training** is a separate menu entry with nine selectable rooms. **Arena** remains directly accessible. R retries the current training room; reaching its ring advances. You can skip without proving mastery.
 
-Fivers have 100 HP and a three-second test respawn. Shift halves incoming damage; punches remain non-damaging. Click a cargo ball to occupy one hand. Click that same hand again to drop it; recall and E retain it. The free hand can grapple, stretch for an E slingshot, or repeatedly regrip the ceiling in fixed mode. Two-handed attacks remain unavailable. Pads preserve cargo; portals transfer it if both cargo and player fit at the exit. Bring it to its amber socket.
+High Fivers have 100 HP and a three-second test respawn. Shift halves incoming damage; punches remain non-damaging. Click a cargo ball to occupy one hand. Click that same hand again to drop it; recall and E retain it. The free hand can grapple, stretch for an E slingshot, or repeatedly regrip the ceiling in fixed mode. Two-handed attacks remain unavailable. Pads preserve cargo; portals transfer it if both cargo and player fit at the exit. Bring it to its amber socket.
 
 At the pink station, click the local partner to offer a high-five. Its automatic reciprocal response heals both and completes one task. Recall or attack cancels a pending exchange. This partner is a simulation, not a second player. Three rings, one delivery, one high-five, one maintenance panel and one dummy KO make the seven-task sampler. Maintenance is an aim-and-confirm sequence: press your Interact key (default V) while aiming at the enlarged node.
 
-F6 switches roles. Watcher controls: 1–7 or A/D select eyes; LMB fires the machine gun; hold RMB to scope for sniper shots at 50% look sensitivity on both axes; Q lobs a low-rebound grenade that explodes one second after landing; W marks a sustained orbital strike with a pulsing circle covering the full impact area; E throws a flashing proximity mine; R reveals Fiver silhouettes through walls for five seconds; F7 toggles full arena blackout; S deploys an impostor robot. Unattended auto-fire is **off by default**, configurable in Local playtest. Auto-fire warns for 0.65 seconds and shoots the recorded position rather than tracking instantly.
+F6 switches roles. Watcher controls: 1–7 or A/D select eyes; LMB fires the machine gun; hold RMB to scope for sniper shots at 50% look sensitivity on both axes; Q lobs a low-rebound grenade that explodes one second after landing; W marks a sustained orbital strike with a pulsing circle covering the full impact area; E throws a flashing proximity mine; R reveals High Fiver silhouettes through walls for five seconds; F7 toggles full arena blackout; S deploys an impostor robot. Unattended auto-fire is **off by default**, configurable in Local playtest. Auto-fire warns for 0.65 seconds and shoots the recorded position rather than tracking instantly.
 
-The impostor can lethally high-five test partners. Stay completely still on the ground for ten seconds to self-destruct, or return to a tower base; F6 returns to the original Fiver. Punching an eye disrupts it for four seconds. Blackout affects lighting, not voice chat: there is no voice system yet.
+The impostor can lethally high-five test partners. Stay completely still on the ground for ten seconds to self-destruct, or return to a tower base; F6 returns to the original High Fiver. Punching an eye disrupts it for four seconds. Blackout affects lighting, not voice chat: there is no voice system yet.
 
 The south gallery contains a slowing gate, jumpable sweep, damaging laser channel and warning-timed press. Disable the gallery in Local playtest. Arm/leg-disable zones remain absent. All these systems are a local mechanics sampler, not a balanced multiplayer match. See [the review and limitations](LOCAL-PILOT.md).
 
 ### Watcher weapon update
 
-LMB fires immediately and holds for a 30-shot/second machine gun with twice the previous spread. Hold RMB to expose the scoped aiming laser and fire a 55-damage sniper shot every 0.4 seconds. Q repeats every 0.25 s with modest bounces and a one-second fuse from first floor contact; W every 5 s; E throws a mine every 2 s. R reveals players for 5 s with a 5 s cooldown measured from activation. F7 is the immediate test blackout toggle for both roles. Blackout grants no night vision. Fiver hands stay emissive, and shots/explosions briefly light nearby surfaces. See [current carry and night-vision pass](CARRY-NIGHT-PASS.md). Restart the local source game to load changes; the GitHub v0.2.0 snapshot predates the Watcher prototype.
+LMB fires immediately and holds for a 30-shot/second machine gun with twice the previous spread. Hold RMB to expose the scoped aiming laser and fire a 55-damage sniper shot every 0.4 seconds. Q repeats every 0.25 s with modest bounces and a one-second fuse from first floor contact; W every 5 s; E throws a mine every 2 s. R reveals players for 5 s with a 5 s cooldown measured from activation. F7 is the immediate test blackout toggle for both roles. Blackout grants no night vision. High Fiver hands stay emissive, and shots/explosions briefly light nearby surfaces. See [current carry and night-vision pass](CARRY-NIGHT-PASS.md). Restart the local source game to load changes; the GitHub v0.2.0 snapshot predates the Watcher prototype.
 
 ### Arms around cover
 
@@ -92,11 +92,11 @@ The orbital strike has an **18 m radius** and burns for **4 seconds** after its 
 
 ## Moving targets and automated opponents
 
-Esc → Local playtest has separate **8 moving Fivers · mixed speeds** and **Tower AI · guns + abilities** switches (both initially off). Automated towers alternate sniper/machine gun, use grenades and orbital strikes, and aim about 0.6 seconds behind visible targets. See [simulation details](CROWD-AND-TOWER-AI.md).
+Esc → Local playtest has separate **8 moving High Fivers · mixed speeds** and **Tower AI · guns + abilities** switches (both initially off). Automated towers alternate sniper/machine gun, use grenades and orbital strikes, and aim about 0.6 seconds behind visible targets. See [simulation details](CROWD-AND-TOWER-AI.md).
 
 ## Wheel robot and workshop
 
-The Fiver now always rides one broad wheel. It leans while steering, compresses its suspension to brake, and retains its body during flight, charging and hanging. There are no legs or ball transformation. Low arena shortcuts have been raised to fit its 1.62 m braking capsule; normal height remains 1.8 m.
+The High Fiver now always rides one broad wheel. It leans while steering, compresses its suspension to brake, and retains its body during flight, charging and hanging. There are no legs or ball transformation. Low arena shortcuts have been raised to fit its 1.62 m braking capsule; normal height remains 1.8 m.
 
 Watcher E mines last 120 seconds, settle before arming after 0.7 seconds, and flash to advertise their roughly one-metre trigger. Punch one from beyond its four-metre blast radius to clear it; the blast can still hurt nearby players. Two parallel fists share crosshair targeting without converging. Mines expire quietly if unused.
 
@@ -115,4 +115,4 @@ The optional local minimap shows the current floor, nearby walls, gaps, ramps, p
 
 Unpiloted tower shots, explosions and orbital strikes now have positional sound and distance attenuation. A brief orange arc indicates the bearing of an actual incoming hit; it fades after 0.85 seconds and does not track enemies. Workshop middle-click picks a part and its rotation; Shift+F7 tests from a clear pointed surface; R retries there. See [the pre-map refinement roadmap](design/PRE-MAP-ROADMAP.md).
 
-**Arena overview (M):** fixed whole-map scale, cream player arrow, teal Fiver dots and seven numbered red towers. The active Watcher tower is gold. All actors appear across floors with height ticks; architecture follows the current floor. This is prototype radar, including through walls.
+**Arena overview (M):** fixed whole-map scale, cream player arrow, teal High Fiver dots and seven numbered red towers. The active Watcher tower is gold. All actors appear across floors with height ticks; architecture follows the current floor. This is prototype radar, including through walls.

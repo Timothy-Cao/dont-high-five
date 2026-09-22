@@ -1,6 +1,6 @@
 config_version=5
 [application]
-config/version="0.3.1-dev"
+config/version="0.3.1"
 config/name="Don’t High Five"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="ParcelPop"

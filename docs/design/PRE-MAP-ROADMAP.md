@@ -59,4 +59,4 @@ Sources checked 2026-09-22. These support principles, not a claim that copying a
 
 ## Cheapest human comparison
 
-Play Fiver for two minutes with patrol enabled and music at your usual level: can you identify a nearby blast's direction and tell a distant one apart? In workshop, build a platform, middle-click it, Shift+F7 onto it, R retry and F7 back. Spend five minutes on one cargo crossing before deciding which movement numbers to touch. This pass has engine tests and rendered review; enjoyment and headphone clarity still need that human check.
+Play High Fiver for two minutes with patrol enabled and music at your usual level: can you identify a nearby blast's direction and tell a distant one apart? In workshop, build a platform, middle-click it, Shift+F7 onto it, R retry and F7 back. Spend five minutes on one cargo crossing before deciding which movement numbers to touch. This pass has engine tests and rendered review; enjoyment and headphone clarity still need that human check.

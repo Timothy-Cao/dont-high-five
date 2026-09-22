@@ -1,19 +1,19 @@
-# Local Fiver / Watcher pilot
+# Local High Fiver / Watcher pilot
 
 2026-09-21. This source build follows the user's expanded notes and approved choices: local role switching, automatic towers off by default, and separate Training. The published [v0.2.0 release](https://github.com/Timothy-Cao/dont-high-five/releases/tag/v0.2.0) remains the earlier verified movement snapshot, so the external tester can use that build while this prototype develops.
 
 ## Try it
 
-Open `Play.cmd` after closing an older game instance. **Arena** enters directly; **Training** offers nine short, individually selectable rooms. **F6** switches Fiver / Watcher. Esc → Local playtest contains auto-fire, the hazard toggle, round reset and task shortcuts. **2** selects punch / parallel zip. Existing automatic fixed-arm traversal remains on **1**.
+Open `Play.cmd` after closing an older game instance. **Arena** enters directly; **Training** offers nine short, individually selectable rooms. **F6** switches High Fiver / Watcher. Esc → Local playtest contains auto-fire, the hazard toggle, round reset and task shortcuts. **2** selects punch / parallel zip. Existing automatic fixed-arm traversal remains on **1**.
 
-The local Fiver can carry with one hand, use the other to traverse, heal with an explicitly simulated reciprocal partner, complete rings and maintenance, and knock down dummies. Watcher tests cover seven cameras, MG/sniper, a bouncing grenade, delayed area strike, blackout, full-auto burst and impostor deployment. The quota is seven tasks; it can be reset and does not end in a competitive match result.
+The local High Fiver can carry with one hand, use the other to traverse, heal with an explicitly simulated reciprocal partner, complete rings and maintenance, and knock down dummies. Watcher tests cover seven cameras, MG/sniper, a bouncing grenade, delayed area strike, blackout, full-auto burst and impostor deployment. The quota is seven tasks; it can be reset and does not end in a competitive match result.
 
 ![Local high-five test partner, with readable face under the glove lights](screenshots/pilot-fiver.png)
 
 ## Changes that mattered in review
 
 - **Input ownership:** carrying occupies one hand and blocks two-handed attacks. Extended gloves recall before a punch; a pending high-five cancels when the player recalls or attacks. Zip needs both parallel rays to hit real geometry and cannot create empty-air speed.
-- **Recovery:** Fivers have 100 HP and a three-second local respawn. Shift halves incoming damage and rejects knockback; temporary toughness is independent. Eye disruption blocks firing and darkens the current view for four seconds. Task/partner reset restores collision as well as health.
+- **Recovery:** High Fivers have 100 HP and a three-second local respawn. Shift halves incoming damage and rejects knockback; temporary toughness is independent. Eye disruption blocks firing and darkens the current view for four seconds. Task/partner reset restores collision as well as health.
 - **Training readability:** first render hid the floor gap. Added actual ledge markings, a quiet grid and ceiling grip panels. Every room has a reset and skip path; no strict mastery checks. The anchor pulse has a countdown.
 - **Local partners:** reuse the original rig with idle/walk animations and short elastic forearms. A proximity-facing idle makes the social partner readable. Visor material was softened after a render showed the glove lights producing a white rectangle over its face.
 - **Map coherence:** kept one northwest ground maze. Other maze patches became wide corridor bays with end bypasses, through-windows and canopy routes. Existing pad arcs, broad ramps, portals and hanging refuges remain. Main structural columns reach the roof.
@@ -34,7 +34,7 @@ Cargo uses physical sweeps toward its occupied hand and can lag at high speed. P
 
 ## Validation and artifacts
 
-Actual in-engine rendering was reviewed at **2560 × 1440** for the Fiver, Watcher, blackout, Training and menus. These are authored camera fixtures, not footage of a human finishing the game. No desktop capture or system input automation was used. The build was not interactively launched for the user.
+Actual in-engine rendering was reviewed at **2560 × 1440** for the High Fiver, Watcher, blackout, Training and menus. These are authored camera fixtures, not footage of a human finishing the game. No desktop capture or system input automation was used. The build was not interactively launched for the user.
 
 The focused integration suite checks hand occupancy, healing/cancellation, health, respawn, buffs, zip, eye disruption, weapons, blackout restoration, infiltration, default-off/opt-in fire, Training, shortcuts and station exposure. The fixed-arm suite still measures six alternate clicks moving **27.42 m** without WASD or reel input. The final full run passed **12 suites / 524 assertions**, including **87 local-pilot checks** and **47 fixed-arm checks**. No script errors or failed assertions were reported. The source audit passed 90 static resource references, unique script UIDs and authoring syntax checks.
 

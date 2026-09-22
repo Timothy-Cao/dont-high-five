@@ -15,7 +15,7 @@ With cargo, the free hand can stretch and slingshot using E. In fixed mode a cli
 
 ## Blackout
 
-The world remains dark. Only the Watcher camera receives a brighter private Environment and green monochrome display filter, drawn before HUD text. Switching to Fiver removes that camera override/filter. No global ambient light is restored for night vision. The filter compresses highlights so a flash is less disruptive to the Watcher than to a Fiver.
+The world remains dark. Only the Watcher camera receives a brighter private Environment and green monochrome display filter, drawn before HUD text. Switching to High Fiver removes that camera override/filter. No global ambient light is restored for night vision. The filter compresses highlights so a flash is less disruptive to the Watcher than to a High Fiver.
 
 Gloves use private emissive materials, including the local simulated partners' gloves, and remain visible in darkness without making entire robots emissive. First-person glow is quieter to preserve hand shape. Real hand lamps still illuminate nearby cover. Shots add bounded impact-light pulses (ten pooled lights, 0.16 s lifetime), alongside muzzle light. Existing explosions reveal nearby geometry briefly before it returns to darkness. This is local camera behavior, not tested network replication.
 
@@ -25,10 +25,10 @@ Full regression: **14 suites / 607 checks** passed. The final explicit-drop edge
 
 The dedicated carry/night suite passes **23/23** checks: both hand ownerships, elastic/fixed E, pad/portal retention, fast cargo tracking, same-hand ceiling regrips, explicit drop, separate camera lighting, remote glove emission, temporary impact light, low grenade rebound, landing-relative fuse and vertical strike geometry. Five same-hand ceiling clicks cover **27.07 m** in the controlled scenario while retaining cargo.
 
-Six authored 2560 × 1440 engine renders compare the same area with ordinary Watcher vision, green night vision, Fiver darkness, attack flashes and the vertical warning. Own-hand emission was reduced after the first review showed flattened glove shapes. No desktop input or interactive game launch was used. Certificate-store and shutdown resource warnings persist in the test environment.
+Six authored 2560 × 1440 engine renders compare the same area with ordinary Watcher vision, green night vision, High Fiver darkness, attack flashes and the vertical warning. Own-hand emission was reduced after the first review showed flattened glove shapes. No desktop input or interactive game launch was used. Certificate-store and shutdown resource warnings persist in the test environment.
 
 ![Watcher night vision](screenshots/night-watcher-vision.png)
 
-![Fiver view during blackout](screenshots/night-fiver-gloves.png)
+![High Fiver view during blackout](screenshots/night-fiver-gloves.png)
 
 ![Attack briefly reveals the nearby arena](screenshots/night-fiver-flash.png)

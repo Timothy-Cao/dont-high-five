@@ -1,8 +1,8 @@
 # Don’t High Five 0.3 — Watcher playground
 
-The latest local Fiver / Watcher prototype, packaged for Windows with Godot 4.7.2. Extract the ZIP and run **Play.cmd**; first launch imports assets. Multiplayer is not implemented.
+The latest local High Fiver / Watcher prototype, packaged for Windows with Godot 4.7.2. Extract the ZIP and run **Play.cmd**; first launch imports assets. Multiplayer is not implemented.
 
-- Full-arena north-up overview: living Fivers, seven numbered towers, selected Watcher eye and floor-height cues. M toggles it.
+- Full-arena north-up overview: living High Fivers, seven numbered towers, selected Watcher eye and floor-height cues. M toggles it.
 - Minimal wall texture using the original tiny, sparse floor flecks; no circuit patterns. Wall flecks are dimmer and switch off with blackout.
 - Charge punches, automatic fixed-arm ceiling traversal, the wheel robot and expanded Watcher arsenal.
 - Opaque orbital beam after a full-footprint warning; adjustable fog and quieter positional orbital audio.
@@ -14,4 +14,4 @@ F5 changes camera, F6 switches role, F7 toggles arena blackout; Esc opens settin
 
 This is a portable source/development package rather than an optimized production export. It contains editable assets and the five authorized soundtrack files. The overview currently shows actor positions through walls as a local testing aid; stacked architecture remains approximate. Earlier 0.2 downloads remain available unchanged.
 
-Validation: all 20 suites passed (775 assertions); source audit passed. Fiver/Watcher overview and blackout were inspected in engine renders. Known engine certificate/teardown diagnostics remain.
+Validation: all 20 suites passed (775 assertions); source audit passed. High Fiver/Watcher overview and blackout were inspected in engine renders. Known engine certificate/teardown diagnostics remain.

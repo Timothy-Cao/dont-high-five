@@ -168,11 +168,11 @@ func show_page(which: String) -> void:
 		"Playtest":
 			label(pages,"Local prototype",26)
 			label(pages,"Your placed objects · F6 switches role" if lab.builder.active else "Test partners simulate other players. F6 switches your role.",17,DIM)
-			button(pages,"Return as Fiver" if lab.session.watcher.active or lab.player.impostor else "Become Watcher",func():lab.session.switch_role();lab.started=true;lab.set_paused(false))
+			button(pages,"Return as High Fiver" if lab.session.watcher.active or lab.player.impostor else "Become Watcher",func():lab.session.switch_role();lab.started=true;lab.set_paused(false))
 			pressure_selector(lab.builder.active)
 			check_button("Blackout",lab.session.watcher.blackout>0,func(_v):lab.session.watcher.cut_power())
 			if not lab.builder.active:
-				check_button("8 moving Fivers · mixed speeds",lab.session.objectives.moving_fivers,func(v):lab.session.objectives.set_moving_fivers(v))
+				check_button("8 moving High Fivers · mixed speeds",lab.session.objectives.moving_fivers,func(v):lab.session.objectives.set_moving_fivers(v))
 				check_button("Hazard gallery",lab.session.hazards.enabled,func(v):lab.session.hazards.enabled=v)
 			button(pages,"Reset tasks / heal" if lab.builder.active else "Reset tasks / heal partners",func():lab.session.reset_round();show_page("Playtest"))
 			if not lab.builder.active:button(pages,"Visit a task",func():show_page("Tasks"))
@@ -439,13 +439,13 @@ func draw_session(center:Vector2) -> bool:
 		else:
 			centered(center+Vector2(0,42),"LMB  MACHINE GUN",13,DIM)
 		txt(Vector2(30,42),("WATCHER  /  EYE %d"%(w.selected+1))+("  ·  BLACKOUT" if w.blackout>0 else ""),22,ORANGE)
-		txt(Vector2(30,70),"Fivers   %d / %d tasks"%[session.objectives.progress(),session.objectives.total()],16,DIM)
+		txt(Vector2(30,70),"High Fivers   %d / %d tasks"%[session.objectives.progress(),session.objectives.total()],16,DIM)
 		var row:=""
 		for spec in [["Q","grenade","Grenade"],["W","strike","Blast"],["E","mine","Mine"],["R","reveal","Reveal %.1fs"%w.reveal_left if w.reveal_left>0 else "Reveal"]]:
 			var cooling:bool=w.cooldowns[spec[1]]>0 and not (spec[1]=="reveal" and w.reveal_left>0)
 			row+="%s  %s%s    "%[spec[0],spec[2],"  %.1fs"%w.cooldowns[spec[1]] if cooling else ""]
 		centered(Vector2(center.x,size.y-62),row,17)
-		centered(Vector2(center.x,size.y-32),"1–%d / A D  Towers   ·   LMB  Fire   ·   RMB  Scope   ·   S  Infiltrate   ·   F6  Fiver   ·   F7  %s"%[w.towers.size(),"Edit" if lab.builder.active else "Lights"],16,DIM)
+		centered(Vector2(center.x,size.y-32),"1–%d / A D  Towers   ·   LMB  Fire   ·   RMB  Scope   ·   S  Infiltrate   ·   F6  High Fiver   ·   F7  %s"%[w.towers.size(),"Edit" if lab.builder.active else "Lights"],16,DIM)
 		return true
 	if session.training.active:
 		var t=session.training
@@ -454,7 +454,7 @@ func draw_session(center:Vector2) -> bool:
 		txt(Vector2(30,99),lab.controls.prompt("retry")+"  Reset room  ·  Esc → Training  Skip",14,DIM)
 		if t.room==6:centered(center+Vector2(0,-100),"PULSE  %.1fs"%(2.5-t.pulse),19,ORANGE)
 	else:
-		txt(Vector2(28,40),"IMPOSTOR" if p.impostor else "FIVER",19,ORANGE if p.impostor else PAPER)
+		txt(Vector2(28,40),"IMPOSTOR" if p.impostor else "HIGH FIVER",19,ORANGE if p.impostor else PAPER)
 		if session.objectives.total()>0:txt(Vector2(28,66),"%d / %d tasks"%[session.objectives.progress(),session.objectives.total()],16,ORANGE if session.objectives.complete_flash>0 else DIM)
 		draw_rect(Rect2(28,80,110,4),Color("293e48"))
 		draw_rect(Rect2(28,80,110*p.health/100,4),Color("7ddbc7"))

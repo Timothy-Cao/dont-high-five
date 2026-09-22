@@ -60,7 +60,7 @@ func shot(from:Vector3,to:Vector3,sniper:bool,hit:Dictionary) -> void:
 	tracer.material_override=beam_material(Color(1.0,0.015,0.07,0.95) if sniper else Color(1.0,0.35,0.07,0.85))
 	watcher.add_effect(tracer,0.19 if sniper else 0.055)
 	var flash=P.orb(watcher,from,0.45 if sniper else 0.22,Color("ffcf89"),3)
-	flash.layers=8 # World flash stays visible to Fivers without filling the scoped operator view.
+	flash.layers=8 # World flash stays visible to High Fivers without filling the scoped operator view.
 	flash.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	watcher.add_effect(flash,0.075)
 	muzzle_light.global_position=from;flash_left=0.09;muzzle_light.light_energy=3 if sniper else 1.4

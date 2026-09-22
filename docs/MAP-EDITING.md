@@ -22,12 +22,12 @@ Open **Esc → Build workshop → Enter / continue workshop**. The new workspace
 | Ctrl+Z / Ctrl+Y | Undo / redo |
 | Ctrl+S / Ctrl+L | Save / load your arena |
 | F7 | Playtest from placed start (or entrance) / return to editing |
-| F6 during playtest | Switch Fiver / a placed Watcher tower |
+| F6 during playtest | Switch High Fiver / a placed Watcher tower |
 | Shift+F7 | Playtest from the pointed walkable surface (requires clear headroom) |
 | R during playtest | Retry at the current test start |
 | Esc | Menu, return to main arena |
 
-Green preview means valid; red means blocked. Parts snap against the surface under the crosshair. Placement protects the spawn and shell boundaries and uses conservative bounds to reject overlap. F7 uses the actual Fiver controller, arms and collision; pads launch you. Shift+F7 chooses a nearby working start on the surface under your crosshair; R retries there. Returning to edit preserves your working camera. Edit lighting is brighter than the playtest lighting.
+Green preview means valid; red means blocked. Parts snap against the surface under the crosshair. Placement protects the spawn and shell boundaries and uses conservative bounds to reject overlap. F7 uses the actual High Fiver controller, arms and collision; pads launch you. Shift+F7 chooses a nearby working start on the surface under your crosshair; R retries there. Returning to edit preserves your working camera. Edit lighting is brighter than the playtest lighting.
 
 One working arena saves versioned JSON under `user://maps/workshop-1.json` (the existing filename is retained for compatibility); on Windows this is inside the game's Godot app-data folder. Each replacement preserves a `.bak`; unsaved work also writes `workshop-autosave.json` every 60 active seconds and on leaving. Use **Recover autosave** in the Build menu to restore it; recovery is undoable and keeps the unsaved marker until you save the main layout. No recovery write overwrites the main layout. Invalid files preserve the current layout. The 2048-part limit and 64 undo steps keep this first pass bounded.
 

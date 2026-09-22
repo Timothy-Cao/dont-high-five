@@ -4,7 +4,7 @@ Updated 2026-09-21 Pacific / 2026-09-22 UTC. Current source and local package on
 
 ## What was wrong
 
-The second eye's starting aim hit its own upper side support about 1.28 m away. Shortened those supports beneath the firing level; all seven starting views now have more than 8 m of clearance. Ordinary practice dummies lacked a firearm response. Added bullet/explosion reactions without allowing Watcher hits to award the Fivers' punch task.
+The second eye's starting aim hit its own upper side support about 1.28 m away. Shortened those supports beneath the firing level; all seven starting views now have more than 8 m of clearance. Ordinary practice dummies lacked a firearm response. Added bullet/explosion reactions without allowing Watcher hits to award the High Fivers' punch task.
 
 The original test called the ray-fire method directly, bypassing input. A press and release between physics ticks could also disappear before a shot. Press now fires immediately, then holding repeats at the weapon interval. Tests now inject events through the game's viewport and exercise actual input routing; they do not automate the user's desktop.
 

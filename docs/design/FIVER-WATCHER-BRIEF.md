@@ -1,4 +1,4 @@
-# Fiver / Watcher — user brief
+# High Fiver / Watcher — user brief
 
 Received 2026-09-21. Working direction, not a claim that every feature is implemented. Original notes follow.
 
@@ -27,14 +27,14 @@ Tutorial map: WASD + jump. Just let them walk around. to move to anothert area (
 
 
 ## Overall gameplay
-The goal of the game will eventually be that Fivers, aka the current player robots, need to complete tasks while the watcher tries to stop them by killing them and delaynig them) The Fivers are quick, nimble, and hard to hit and can get around quickly while the watcher is confined to towers most of the time but with incredible firepower and zoning capabilities. They can sometimes join as an imposter robot but only effective when the other robots comms and sight is weakened. Fivers will have 100 hp and takes damage from various sources but lets make all the damage sources weak for now.
+The goal of the game will eventually be that High Fivers, aka the current player robots, need to complete tasks while the watcher tries to stop them by killing them and delaynig them) The High Fivers are quick, nimble, and hard to hit and can get around quickly while the watcher is confined to towers most of the time but with incredible firepower and zoning capabilities. They can sometimes join as an imposter robot but only effective when the other robots comms and sight is weakened. High Fivers will have 100 hp and takes damage from various sources but lets make all the damage sources weak for now.
 ivers don’t die but take 20s to respawn. In our testing mode, they can just respawn in 3s.
 
 
-## Fiver controls
+## High Fiver controls
 
 
-Fiver Ctrls:
+High Fiver Ctrls:
 WASD + space = movement
 LC / RC = Sticky Hand
 LC + RC = punch
@@ -101,17 +101,17 @@ let’s make the watcher feel very powerful and destructive. Use good visual ass
 
 ## Overall feel of the game
 Dynamics:
-- Watcher typically scouts the map raining fire on zones that Fivers have tasks with
+- Watcher typically scouts the map raining fire on zones that High Fivers have tasks with
 
 - Watchers when com and light disable is active, they may want to become a robot, and try to either self destruct near someone or high five someone as an imposter
 - Watcher’s current tower has a full range of weapons but when a watcher isn’t using a tower, it’s on autopilot mode. They do use basic Ais and do 50% damage.
 
 - Watchers see the task progress of the players to hvae an idea of where to watch for.
 
-- Fivers could also punch the eye of the towers to make them reduce visibility for a while
-- Fivers need to maintain speed and agility to be a difficult target. They need to find blindspots and coordinate movements to overload the watcher.
+- High Fivers could also punch the eye of the towers to make them reduce visibility for a while
+- High Fivers need to maintain speed and agility to be a difficult target. They need to find blindspots and coordinate movements to overload the watcher.
 - When coms and lights are cut, fivers need to have an idea of where their teammates are. And be suspicious of behaviors of the imposter
-- Fivers need to efficiently do their tasks, while staying connected to each other to heal up and do group tasks.
+- High Fivers need to efficiently do their tasks, while staying connected to each other to heal up and do group tasks.
 
 
 

@@ -42,7 +42,7 @@ The denser upper maze, terrace stacks and annex bridge bay were captured at **25
 
 ![Amber bridge bay and distributed laser fan](infill-bridge-bay.png)
 
-## Fiver movement pass
+## High Fiver movement pass
 
 2560 × 1440 authored in-engine review frames, 2026-09-21. [Implementation and capture limits](../FIVER-MOVEMENT-PASS.md).
 
@@ -53,11 +53,11 @@ The denser upper maze, terrace stacks and annex bridge bay were captured at **25
 
 Earlier red-field screenshots are historical; the live equipment bay no longer disables arms.
 
-## Local Fiver / Watcher prototype — 2026-09-21
+## Local High Fiver / Watcher prototype — 2026-09-21
 
 These 2560 × 1440 engine renders show the later **unpublished local source build**, not the v0.2.0 movement download. The partner is a local simulated character. Views are staged with `tests/capture_pilot.gd`; no desktop capture is involved.
 
-| Fiver / partner | Watcher eye |
+| High Fiver / partner | Watcher eye |
 | --- | --- |
 | ![Local partner](pilot-fiver.png) | ![Watcher view](pilot-watcher.png) |
 
@@ -73,7 +73,7 @@ These 2560 × 1440 engine renders show the later **unpublished local source buil
 
 ## Carry / night-vision pass
 
-`night-*.png` are 2560 × 1440 engine render fixtures from `tests/capture_night.gd`, comparing private Watcher night vision with the Fiver's dark world and temporary attack illumination. These are authored camera views rather than desktop screenshots.
+`night-*.png` are 2560 × 1440 engine render fixtures from `tests/capture_night.gd`, comparing private Watcher night vision with the High Fiver's dark world and temporary attack illumination. These are authored camera views rather than desktop screenshots.
 
 ## Orbital pass
 

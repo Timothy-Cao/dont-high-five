@@ -1,4 +1,4 @@
-# Fiver / Watcher disposition
+# High Fiver / Watcher disposition
 
 Updated 2026-09-21 after the user approved the broader **local role-switching prototype**, optional auto-fire off, and separate Training. Original [brief](FIVER-WATCHER-BRIEF.md) is retained verbatim. The published [v0.2.0 movement build](https://github.com/Timothy-Cao/dont-high-five/releases/tag/v0.2.0) is a frozen earlier snapshot.
 
@@ -45,7 +45,7 @@ Updated 2026-09-21 after the user approved the broader **local role-switching pr
 
 ## Later refinement review
 
-See [REFINEMENT-TODO.md](REFINEMENT-TODO.md) for the ranked discussion backlog. The historical arsenal/auto-tower rows above are superseded by [CROWD-AND-TOWER-AI.md](../CROWD-AND-TOWER-AI.md): alternating full-damage weapons, delayed aim, independent grenade/orbital timers, eight optional moving Fivers, and a shared death collapse. These refinements are proposals, not an instruction to implement everything.
+See [REFINEMENT-TODO.md](REFINEMENT-TODO.md) for the ranked discussion backlog. The historical arsenal/auto-tower rows above are superseded by [CROWD-AND-TOWER-AI.md](../CROWD-AND-TOWER-AI.md): alternating full-damage weapons, delayed aim, independent grenade/orbital timers, eight optional moving High Fivers, and a shared death collapse. These refinements are proposals, not an instruction to implement everything.
 
 ## Wheel / workshop follow-up
 

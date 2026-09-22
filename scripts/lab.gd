@@ -11,7 +11,7 @@ var scripted_run := false
 var controls: Node
 var environment: Environment
 var visibility_fill := 0.12
-# Approximate base Fiver distance at which exponential haze obscures 90%.
+# Approximate base High Fiver distance at which exponential haze obscures 90%.
 var fog_distance:=100.0
 var world_hints: Array[Label3D] = []
 var rounded_mesh: Mesh

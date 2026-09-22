@@ -1,6 +1,6 @@
 # Wheel robot and empty-shell workshop
 
-This source pass replaces the legged Fiver with an original unicycle, adds thrown mines and builds the first creator workshop. The published v0.2.0 release is unchanged.
+This source pass replaces the legged High Fiver with an original unicycle, adds thrown mines and builds the first creator workshop. The published v0.2.0 release is unchanged.
 
 ## Character
 

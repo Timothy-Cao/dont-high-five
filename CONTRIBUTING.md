@@ -25,7 +25,7 @@ Open `project.godot` in Godot 4.7.2. On Windows, `tools/Setup-Godot.ps1` install
 ./tools/Run.ps1 -Mode Verify
 ```
 
-Twenty-one suites cover controller feel, collisions, arena routes, audio/settings, fixed arms, character animation, Fiver/Watcher systems, minimap and workshop gameplay/editing. Script errors and failed assertions stop verification. Tests isolate settings writes and never capture the desktop or inject system input. Current workshop results and limits are in `docs/WORKSHOP-ITERATION.md`.
+Twenty-one suites cover controller feel, collisions, arena routes, audio/settings, fixed arms, character animation, High Fiver/Watcher systems, minimap and workshop gameplay/editing. Script errors and failed assertions stop verification. Tests isolate settings writes and never capture the desktop or inject system input. Current workshop results and limits are in `docs/WORKSHOP-ITERATION.md`.
 
 `tests/capture_showcase.gd` uses authored cameras and posed models to reproduce the gallery with `-- --showcase`. It requires a rendering-capable Godot instance; headless verification uses the dummy renderer. Screenshot characters are cosmetic staging, not connected clients. There is no multiplayer implementation yet.
 

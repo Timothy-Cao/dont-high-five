@@ -1,6 +1,6 @@
 # Movement modes — decisions, research and limits
 
-2026-09-21. Implementation design for the local Fiver pass. [Full brief](FIVER-WATCHER-BRIEF.md), [staged backlog](IMPLEMENTATION-BACKLOG.md).
+2026-09-21. Implementation design for the local High Fiver pass. [Full brief](FIVER-WATCHER-BRIEF.md), [staged backlog](IMPLEMENTATION-BACKLOG.md).
 
 ## Research that changed the implementation
 

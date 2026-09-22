@@ -21,7 +21,7 @@ The last two references challenge a tempting simplification: neither “more ope
 
 All changes in this table are **proposals**, including any map consequences. The current pilot already contains simpler examples of the first five categories; it does not contain the full versions below.
 
-| Sketch | What the hands and body do | Watcher opportunity / Fiver response | Outcome and verdict |
+| Sketch | What the hands and body do | Watcher opportunity / High Fiver response | Outcome and verdict |
 | --- | --- | --- | --- |
 | **1. Carry a service ball** | Grip a ball with one hand, swing around a column with the other, choose an exposed upper crossing or covered ramp. Drop deliberately to regain punch, then recover. | Attack a crossing; carrier ducks into an alcove or an unladen ally disrupts an eye. | Seat the ball and bank one delivery immediately. **Choose first.** It directly tests the user's one-hand premise. |
 | **2. Thread a route through rings** | Enter from either side, chain a turn, a rise and a drop; no minimum speed or mandatory trick. | An eye sees one segment, not all three; player chooses entry timing or a second approach. | Each unique ring counts once. **Keep as baseline/optional circuit.** Cheap, but repeated laps must not become the universally safest score farm. |
@@ -49,7 +49,7 @@ Proposed contract:
 
 ## Selected example B: repair the way out
 
-Imagine seeing an attractive ceiling passage behind a shutter. The repair contacts sit on three faces of its support column. You hook above the first, swing around the second, and land in the sheltered third recess. Each contact latches once; the shutter opens visibly onto the route you wanted to use. Another Fiver benefits without waiting beside you. The Watcher gets a newly important crossing to watch rather than a frozen player to farm.
+Imagine seeing an attractive ceiling passage behind a shutter. The repair contacts sit on three faces of its support column. You hook above the first, swing around the second, and land in the sheltered third recess. Each contact latches once; the shutter opens visibly onto the route you wanted to use. Another High Fiver benefits without waiting beside you. The Watcher gets a newly important crossing to watch rather than a frozen player to farm.
 
 For the cheapest future implementation, reuse existing maintenance nodes and authored architecture. Spread the contacts spatially; reveal one prebuilt bypass. No construction inventory, simulated wiring or moving bridge physics. Each completed contact remains latched, and the ordinary route remains available before repair. Show the effect from the final contact so the player need not read a task explanation to understand the reward.
 

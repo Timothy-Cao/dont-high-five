@@ -1,8 +1,8 @@
-# Fiver movement pass — 2026-09-21
+# High Fiver movement pass — 2026-09-21
 
 **Follow-up:** [Automatic ceiling traversal](AUTO-CEILING.md) supersedes the manual fixed-rope reeling described in this initial pass. Fixed mode now works with alternating clicks alone.
 
-The new Fiver / Watcher brief is split into a playable traversal pass and a staged [backlog](design/IMPLEMENTATION-BACKLOG.md). [Research and design decisions](design/MOVEMENT-MODES.md) preserve direct sources, counterexamples and scope limits. Original user notes are saved [verbatim](design/FIVER-WATCHER-BRIEF.md).
+The new High Fiver / Watcher brief is split into a playable traversal pass and a staged [backlog](design/IMPLEMENTATION-BACKLOG.md). [Research and design decisions](design/MOVEMENT-MODES.md) preserve direct sources, counterexamples and scope limits. Original user notes are saved [verbatim](design/FIVER-WATCHER-BRIEF.md).
 
 ## Implemented
 
@@ -17,7 +17,7 @@ The tutorial, carryable ball, Watcher role/weapons/health/AI, high-five healing,
 
 ## Verification
 
-The complete eleven-suite run passed **433/433** checks. Subsequent targeted verification expanded the new Fiver suite from 36 to **42/42**, adding coverage for continuous full-charge vibration, near-camera ghost fading, trail reset, custom-key migration and retained reel velocity. This brings current suite coverage to **439 assertions**; the final targeted suite passed after those changes. No script parse errors or test failures remain in these runs. Source/resource audit passes.
+The complete eleven-suite run passed **433/433** checks. Subsequent targeted verification expanded the new High Fiver suite from 36 to **42/42**, adding coverage for continuous full-charge vibration, near-camera ghost fading, trail reset, custom-key migration and retained reel velocity. This brings current suite coverage to **439 assertions**; the final targeted suite passed after those changes. No script parse errors or test failures remain in these runs. Source/resource audit passes.
 
 Highlights: ten-second 30 m/s orbits preserve speed/radius at 60 and 120 Hz; a gravity-driven swing reaches 21.91 m/s horizontally; the actual controller swings and reels; blocked reeling stops at a solid ceiling; old grip release, missed replacements, recall arbitration, target separation, anchor/pad interactions and bounded effect pools are tested. Existing recoil, movement, platform routes, portals, settings and full ramp walks passed in the full run.
 

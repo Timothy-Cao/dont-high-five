@@ -1,5 +1,5 @@
 extends Node
-## Camera-only environment plus a pre-HUD display filter. Fiver lighting is untouched.
+## Camera-only environment plus a pre-HUD display filter. High Fiver lighting is untouched.
 var watcher:Node3D
 var environment:Environment
 var layer:CanvasLayer

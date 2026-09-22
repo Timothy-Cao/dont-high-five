@@ -1,4 +1,4 @@
-# Local Fiver / Watcher pilot
+# Local High Fiver / Watcher pilot
 
 2026-09-21. User approved continuing the full brief in realistic stages: local role switching, optional tower auto-fire OFF by default, separate Training with Arena directly accessible. No networking or public deployment is part of this pass.
 

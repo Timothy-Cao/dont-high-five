@@ -55,11 +55,11 @@ Read [TOMORROW-DISCUSSION.md](TOMORROW-DISCUSSION.md) before the remaining resea
 
 Pass 2 should compare these concrete quest types; pass 3 should examine their asymmetric tools and counterplay. Treat a revealed hunter as a legitimate alternative to the earlier hidden traitor. Do not assume the complete arsenal, high-five purpose, win conditions or knockout rules are decided. Keep all work documentation-only. This steering does not increment the five-pass count.
 
-## New steering — 2026-09-21 Fiver / Watcher brief
+## New steering — 2026-09-21 High Fiver / Watcher brief
 
 The user has now selected an overt Fiver-versus-Watcher working direction, with optional infiltration during blackouts. Read [the new brief](FIVER-WATCHER-BRIEF.md) and [backlog](IMPLEMENTATION-BACKLOG.md) before the next pass. Movement implementation is being handled in the active development turn; the overnight series remains research/documentation only. Do not count this implementation pass as another overnight research pass.
 
-Pass 2 should compare carry-one-hand, rings, elevated maintenance, dummy knockback, and a cooperative high-five station under tower pressure. Pass 3 should test readable counterplay against fixed-tower fire, delayed zoning and infiltration, including why an overloaded arsenal could feel unavoidable. Pass 4 should evaluate sightlines, refuge-to-refuge routes, exposed stations and layered cover; tower coverage percentages are hypotheses. Pass 5 should synthesize three variants within the user's Fiver / Watcher direction, not silently revert to a hidden-saboteur-only game.
+Pass 2 should compare carry-one-hand, rings, elevated maintenance, dummy knockback, and a cooperative high-five station under tower pressure. Pass 3 should test readable counterplay against fixed-tower fire, delayed zoning and infiltration, including why an overloaded arsenal could feel unavoidable. Pass 4 should evaluate sightlines, refuge-to-refuge routes, exposed stations and layered cover; tower coverage percentages are hypotheses. Pass 5 should synthesize three variants within the user's High Fiver / Watcher direction, not silently revert to a hidden-saboteur-only game.
 
 ### Pass 2 complete — 2026-09-22, run triggered 03:39 UTC
 
@@ -71,4 +71,4 @@ The playtest proposal explicitly distinguishes the published movement-only v0.2.
 
 Documentation only: no gameplay edits, engine runs, desktop/browser control, messages, installation, publication or push. Updated the notebook index to remove stale claims about the earlier suppression room and unimplemented local roles.
 
-**Series status: 2 / 5 passes complete.** Next: pass 3, Watcher advantages and Fiver counterplay, especially one-hand carrier escape options, repair interruption, and healing versus lethal infiltration. Then compact social spaces and morning synthesis. Do not count the intervening implementation/release work as overnight passes. Stop after pass 5 or completed synthesis.
+**Series status: 2 / 5 passes complete.** Next: pass 3, Watcher advantages and High Fiver counterplay, especially one-hand carrier escape options, repair interruption, and healing versus lethal infiltration. Then compact social spaces and morning synthesis. Do not count the intervening implementation/release work as overnight passes. Stop after pass 5 or completed synthesis.
